@@ -1,0 +1,53 @@
+Shen-js
+=======
+
+## Running provided REPL
+
+Put `shen.html`, `shen.js`, `shen-repl-html.js`, `io-html5,js` into a
+directory of your choice. Then open `shen.html` in your browser. It's been
+tested in Firefox and WebKit-based browsers (Chrome and Surf).
+
+Working with files is a bit clumsy. It requires manual interventions and has
+limited filesize. Shen-js maintains list of files it has access to directly on
+a page. To add local files into it use button under `Filesystem` title. To
+download written file to your local drive press on that file in a list.
+Currently only Chrome supports naming such files. On firefox specify correct
+name manually.
+
+## Making your own REPL and I/O
+
+To write your own Shen-js REPL and I/O the following four functions must be
+redefined:
+
+	* shenjs_open
+	* shenjs_puts
+	* shenjs_gets
+	* shenjs_open_repl
+
+### shenjs_open(type, name, direction)
+
+Represents Shen's 'open' function. Returns a (stream in) or a (stream out)
+objects. In Shen-js those objects are
+
+	[shen_type_stream_in, read_byte(), close()]
+	[shen_type_stream_out, write_byte(byte), close()]
+
+	* `read_byte` function returns numeric value of a next byte from a stream or
+		 -1 as end of file marker.
+	* `write_byte` function writes a byte to a stream. `byte` is a number.
+	* `close` closes a stream.
+
+### shenjs_puts(str)
+
+Puts `str` to REPL. It does not append newline itself.
+
+### shenjs_gets()
+
+Reads a string from REPL.
+
+### shenjs_open_repl()
+
+Initialized *stinput* and *stoutput*.
+
+You can use `runtime/io.js`, `runtine/io-cli.js` or `shen-repl-html.js`,
+`io-html5.js` as a references.

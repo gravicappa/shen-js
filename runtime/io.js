@@ -1,7 +1,7 @@
 /*
 
 # Expects implemented functions
-## shenjs_open([type, name, direction])
+## shenjs_open(type, name, direction)
 ## shenjs_puts(str)
 ## shenjs_gets()
 ## shenjs_open_repl()
@@ -50,7 +50,7 @@ function shenjs_write_byte(byte, stream) {
 }
 
 function shenjs_close(stream) {
- switch (stream[0]) {
+  switch (stream[0]) {
     case shen_type_stream_in:
       stream[2]()
       stream[1] = (function() {return -1});
@@ -90,9 +90,9 @@ function shenjs_repl_read_byte(stream, s, pos) {
 }
 
 function shenjs_pr(s, stream) {
-	for (i = 0; i < s.length; ++i)
-		shenjs_write_byte(s.charCodeAt(i), stream)
-	return s
+  for (i = 0; i < s.length; ++i)
+    shenjs_write_byte(s.charCodeAt(i), stream)
+  return s
 }
 
 shenjs_open_repl()
