@@ -476,7 +476,7 @@ shenjs_load = shenjs_mkfunction("shenjs-load", 1, function self(x) {
 
 shenjs_globals["shen_*language*"] = "Javascript"
 shenjs_globals["shen_*implementation*"] = "cli"
-shenjs_globals["shen_*port*"] = "0.3"
+shenjs_globals["shen_*port*"] = "0.9"
 shenjs_globals["shen_*porters*"] = "Ramil Farkhshatov"
 shenjs_globals["shen_js-skip-internals"] = true
 
