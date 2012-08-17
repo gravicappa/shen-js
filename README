@@ -19,23 +19,23 @@ name manually.
 To write your own Shen-js REPL and I/O the following four functions must be
 redefined:
 
-	* shenjs_open
-	* shenjs_puts
-	* shenjs_gets
-	* shenjs_open_repl
+  * shenjs_open
+  * shenjs_puts
+  * shenjs_gets
+  * shenjs_open_repl
 
 ### shenjs_open(type, name, direction)
 
 Represents Shen's 'open' function. Returns a (stream in) or a (stream out)
 objects. In Shen-js those objects are
 
-	[shen_type_stream_in, read_byte(), close()]
-	[shen_type_stream_out, write_byte(byte), close()]
+  [shen_type_stream_in, read_byte(), close()]
+  [shen_type_stream_out, write_byte(byte), close()]
 
-	* `read_byte` function returns numeric value of a next byte from a stream or
-		 -1 as end of file marker.
-	* `write_byte` function writes a byte to a stream. `byte` is a number.
-	* `close` closes a stream.
+  * `read_byte` function returns numeric value of a next byte from a stream or
+     -1 as end of file marker.
+  * `write_byte` function writes a byte to a stream. `byte` is a number.
+  * `close` closes a stream.
 
 ### shenjs_puts(str)
 
