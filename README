@@ -75,7 +75,10 @@ Reads a string from REPL.
 
 ### shenjs_open_repl()
 
-Initialized *stinput* and *stoutput*.
+Initializes *stinput* and *stoutput*.
 
 You can use `runtime/io.js`, `runtine/io-cli.js` or `shen-repl-html.js`,
 `io-html5.js` as a references.
+
+Current implementation sets `*stinput*` as in/out stream as a workaround of
+Shen using `*stinput*` for output.
