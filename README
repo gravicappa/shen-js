@@ -14,6 +14,34 @@ download written file to your local drive press on that file in a list.
 Currently only Chrome supports naming such files. On firefox specify correct
 name manually.
 
+## JS integration
+
+To define a Shen function from javascript use `shenjs_mkfunction`.
+
+shenjs_mkfunction takes three arguments:
+
+  - name of a function
+  - number of arguments
+  - function
+
+`function` takes a vector as an argument and must check its length.
+If length is less than expected it must return function object which is
+a four element vector with elements:
+
+    1. `shen_type_func`,
+    2. function object,
+    3. number of arguments,
+    4. closure vector.
+
+Example:
+
+    shenjs_mkfunction("plus", 2, function f(args) {
+      if (args.length < 2) return [shen_type_func, f, 2, args]
+      return args[0] + args[1]
+    })
+
+To load javascript file from Shen use `shenjs-load` function.
+
 ## Making your own REPL and I/O
 
 To write your own Shen-js REPL and I/O the following four functions must be
