@@ -35,7 +35,7 @@ repl_src = $runtime_dir/repl.js
 $name: $runtime_src $shen_src $repl_src
 	{
 		echo '/*'
-		cat HEADER
+		cat LICENSE
 		echo '*/'
 		echo ''
 		cat $runtime_src

@@ -1,7 +1,7 @@
 (register-module [[name: shen-js]
                   [depends: js-kl]
                   [author: "Ramil Farkshatov"]
-                  [license: "GPLv3+"]
+                  [license: "Shen license"]
                   [desc: "Shen-JS."]
                   [load: "js-dump.shen"]
                   [dump-fn: js-dump-shen]])
