@@ -474,6 +474,10 @@ shenjs_load = shenjs_mkfunction("shenjs-load", 1, function self(x) {
   })
 })
 
+shenjs_exit = shenjs_mkfunction("shenjs-exit", 1, function self(x) {
+  quit()
+})
+
 shenjs_globals["shen_*language*"] = "Javascript"
 shenjs_globals["shen_*implementation*"] = "cli"
 shenjs_globals["shen_*port*"] = "0.9"

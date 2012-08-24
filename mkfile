@@ -2,7 +2,7 @@ MKSHELL = rc
 name = shen.js
 
 runtime_dir = runtime
-shen_dir = ../../shenjs/
+shen_dir = shenjs/
 
 runtime_src = \
 	$runtime_dir/runtime.js \
@@ -32,7 +32,14 @@ shen_src = \
 
 repl_src = $runtime_dir/repl.js
 
-$name: $runtime_src $shen_src $repl_src
+all:V: $name
+
+$shen_dir/stamp:
+	mkdir -p $shen_dir
+	shen_run -ne ./make.shen $shen_dir
+	touch $target
+
+$name: $shen_dir/stamp $runtime_src $shen_src $repl_src
 	{
 		echo '/*'
 		cat LICENSE
