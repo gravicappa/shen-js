@@ -89,7 +89,7 @@ Shen_repl = {
     }
     shenjs_call(shen_initialise$_environment, [])
     shenjs_call(shen_prompt, [])
-    shenjs_puts(Shen_repl.buf + "\n")
+    shenjs_puts(Shen_repl.buf)
   },
 
   load: function(src, onload) {

@@ -54,3 +54,10 @@ $name: $shen_dir/stamp $rt_src $repl_src
       {print}'
     cat $repl_src
   } >shen.js
+
+shen_repl_html.tar.gz: $name shen.html shen.css shen-repl-html.js io-html5.js
+	dir=shen_repl_html
+	rm -rf $dir
+	mkdir $dir
+	cp $prereq $dir
+	tar c $dir | gzip >$target
