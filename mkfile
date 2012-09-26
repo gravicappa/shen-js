@@ -10,7 +10,7 @@ rt_src = \
   $runtime_dir/io.js \
   $runtime_dir/dummy.js
 
-runtime_src = $runtime_src $shen_dir/primitives.js
+runtime_src = $rt_src $shen_dir/primitives.js
 
 shen_src = \
   $shen_dir/reg-kl.shen.js \
@@ -46,7 +46,7 @@ $name: $shen_dir/stamp $rt_src $repl_src
     cat LICENSE
     echo '*/'
     echo ''
-    cat $rt_src
+    cat $runtime_src
     cat $shen_src | awk '
       /^"/ {str=1;next}
       /^$/ {str=0}

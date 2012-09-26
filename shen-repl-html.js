@@ -99,7 +99,8 @@ Shen_repl = {
     if (onload) {
       s.onload = onload
       s.onreadystatechange = function() {
-        if (Shen_repl.readyState == 'complete')
+        var state = Shen_repl.readyState || this.readyState
+        if (state == 'complete')
           onload()
       }
     }
@@ -216,5 +217,5 @@ Shen_repl = {
     input.focus()
   },
 
-  quit: function() {},
+  quit: function() {}
 }

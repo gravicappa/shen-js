@@ -709,6 +709,731 @@ shen_compile = [shen_type_func, function(args) {return []}, 3, []]
 shen_declare = [shen_type_func, function(args) {return []}, 2, []]
 
 
+shen_hd = [shen_type_func,
+  function shen_user_lambda4121(Arg4120) {
+  if (Arg4120.length < 1) return [shen_type_func, shen_user_lambda4121, 1, Arg4120];
+  var Arg4120_0 = Arg4120[0];
+  return Arg4120_0[1]},
+  1,
+  [],
+  "hd"];
+shenjs_functions["shen_hd"] = shen_hd;
+
+
+
+
+
+
+shen_tl = [shen_type_func,
+  function shen_user_lambda4123(Arg4122) {
+  if (Arg4122.length < 1) return [shen_type_func, shen_user_lambda4123, 1, Arg4122];
+  var Arg4122_0 = Arg4122[0];
+  return Arg4122_0[2]},
+  1,
+  [],
+  "tl"];
+shenjs_functions["shen_tl"] = shen_tl;
+
+
+
+
+
+
+shen_not = [shen_type_func,
+  function shen_user_lambda4125(Arg4124) {
+  if (Arg4124.length < 1) return [shen_type_func, shen_user_lambda4125, 1, Arg4124];
+  var Arg4124_0 = Arg4124[0];
+  return (!Arg4124_0)},
+  1,
+  [],
+  "not"];
+shenjs_functions["shen_not"] = shen_not;
+
+
+
+
+
+
+shen_thaw = [shen_type_func,
+  function shen_user_lambda4127(Arg4126) {
+  if (Arg4126.length < 1) return [shen_type_func, shen_user_lambda4127, 1, Arg4126];
+  var Arg4126_0 = Arg4126[0];
+  return shenjs_thaw(Arg4126_0)},
+  1,
+  [],
+  "thaw"];
+shenjs_functions["shen_thaw"] = shen_thaw;
+
+
+
+
+
+
+shen_string$question$ = [shen_type_func,
+  function shen_user_lambda4129(Arg4128) {
+  if (Arg4128.length < 1) return [shen_type_func, shen_user_lambda4129, 1, Arg4128];
+  var Arg4128_0 = Arg4128[0];
+  return (typeof(Arg4128_0) == 'string')},
+  1,
+  [],
+  "string?"];
+shenjs_functions["shen_string?"] = shen_string$question$;
+
+
+
+
+
+
+shen_number$question$ = [shen_type_func,
+  function shen_user_lambda4131(Arg4130) {
+  if (Arg4130.length < 1) return [shen_type_func, shen_user_lambda4131, 1, Arg4130];
+  var Arg4130_0 = Arg4130[0];
+  return (typeof(Arg4130_0) == 'number')},
+  1,
+  [],
+  "number?"];
+shenjs_functions["shen_number?"] = shen_number$question$;
+
+
+
+
+
+
+shen_symbol$question$ = [shen_type_func,
+  function shen_user_lambda4133(Arg4132) {
+  if (Arg4132.length < 1) return [shen_type_func, shen_user_lambda4133, 1, Arg4132];
+  var Arg4132_0 = Arg4132[0];
+  return shenjs_is_type(Arg4132_0, shen_type_symbol)},
+  1,
+  [],
+  "symbol?"];
+shenjs_functions["shen_symbol?"] = shen_symbol$question$;
+
+
+
+
+
+
+shen_cons$question$ = [shen_type_func,
+  function shen_user_lambda4135(Arg4134) {
+  if (Arg4134.length < 1) return [shen_type_func, shen_user_lambda4135, 1, Arg4134];
+  var Arg4134_0 = Arg4134[0];
+  return shenjs_is_type(Arg4134_0, shen_type_cons)},
+  1,
+  [],
+  "cons?"];
+shenjs_functions["shen_cons?"] = shen_cons$question$;
+
+
+
+
+
+
+shen_vector$question$ = [shen_type_func,
+  function shen_user_lambda4137(Arg4136) {
+  if (Arg4136.length < 1) return [shen_type_func, shen_user_lambda4137, 1, Arg4136];
+  var Arg4136_0 = Arg4136[0];
+  return (function() {
+  return shenjs_vector$question$(Arg4136_0);})},
+  1,
+  [],
+  "vector?"];
+shenjs_functions["shen_vector?"] = shen_vector$question$;
+
+
+
+
+
+
+shen_absvector$question$ = [shen_type_func,
+  function shen_user_lambda4139(Arg4138) {
+  if (Arg4138.length < 1) return [shen_type_func, shen_user_lambda4139, 1, Arg4138];
+  var Arg4138_0 = Arg4138[0];
+  return (function() {
+  return shenjs_absvector$question$(Arg4138_0);})},
+  1,
+  [],
+  "absvector?"];
+shenjs_functions["shen_absvector?"] = shen_absvector$question$;
+
+
+
+
+
+
+shen_value = [shen_type_func,
+  function shen_user_lambda4141(Arg4140) {
+  if (Arg4140.length < 1) return [shen_type_func, shen_user_lambda4141, 1, Arg4140];
+  var Arg4140_0 = Arg4140[0];
+  return (shenjs_globals["shen_" + Arg4140_0[1]])},
+  1,
+  [],
+  "value"];
+shenjs_functions["shen_value"] = shen_value;
+
+
+
+
+
+
+shen_intern = [shen_type_func,
+  function shen_user_lambda4143(Arg4142) {
+  if (Arg4142.length < 1) return [shen_type_func, shen_user_lambda4143, 1, Arg4142];
+  var Arg4142_0 = Arg4142[0];
+  return (function() {
+  return shenjs_intern(Arg4142_0);})},
+  1,
+  [],
+  "intern"];
+shenjs_functions["shen_intern"] = shen_intern;
+
+
+
+
+
+
+shen_vector = [shen_type_func,
+  function shen_user_lambda4145(Arg4144) {
+  if (Arg4144.length < 1) return [shen_type_func, shen_user_lambda4145, 1, Arg4144];
+  var Arg4144_0 = Arg4144[0];
+  return (function() {
+  return shenjs_vector(Arg4144_0);})},
+  1,
+  [],
+  "vector"];
+shenjs_functions["shen_vector"] = shen_vector;
+
+
+
+
+
+
+shen_read_byte = [shen_type_func,
+  function shen_user_lambda4147(Arg4146) {
+  if (Arg4146.length < 1) return [shen_type_func, shen_user_lambda4147, 1, Arg4146];
+  var Arg4146_0 = Arg4146[0];
+  return (function() {
+  return shenjs_read_byte(Arg4146_0);})},
+  1,
+  [],
+  "read-byte"];
+shenjs_functions["shen_read-byte"] = shen_read_byte;
+
+
+
+
+
+
+shen_close = [shen_type_func,
+  function shen_user_lambda4149(Arg4148) {
+  if (Arg4148.length < 1) return [shen_type_func, shen_user_lambda4149, 1, Arg4148];
+  var Arg4148_0 = Arg4148[0];
+  return (function() {
+  return shenjs_close(Arg4148_0);})},
+  1,
+  [],
+  "close"];
+shenjs_functions["shen_close"] = shen_close;
+
+
+
+
+
+
+shen_absvector = [shen_type_func,
+  function shen_user_lambda4151(Arg4150) {
+  if (Arg4150.length < 1) return [shen_type_func, shen_user_lambda4151, 1, Arg4150];
+  var Arg4150_0 = Arg4150[0];
+  return (function() {
+  return shenjs_absvector(Arg4150_0);})},
+  1,
+  [],
+  "absvector"];
+shenjs_functions["shen_absvector"] = shen_absvector;
+
+
+
+
+
+
+shen_str = [shen_type_func,
+  function shen_user_lambda4153(Arg4152) {
+  if (Arg4152.length < 1) return [shen_type_func, shen_user_lambda4153, 1, Arg4152];
+  var Arg4152_0 = Arg4152[0];
+  return (function() {
+  return shenjs_str(Arg4152_0);})},
+  1,
+  [],
+  "str"];
+shenjs_functions["shen_str"] = shen_str;
+
+
+
+
+
+
+shen_tlstr = [shen_type_func,
+  function shen_user_lambda4155(Arg4154) {
+  if (Arg4154.length < 1) return [shen_type_func, shen_user_lambda4155, 1, Arg4154];
+  var Arg4154_0 = Arg4154[0];
+  return (function() {
+  return shenjs_tlstr(Arg4154_0);})},
+  1,
+  [],
+  "tlstr"];
+shenjs_functions["shen_tlstr"] = shen_tlstr;
+
+
+
+
+
+
+shen_n_$gt$string = [shen_type_func,
+  function shen_user_lambda4157(Arg4156) {
+  if (Arg4156.length < 1) return [shen_type_func, shen_user_lambda4157, 1, Arg4156];
+  var Arg4156_0 = Arg4156[0];
+  return (function() {
+  return shenjs_n_$gt$string(Arg4156_0);})},
+  1,
+  [],
+  "n->string"];
+shenjs_functions["shen_n->string"] = shen_n_$gt$string;
+
+
+
+
+
+
+shen_string_$gt$n = [shen_type_func,
+  function shen_user_lambda4159(Arg4158) {
+  if (Arg4158.length < 1) return [shen_type_func, shen_user_lambda4159, 1, Arg4158];
+  var Arg4158_0 = Arg4158[0];
+  return (function() {
+  return shenjs_string_$gt$n(Arg4158_0);})},
+  1,
+  [],
+  "string->n"];
+shenjs_functions["shen_string->n"] = shen_string_$gt$n;
+
+
+
+
+
+
+shen_empty$question$ = [shen_type_func,
+  function shen_user_lambda4161(Arg4160) {
+  if (Arg4160.length < 1) return [shen_type_func, shen_user_lambda4161, 1, Arg4160];
+  var Arg4160_0 = Arg4160[0];
+  return (function() {
+  return shenjs_empty$question$(Arg4160_0);})},
+  1,
+  [],
+  "empty?"];
+shenjs_functions["shen_empty?"] = shen_empty$question$;
+
+
+
+
+
+
+shen_get_time = [shen_type_func,
+  function shen_user_lambda4163(Arg4162) {
+  if (Arg4162.length < 1) return [shen_type_func, shen_user_lambda4163, 1, Arg4162];
+  var Arg4162_0 = Arg4162[0];
+  return (function() {
+  return shenjs_get_time(Arg4162_0);})},
+  1,
+  [],
+  "get-time"];
+shenjs_functions["shen_get-time"] = shen_get_time;
+
+
+
+
+
+
+shen_error = [shen_type_func,
+  function shen_user_lambda4165(Arg4164) {
+  if (Arg4164.length < 1) return [shen_type_func, shen_user_lambda4165, 1, Arg4164];
+  var Arg4164_0 = Arg4164[0];
+  return (function() {
+  return shenjs_error(Arg4164_0);})},
+  1,
+  [],
+  "error"];
+shenjs_functions["shen_error"] = shen_error;
+
+
+
+
+
+
+shen_simple_error = [shen_type_func,
+  function shen_user_lambda4167(Arg4166) {
+  if (Arg4166.length < 1) return [shen_type_func, shen_user_lambda4167, 1, Arg4166];
+  var Arg4166_0 = Arg4166[0];
+  return (function() {
+  return shenjs_simple_error(Arg4166_0);})},
+  1,
+  [],
+  "simple-error"];
+shenjs_functions["shen_simple-error"] = shen_simple_error;
+
+
+
+
+
+
+shen_eval_kl = [shen_type_func,
+  function shen_user_lambda4169(Arg4168) {
+  if (Arg4168.length < 1) return [shen_type_func, shen_user_lambda4169, 1, Arg4168];
+  var Arg4168_0 = Arg4168[0];
+  return (function() {
+  return shenjs_eval_kl(Arg4168_0);})},
+  1,
+  [],
+  "eval-kl"];
+shenjs_functions["shen_eval-kl"] = shen_eval_kl;
+
+
+
+
+
+
+shen_error_to_string = [shen_type_func,
+  function shen_user_lambda4171(Arg4170) {
+  if (Arg4170.length < 1) return [shen_type_func, shen_user_lambda4171, 1, Arg4170];
+  var Arg4170_0 = Arg4170[0];
+  return (function() {
+  return shenjs_error_to_string(Arg4170_0);})},
+  1,
+  [],
+  "error-to-string"];
+shenjs_functions["shen_error-to-string"] = shen_error_to_string;
+
+
+
+
+
+
+shen_js_call_js = [shen_type_func,
+  function shen_user_lambda4173(Arg4172) {
+  if (Arg4172.length < 1) return [shen_type_func, shen_user_lambda4173, 1, Arg4172];
+  var Arg4172_0 = Arg4172[0];
+  return (function() {
+  return shenjs_js_call_js(Arg4172_0);})},
+  1,
+  [],
+  "js-call-js"];
+shenjs_functions["shen_js-call-js"] = shen_js_call_js;
+
+
+
+
+
+
+shen_$plus$ = [shen_type_func,
+  function shen_user_lambda4175(Arg4174) {
+  if (Arg4174.length < 2) return [shen_type_func, shen_user_lambda4175, 2, Arg4174];
+  var Arg4174_0 = Arg4174[0], Arg4174_1 = Arg4174[1];
+  return (Arg4174_0 + Arg4174_1)},
+  2,
+  [],
+  "+"];
+shenjs_functions["shen_+"] = shen_$plus$;
+
+
+
+
+
+
+shen__ = [shen_type_func,
+  function shen_user_lambda4177(Arg4176) {
+  if (Arg4176.length < 2) return [shen_type_func, shen_user_lambda4177, 2, Arg4176];
+  var Arg4176_0 = Arg4176[0], Arg4176_1 = Arg4176[1];
+  return (Arg4176_0 - Arg4176_1)},
+  2,
+  [],
+  "-"];
+shenjs_functions["shen_-"] = shen__;
+
+
+
+
+
+
+shen_$asterisk$ = [shen_type_func,
+  function shen_user_lambda4179(Arg4178) {
+  if (Arg4178.length < 2) return [shen_type_func, shen_user_lambda4179, 2, Arg4178];
+  var Arg4178_0 = Arg4178[0], Arg4178_1 = Arg4178[1];
+  return (Arg4178_0 * Arg4178_1)},
+  2,
+  [],
+  "*"];
+shenjs_functions["shen_*"] = shen_$asterisk$;
+
+
+
+
+
+
+shen_$slash$ = [shen_type_func,
+  function shen_user_lambda4181(Arg4180) {
+  if (Arg4180.length < 2) return [shen_type_func, shen_user_lambda4181, 2, Arg4180];
+  var Arg4180_0 = Arg4180[0], Arg4180_1 = Arg4180[1];
+  return (Arg4180_0 / Arg4180_1)},
+  2,
+  [],
+  "/"];
+shenjs_functions["shen_/"] = shen_$slash$;
+
+
+
+
+
+
+shen_and = [shen_type_func,
+  function shen_user_lambda4183(Arg4182) {
+  if (Arg4182.length < 2) return [shen_type_func, shen_user_lambda4183, 2, Arg4182];
+  var Arg4182_0 = Arg4182[0], Arg4182_1 = Arg4182[1];
+  return (Arg4182_0 && Arg4182_1)},
+  2,
+  [],
+  "and"];
+shenjs_functions["shen_and"] = shen_and;
+
+
+
+
+
+
+shen_or = [shen_type_func,
+  function shen_user_lambda4185(Arg4184) {
+  if (Arg4184.length < 2) return [shen_type_func, shen_user_lambda4185, 2, Arg4184];
+  var Arg4184_0 = Arg4184[0], Arg4184_1 = Arg4184[1];
+  return (Arg4184_0 || Arg4184_1)},
+  2,
+  [],
+  "or"];
+shenjs_functions["shen_or"] = shen_or;
+
+
+
+
+
+
+shen_$eq$ = [shen_type_func,
+  function shen_user_lambda4187(Arg4186) {
+  if (Arg4186.length < 2) return [shen_type_func, shen_user_lambda4187, 2, Arg4186];
+  var Arg4186_0 = Arg4186[0], Arg4186_1 = Arg4186[1];
+  return shenjs_$eq$(Arg4186_0, Arg4186_1)},
+  2,
+  [],
+  "="];
+shenjs_functions["shen_="] = shen_$eq$;
+
+
+
+
+
+
+shen_$gt$ = [shen_type_func,
+  function shen_user_lambda4189(Arg4188) {
+  if (Arg4188.length < 2) return [shen_type_func, shen_user_lambda4189, 2, Arg4188];
+  var Arg4188_0 = Arg4188[0], Arg4188_1 = Arg4188[1];
+  return (Arg4188_0 > Arg4188_1)},
+  2,
+  [],
+  ">"];
+shenjs_functions["shen_>"] = shen_$gt$;
+
+
+
+
+
+
+shen_$gt$$eq$ = [shen_type_func,
+  function shen_user_lambda4191(Arg4190) {
+  if (Arg4190.length < 2) return [shen_type_func, shen_user_lambda4191, 2, Arg4190];
+  var Arg4190_0 = Arg4190[0], Arg4190_1 = Arg4190[1];
+  return (Arg4190_0 >= Arg4190_1)},
+  2,
+  [],
+  ">="];
+shenjs_functions["shen_>="] = shen_$gt$$eq$;
+
+
+
+
+
+
+shen_$lt$ = [shen_type_func,
+  function shen_user_lambda4193(Arg4192) {
+  if (Arg4192.length < 2) return [shen_type_func, shen_user_lambda4193, 2, Arg4192];
+  var Arg4192_0 = Arg4192[0], Arg4192_1 = Arg4192[1];
+  return (Arg4192_0 < Arg4192_1)},
+  2,
+  [],
+  "<"];
+shenjs_functions["shen_<"] = shen_$lt$;
+
+
+
+
+
+
+shen_$lt$$eq$ = [shen_type_func,
+  function shen_user_lambda4195(Arg4194) {
+  if (Arg4194.length < 2) return [shen_type_func, shen_user_lambda4195, 2, Arg4194];
+  var Arg4194_0 = Arg4194[0], Arg4194_1 = Arg4194[1];
+  return (Arg4194_0 <= Arg4194_1)},
+  2,
+  [],
+  "<="];
+shenjs_functions["shen_<="] = shen_$lt$$eq$;
+
+
+
+
+
+
+shen_cons = [shen_type_func,
+  function shen_user_lambda4197(Arg4196) {
+  if (Arg4196.length < 2) return [shen_type_func, shen_user_lambda4197, 2, Arg4196];
+  var Arg4196_0 = Arg4196[0], Arg4196_1 = Arg4196[1];
+  return [shen_type_cons, Arg4196_0, Arg4196_1]},
+  2,
+  [],
+  "cons"];
+shenjs_functions["shen_cons"] = shen_cons;
+
+
+
+
+
+
+shen_set = [shen_type_func,
+  function shen_user_lambda4199(Arg4198) {
+  if (Arg4198.length < 2) return [shen_type_func, shen_user_lambda4199, 2, Arg4198];
+  var Arg4198_0 = Arg4198[0], Arg4198_1 = Arg4198[1];
+  return (shenjs_globals["shen_" + Arg4198_0[1]] = Arg4198_1)},
+  2,
+  [],
+  "set"];
+shenjs_functions["shen_set"] = shen_set;
+
+
+
+
+
+
+shen_$lt$_address = [shen_type_func,
+  function shen_user_lambda4201(Arg4200) {
+  if (Arg4200.length < 2) return [shen_type_func, shen_user_lambda4201, 2, Arg4200];
+  var Arg4200_0 = Arg4200[0], Arg4200_1 = Arg4200[1];
+  return shenjs_absvector_ref(Arg4200_0, Arg4200_1)},
+  2,
+  [],
+  "<-address"];
+shenjs_functions["shen_<-address"] = shen_$lt$_address;
+
+
+
+
+
+
+shen_cn = [shen_type_func,
+  function shen_user_lambda4203(Arg4202) {
+  if (Arg4202.length < 2) return [shen_type_func, shen_user_lambda4203, 2, Arg4202];
+  var Arg4202_0 = Arg4202[0], Arg4202_1 = Arg4202[1];
+  return (Arg4202_0 + Arg4202_1)},
+  2,
+  [],
+  "cn"];
+shenjs_functions["shen_cn"] = shen_cn;
+
+
+
+
+
+
+shen_pos = [shen_type_func,
+  function shen_user_lambda4205(Arg4204) {
+  if (Arg4204.length < 2) return [shen_type_func, shen_user_lambda4205, 2, Arg4204];
+  var Arg4204_0 = Arg4204[0], Arg4204_1 = Arg4204[1];
+  return Arg4204_0[Arg4204_1]},
+  2,
+  [],
+  "pos"];
+shenjs_functions["shen_pos"] = shen_pos;
+
+
+
+
+
+
+shen_$at$p = [shen_type_func,
+  function shen_user_lambda4207(Arg4206) {
+  if (Arg4206.length < 2) return [shen_type_func, shen_user_lambda4207, 2, Arg4206];
+  var Arg4206_0 = Arg4206[0], Arg4206_1 = Arg4206[1];
+  return [shen_tuple, Arg4206_0, Arg4206_1]},
+  2,
+  [],
+  "@p"];
+shenjs_functions["shen_@p"] = shen_$at$p;
+
+
+
+
+
+
+shen_pr = [shen_type_func,
+  function shen_user_lambda4209(Arg4208) {
+  if (Arg4208.length < 2) return [shen_type_func, shen_user_lambda4209, 2, Arg4208];
+  var Arg4208_0 = Arg4208[0], Arg4208_1 = Arg4208[1];
+  return (function() {
+  return shenjs_pr(Arg4208_0, Arg4208_1);})},
+  2,
+  [],
+  "pr"];
+shenjs_functions["shen_pr"] = shen_pr;
+
+
+
+
+
+
+shen_address_$gt$ = [shen_type_func,
+  function shen_user_lambda4211(Arg4210) {
+  if (Arg4210.length < 3) return [shen_type_func, shen_user_lambda4211, 3, Arg4210];
+  var Arg4210_0 = Arg4210[0], Arg4210_1 = Arg4210[1], Arg4210_2 = Arg4210[2];
+  return shenjs_absvector_set(Arg4210_0, Arg4210_1, Arg4210_2)},
+  3,
+  [],
+  "address->"];
+shenjs_functions["shen_address->"] = shen_address_$gt$;
+
+
+
+
+
+
+shen_open = [shen_type_func,
+  function shen_user_lambda4213(Arg4212) {
+  if (Arg4212.length < 3) return [shen_type_func, shen_user_lambda4213, 3, Arg4212];
+  var Arg4212_0 = Arg4212[0], Arg4212_1 = Arg4212[1], Arg4212_2 = Arg4212[2];
+  return (function() {
+  return shenjs_open(Arg4212_0, Arg4212_1, Arg4212_2);})},
+  3,
+  [],
+  "open"];
+shenjs_functions["shen_open"] = shen_open;
+
+
+
+
+
+
 shenjs_call(shen_process_datatype, [[shen_type_symbol, "reg-kl-context"], shenjs_call(shen_compile, [[shen_type_symbol, "shen-<datatype-rules>"], [shen_type_cons, [shen_type_symbol, "Nvars"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "number"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "Toplevel"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-s-expr"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "_________"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "@v"], [shen_type_cons, [shen_type_symbol, "Toplevel"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "@v"], [shen_type_cons, [shen_type_symbol, "Nvars"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "vector"], [shen_type_cons, 0, []]], []]]], []]]], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "_______________________"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "<-vector"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, 2, []]]], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "number"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "B"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "number"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "_______________________"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "vector->"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, 2, [shen_type_cons, [shen_type_symbol, "B"], []]]]], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "_______________________"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "<-vector"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, 1, []]]], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-s-expr"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "B"], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-s-expr"], [shen_type_cons, [shen_type_symbol, ";"], [shen_type_cons, [shen_type_symbol, "_______________________"], [shen_type_cons, [shen_type_cons, [shen_type_symbol, "vector->"], [shen_type_cons, [shen_type_symbol, "A"], [shen_type_cons, 1, [shen_type_cons, [shen_type_symbol, "B"], []]]]], [shen_type_cons, [shen_type_symbol, ":"], [shen_type_cons, [shen_type_symbol, "reg-kl-context"], [shen_type_cons, [shen_type_symbol, ";"], []]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]], [shen_type_symbol, "shen-datatype-error"]])]);
 
 
