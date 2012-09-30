@@ -3,9 +3,9 @@ Shen-js
 
 ## Running provided REPL
 
-Put `shen.html`, `shen.js`, `shen-repl-html.js`, `io-html5,js` into a
-directory of your choice. Then open `shen.html` in your browser. It's been
-tested in Firefox and WebKit-based browsers (Chrome and Surf).
+Put `shen.html`, `shen.css`, `shen.js`, `shen-repl-html.js`, `io-html5,js`
+into a directory of your choice. Then open `shen.html` in your browser. It's
+been tested in Firefox and WebKit-based browsers (Chrome and Surf).
 
 Working with files is a bit clumsy. It requires manual interventions and has
 limited filesize. Shen-js maintains list of files it has access to directly on
