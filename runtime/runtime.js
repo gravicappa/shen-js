@@ -101,7 +101,9 @@ function shenjs_error(s) {
 
 function shenjs_error_to_string(s) {
   var stack = s.stack;
-  return (stack === undefined) ? ("" + s) : ("" + s + " " + stack);
+  var show = (stack !== undefined);
+  show &= shenjs_is_true(shenjs_globals["shen_shenjs-*show-error-stack*"]);
+  return (show) ? ("" + s + " " + stack) : ("" + s);
 }
 
 function shenjs_get_time(x) {
@@ -480,7 +482,7 @@ shenjs_exit = shenjs_mkfunction("shenjs-exit", 1, function self(x) {
 
 shenjs_globals["shen_*language*"] = "Javascript"
 shenjs_globals["shen_*implementation*"] = "cli"
-shenjs_globals["shen_*port*"] = "0.9"
+shenjs_globals["shen_*port*"] = "0.9.1"
 shenjs_globals["shen_*porters*"] = "Ramil Farkhshatov"
 shenjs_globals["shen_js-skip-internals"] = true
 
@@ -488,3 +490,4 @@ shenjs_globals["shen_shen-*show-error-js*"] = false
 shenjs_globals["shen_shen-*show-eval-js*"] = false
 shenjs_globals["shen_shen-*show-func-js*"] = false
 shenjs_globals["shen_shen-*dbg-js*"] = false
+shenjs_globals["shen_shenjs-*show-error-stack*"] = false
