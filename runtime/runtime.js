@@ -1,23 +1,24 @@
-Shenjs_freeze = function(vars, fn) {
-  this.vars = vars
-  this.fn = fn
-}
+Shenjs_tag = function() {}
 
 shen_fail_obj = new Object
 shenjs_globals = []
 shenjs_functions = []
 
-shen_counter_type = 0
-shen_type_func = --shen_counter_type
-shen_type_symbol = --shen_counter_type
-shen_type_cons = --shen_counter_type
-shen_type_stream_in = --shen_counter_type
-shen_type_stream_out = --shen_counter_type
-shen_type_stream_inout = --shen_counter_type
-shen_type_error = --shen_counter_type
+shen_type_func = new Shenjs_tag
+shen_type_symbol = new Shenjs_tag
+shen_type_cons = new Shenjs_tag
+shen_type_stream_in = new Shenjs_tag
+shen_type_stream_out = new Shenjs_tag
+shen_type_stream_inout = new Shenjs_tag
+shen_type_error = new Shenjs_tag
 
 shen_true = true
 shen_false = false
+
+Shenjs_freeze = function(vars, fn) {
+  this.vars = vars
+  this.fn = fn
+}
 
 function shenjs_mkfunction(name, nargs, fn) {
   var x = [shen_type_func, fn, nargs, [], name]
@@ -230,8 +231,7 @@ function shenjs_vector$question$(x) {
 
 function shenjs_absvector$question$(x) {
   return ((x instanceof Array) && x.length > 0
-          && ((typeof(x[0]) != "number")
-              || x[0] >= 0 || x[0] <= shen_counter_type))
+          && (!(x[0] instanceof Shenjs_tag)))
 }
 
 function shenjs_absvector(n) {
@@ -482,7 +482,7 @@ shenjs_exit = shenjs_mkfunction("shenjs-exit", 1, function self(x) {
 
 shenjs_globals["shen_*language*"] = "Javascript"
 shenjs_globals["shen_*implementation*"] = "cli"
-shenjs_globals["shen_*port*"] = "0.9.1"
+shenjs_globals["shen_*port*"] = "0.9.2"
 shenjs_globals["shen_*porters*"] = "Ramil Farkhshatov"
 shenjs_globals["shen_js-skip-internals"] = true
 

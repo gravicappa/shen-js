@@ -10,65 +10,66 @@ to the following license.
    appear on such.
 
 2. It is illegal to distribute the software without this license attached to
-	 it and use of the software implies agreement with the license as such. It
-	 is illegal for anyone who is not the copyright holder to tamper with or
-	 change the license.
+   it and use of the software implies agreement with the license as such. It
+   is illegal for anyone who is not the copyright holder to tamper with or
+   change the license.
 
 3. Neither the names of Lambda Associates or the copyright holder may be used
-	 to endorse or promote products built using the software without specific
-	 prior written permission from the copyright holder.
+   to endorse or promote products built using the software without specific
+   prior written permission from the copyright holder.
 
 4. That possession of this license does not confer on the copyright holder any
-	 special contractual obligation towards the user. That in no event shall the
-	 copyright holder be liable for any direct, indirect, incidental, special,
-	 exemplary or consequential damages (including but not limited to
-	 procurement of substitute goods or services, loss of use, data, or profits;
-	 or business interruption), however caused and on any theory of liability,
-	 whether in contract, strict liability or tort (including negligence)
-	 arising in any way out of the use of the software, even if advised of the
-	 possibility of such damage.
+   special contractual obligation towards the user. That in no event shall the
+   copyright holder be liable for any direct, indirect, incidental, special,
+   exemplary or consequential damages (including but not limited to
+   procurement of substitute goods or services, loss of use, data, or profits;
+   or business interruption), however caused and on any theory of liability,
+   whether in contract, strict liability or tort (including negligence)
+   arising in any way out of the use of the software, even if advised of the
+   possibility of such damage.
 
 5. It is permitted for the user to change the software, for the purpose of
-	 improving performance, correcting an error, or porting to a new platform,
-	 and distribute the modified version of Shen (hereafter the modified
-	 version) provided the resulting program conforms in all respects to the
-	 Shen standard and is issued under that title. The user must make it clear
-	 with his distribution that he/she is the author of the changes and what
-	 these changes are and why.
+   improving performance, correcting an error, or porting to a new platform,
+   and distribute the modified version of Shen (hereafter the modified
+   version) provided the resulting program conforms in all respects to the
+   Shen standard and is issued under that title. The user must make it clear
+   with his distribution that he/she is the author of the changes and what
+   these changes are and why.
 
 6. Derived versions of this software in whatever form are subject to the same
-	 restrictions. In particular it is not permitted to make derived copies of
-	 this software which do not conform to the Shen standard or appear under a
-	 different title.
+   restrictions. In particular it is not permitted to make derived copies of
+   this software which do not conform to the Shen standard or appear under a
+   different title.
 
 7. It is permitted to distribute versions of Shen which incorporate libraries,
-	 graphics or other facilities which are not part of the Shen standard.
+   graphics or other facilities which are not part of the Shen standard.
 
 For an explication of this license see
 [http://www.lambdassociates.org/News/june11/license.htm] which explains this
 license in full.
 */
 
-Shenjs_freeze = function(vars, fn) {
-  this.vars = vars
-  this.fn = fn
-}
+Shenjs_tag = function() {}
 
 shen_fail_obj = new Object
 shenjs_globals = []
 shenjs_functions = []
 
-shen_counter_type = 0
-shen_type_func = --shen_counter_type
-shen_type_symbol = --shen_counter_type
-shen_type_cons = --shen_counter_type
-shen_type_stream_in = --shen_counter_type
-shen_type_stream_out = --shen_counter_type
-shen_type_stream_inout = --shen_counter_type
-shen_type_error = --shen_counter_type
+shen_type_func = new Shenjs_tag
+shen_type_symbol = new Shenjs_tag
+shen_type_cons = new Shenjs_tag
+shen_type_stream_in = new Shenjs_tag
+shen_type_stream_out = new Shenjs_tag
+shen_type_stream_inout = new Shenjs_tag
+shen_type_error = new Shenjs_tag
 
 shen_true = true
 shen_false = false
+
+Shenjs_freeze = function(vars, fn) {
+  this.vars = vars
+  this.fn = fn
+}
 
 function shenjs_mkfunction(name, nargs, fn) {
   var x = [shen_type_func, fn, nargs, [], name]
@@ -281,8 +282,7 @@ function shenjs_vector$question$(x) {
 
 function shenjs_absvector$question$(x) {
   return ((x instanceof Array) && x.length > 0
-          && ((typeof(x[0]) != "number")
-              || x[0] >= 0 || x[0] <= shen_counter_type))
+          && (!(x[0] instanceof Shenjs_tag)))
 }
 
 function shenjs_absvector(n) {
@@ -533,7 +533,7 @@ shenjs_exit = shenjs_mkfunction("shenjs-exit", 1, function self(x) {
 
 shenjs_globals["shen_*language*"] = "Javascript"
 shenjs_globals["shen_*implementation*"] = "cli"
-shenjs_globals["shen_*port*"] = "0.9.1"
+shenjs_globals["shen_*port*"] = "0.9.2"
 shenjs_globals["shen_*porters*"] = "Ramil Farkhshatov"
 shenjs_globals["shen_js-skip-internals"] = true
 
@@ -544,69 +544,69 @@ shenjs_globals["shen_shen-*dbg-js*"] = false
 shenjs_globals["shen_shenjs-*show-error-stack*"] = false
 
 try {
-	shenjs_open;
+  shenjs_open;
 } catch (e) {
-	function shenjs_open(type, name, dir) {
-		if (type[1] != "file")
-			return shen_fail_obj
-		var filename = shenjs_globals["shen_*home-directory*"] + name
-		if (dir[1] == "in") {
-			try {
-				var s = read(filename)
-			} catch(e) {
-				shenjs_error(e)
-				return shen_fail_obj
-			}
-			var stream = [shen_type_stream_in, null, function(){}]
-			stream[1] = (function() {
-				return shenjs_file_instream_get(stream, s, 0)
-			})
-			return stream
-		} else if (dir[1] == "out") {
-			shenjs_error("Writing files is not supported in cli interpreter")
-			return shen_fail_obj
-		}
-		shenjs_error("Unsupported open flags")
-		return shen_fail_obj
-	}
+  function shenjs_open(type, name, dir) {
+    if (type[1] != "file")
+      return shen_fail_obj
+    var filename = shenjs_globals["shen_*home-directory*"] + name
+    if (dir[1] == "in") {
+      try {
+        var s = read(filename)
+      } catch(e) {
+        shenjs_error(e)
+        return shen_fail_obj
+      }
+      var stream = [shen_type_stream_in, null, function(){}]
+      stream[1] = (function() {
+        return shenjs_file_instream_get(stream, s, 0)
+      })
+      return stream
+    } else if (dir[1] == "out") {
+      shenjs_error("Writing files is not supported in cli interpreter")
+      return shen_fail_obj
+    }
+    shenjs_error("Unsupported open flags")
+    return shen_fail_obj
+  }
 }
 
 try {
-	shenjs_puts;
+  shenjs_puts;
 } catch (e) {
-	try {
-		shenjs_puts = putstr;
-	} catch (e) {
-		shenjs_puts = write;
-	}
+  try {
+    shenjs_puts = putstr;
+  } catch (e) {
+    shenjs_puts = write;
+  }
 }
 
 try {
-	shenjs_gets;
+  shenjs_gets;
 } catch (e) {
-	shenjs_gets = readline;
+  shenjs_gets = readline;
 }
 
 try {
-	shenjs_open_repl;
+  shenjs_open_repl;
 } catch (e) {
-	function shenjs_open_repl() {
-		var fout = [shen_type_stream_out, null, null]
-		fout[1] = (function(byte) {
-			return shenjs_repl_write_byte(byte)
-		})
-		fout[2] = (function() {})
-		shenjs_globals["shen_*stoutput*"] = fout
+  function shenjs_open_repl() {
+    var fout = [shen_type_stream_out, null, null]
+    fout[1] = (function(byte) {
+      return shenjs_repl_write_byte(byte)
+    })
+    fout[2] = (function() {})
+    shenjs_globals["shen_*stoutput*"] = fout
 
-		var fin = [shen_type_stream_in, null, null]
-		fin[1] = (function() {
-			return shenjs_repl_read_byte(fin, shenjs_gets(), 0)
-		})
-		fin[2] = (function() {quit()})
+    var fin = [shen_type_stream_in, null, null]
+    fin[1] = (function() {
+      return shenjs_repl_read_byte(fin, shenjs_gets(), 0)
+    })
+    fin[2] = (function() {quit()})
 
-		var finout = [shen_type_stream_inout, fin, fout]
-		shenjs_globals["shen_*stinput*"] = finout
-	}
+    var finout = [shen_type_stream_inout, fin, fout]
+    shenjs_globals["shen_*stinput*"] = finout
+  }
 }
 /*
 
