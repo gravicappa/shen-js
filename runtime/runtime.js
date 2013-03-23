@@ -1,37 +1,44 @@
-Shenjs_tag = function() {}
+Shen = {}
+Shen.globals = {}
 
-shen_fail_obj = new Object
-shenjs_globals = []
-shenjs_functions = []
+Shen.globals["*language*"] = "Javascript"
+Shen.globals["*implementation*"] = "cli"
+Shen.globals["*port*"] = Shen.version = "0.9.3"
+Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
 
-shen_type_func = new Shenjs_tag
-shen_type_symbol = new Shenjs_tag
-shen_type_cons = new Shenjs_tag
-shen_type_stream_in = new Shenjs_tag
-shen_type_stream_out = new Shenjs_tag
-shen_type_stream_inout = new Shenjs_tag
-shen_type_error = new Shenjs_tag
+Shen.tag = function() {}
 
-shen_true = true
-shen_false = false
+Shen.fail_obj = new Object
+Shen.fns = {}
 
-Shenjs_freeze = function(vars, fn) {
+Shen.type_func = new Shen.tag
+Shen.type_symbol = new Shen.tag
+Shen.type_cons = new Shen.tag
+Shen.type_stream_in = new Shen.tag
+Shen.type_stream_out = new Shen.tag
+Shen.type_stream_inout = new Shen.tag
+Shen.type_error = new Shen.tag
+
+Shen.true = true
+Shen.false = false
+
+Shen.Freeze = function(vars, fn) {
   this.vars = vars
   this.fn = fn
 }
 
-function shenjs_mkfunction(name, nargs, fn) {
-  var x = [shen_type_func, fn, nargs, [], name]
-  shenjs_functions[name] = x
+Shen.mkfunction = function(name, nargs, fn) {
+  var x = [Shen.type_func, fn, nargs, [], name]
+  Shen.fns[name] = x
   return x
 }
 
-function shenjs_call_tail(x, args) {
+Shen.call_tail = function(x, args) {
   var j = 0, nargs = args.length
   for (;;) {
     if (typeof(x) == "function") {
       x = x([args[j++]])
-    } else if (x[0] == shen_type_func) {
+    } else if (x[0] == Shen.type_func) {
       var c = x[3], n = c.length, k = x[2], a
       if (!j && !n && nargs <= k) {
         a = args
@@ -46,10 +53,10 @@ function shenjs_call_tail(x, args) {
           a[i] = args[j]
       }
       x = (x[1])(a)
-    } else if (x[0] == shen_type_symbol) {
-      x = shenjs_get_fn(x)
+    } else if (x[0] == Shen.type_symbol) {
+      x = Shen.get_fn(x)
     } else
-      return shenjs_error("shenjs_call: Wrong function: '" + x + "'")
+      return Shen.error("Shen.call: Wrong function: '" + x + "'")
     if (j >= nargs)
       return x
     while (typeof(x) == "function")
@@ -58,93 +65,89 @@ function shenjs_call_tail(x, args) {
   return x
 }
 
-function shenjs_call(x, args) {
-  var x = shenjs_call_tail(x, args)
+Shen.call = function(x, args) {
+  var x = Shen.call_tail(x, args)
   while (typeof(x) == "function")
     x = x()
   return x
 }
 
-function shenjs_unwind_tail(x) {
+Shen.unwind_tail = function(x) {
   while(typeof(x) == "function")
     x = x()
   return x
 }
 
-function shenjs_get_fn(x) {
+Shen.get_fn = function(x) {
   if (typeof(x) == "function")
-    shenjs_error("passed function into get_fn")
+    Shen.error("passed function into get_fn")
   switch (x[0]) {
-  case shen_type_func: return x
-  case shen_type_symbol:
-    var v = shenjs_functions["shen_" + x[1]]
+  case Shen.type_func: return x
+  case Shen.type_symbol:
+    var v = Shen.fns[x[1]]
     if (v != undefined)
       return v
-    v = shenjs_functions["shen_shen_" + x[1]]
-    if (v != undefined)
-      return v
-    shenjs_error("Cannot find '" + x[1] + "' or 'shen_" + x[1] + "'")
-    return shen_fail_obj
+    Shen.error("Cannot find '" + x[1] + "'")
+    return Shen.fail_obj
   }
-  throw new Error("function " + shenjs_str_shen_from_js(x[1]) + " not found")
+  throw new Error("function " + x[1] + " not found")
 }
 
-function shenjs_thaw(f) {
+Shen.thaw = function(f) {
   return f.fn(f.vars)
 }
 
-function shenjs_error(s) {
-  if (shenjs_is_true(shenjs_globals['shen_shen-*show-error-js*']))
-    shenjs_puts("# err: " + s + "\n")
+Shen.error = function(s) {
+  if (Shen.is_true(Shen.globals['shen-*show-error-js*']))
+    Shen.io.puts("# err: " + s + "\n")
   throw new Error(s);
-  return shen_fail_obj
+  return Shen.fail_obj
 }
 
-function shenjs_error_to_string(s) {
+Shen.error_to_string = function(s) {
   var stack = s.stack;
   var show = (stack !== undefined);
-  show &= shenjs_is_true(shenjs_globals["shen_shenjs-*show-error-stack*"]);
+  show &= Shen.is_true(Shen.globals["shenjs-*show-error-stack*"]);
   return (show) ? ("" + s + " " + stack) : ("" + s);
 }
 
-function shenjs_get_time(x) {
+Shen.get_time = function(x) {
   return (new Date()).getTime() / 1000.0
 }
 
-shenjs_simple_error = shenjs_error
+Shen.simple_error = Shen.error
+Shen.log_eq = false
 
-shenjs_log_eq = false
-
-function shenjs_trap_error(fn, handler) {
+Shen.trap_error = function(fn, handler) {
   try {
     return fn()
   } catch (e) {
-    return shenjs_call(handler, [e])
+    return Shen.call(handler, [e])
   }
 }
 
-function shenjs_notrap_error(fn, handler) {
+Shen.notrap_error = function(fn, handler) {
   return fn()
 }
 
-function shenjs_equal_boolean(b, x) {
+Shen.equal_boolean = function(b, x) {
   return ((x instanceof Array)
-          && x[0] == shen_type_symbol
+          && x[0] == Shen.type_symbol
           && ((x[1] == "true" && b === true)
               || (x[1] == "false" && b === false)))
 }
 
-function shenjs_equal_function(f, x) {
-  return (x[0] == shen_type_symbol && f[0] == shen_type_func && x[1] == f[4])
+Shen.equal_function = function(f, x) {
+  return (x[0] == Shen.type_symbol && f[0] == Shen.type_func && x[1] == f[4])
 }
 
-function shenjs_$eq$(x, y) {
+Shen.$eq$ = function(x, y) {
   if (x === y)
     return true
   var tx = typeof(x), ty = typeof(y)
   if (tx != ty)
-    return ((tx == "boolean" && shenjs_equal_boolean(x, y))
-            || (ty == "boolean" && shenjs_equal_boolean(y, x)))
+    return ((tx == "boolean" && Shen.equal_boolean(x, y))
+            || (ty == "boolean" && Shen.equal_boolean(y, x)))
   switch (tx) {
   case "number":
   case "boolean":
@@ -159,18 +162,18 @@ function shenjs_$eq$(x, y) {
     if ((x instanceof Array) ^ (y instanceof Array))
       return false
 
-    if (shenjs_equal_function(x, y) || shenjs_equal_function(y, x))
+    if (Shen.equal_function(x, y) || Shen.equal_function(y, x))
       return true
     if (x.length != y.length)
       return false
     if (x.length == 0)
       return true
-    if (x == shen_fail_obj && y == shen_fail_obj)
+    if (x == Shen.fail_obj && y == Shen.fail_obj)
       return true
     if (x[0] != y[0])
       return false
     switch (x[0]) {
-    case shen_type_func:
+    case Shen.type_func:
      if (x[1] != y[1] || x[2] != y[2])
         return false
       var n = x[3].length
@@ -180,24 +183,24 @@ function shenjs_$eq$(x, y) {
         if (x[3][i] != y[3][i])
           return false
       return true
-    case shen_type_symbol: return x[1] == y[1];
-    case shen_type_cons:
-      var r = shenjs_$eq$(x[1], y[1])
+    case Shen.type_symbol: return x[1] == y[1];
+    case Shen.type_cons:
+      var r = Shen.$eq$(x[1], y[1])
       while (typeof(r) == "function")
         r = r()
       if (!r)
         return false
       return (function() {
-        var r = shenjs_$eq$(x[2], y[2])
+        var r = Shen.$eq$(x[2], y[2])
         while (typeof(r) == "function")
           r = r()
         return r
       });
-    case shen_type_stream_out:
-    case shen_type_stream_in: return x[1] == y[1] && x[2] == y[2];
+    case Shen.type_stream_out:
+    case Shen.type_stream_in: return x[1] == y[1] && x[2] == y[2];
     default:
       for (var i = 1; i < x.length; ++i) {
-        var r = shenjs_$eq$(x[i], y[i])
+        var r = Shen.$eq$(x[i], y[i])
         while (typeof(r) == "function")
           r = r()
         if (!r)
@@ -210,83 +213,83 @@ function shenjs_$eq$(x, y) {
   }
 }
 
-function shenjs_empty$question$(x) {
+Shen.empty$question$ = function(x) {
   return ((x instanceof Array) && !x.length)
 }
 
-function shenjs_is_type(x, type) {
-  if (type == shen_type_symbol && (x === true || x === false))
+Shen.is_type = function(x, type) {
+  if (type == Shen.type_symbol && (x === true || x === false))
     return true
   return ((x instanceof Array) && x[0] == type)
 }
 
-function shenjs_boolean$question$(x) {
-  return (typeof(x) == "boolean") || (shenjs_is_type(x, shen_type_symbol)
+Shen.boolean$question$ = function(x) {
+  return (typeof(x) == "boolean") || (Shen.is_type(x, Shen.type_symbol)
                                       && (x[1] == "true" || x[1] == "false"))
 }
 
-function shenjs_vector$question$(x) {
+Shen.vector$question$ = function(x) {
   return ((x instanceof Array) && x[0] > 0)
 }
 
-function shenjs_absvector$question$(x) {
+Shen.absvector$question$ = function(x) {
   return ((x instanceof Array) && x.length > 0
-          && (!(x[0] instanceof Shenjs_tag)))
+          && (!(x[0] instanceof Shen.tag)))
 }
 
-function shenjs_absvector(n) {
+Shen.absvector = function(n) {
   var ret = new Array(n)
   for (var i = 0; i < n; ++i)
-    ret[i] = shen_fail_obj
+    ret[i] = Shen.fail_obj
   return ret
 }
 
-function dbg_princ(s, x) {
+Shen.dbg_princ = function(s, x) {
   dbg_print(" " + s + x)
   return x
 }
 
-function dbg_print(s) {
-  if (shenjs_is_true(shenjs_globals['shen_shen-*show-error-js*']))
-    shenjs_puts(s + "\n")
+Shen.dbg_print = function(s) {
+  if (Shen.is_true(Shen.globals['shen-*show-error-js*']))
+    Shen.io.puts(s + "\n")
 }
 
-function shenjs_is_true(x) {
+Shen.is_true = function(x) {
   return x != false || ((x instanceof Array)
-                        && (x[0] == shen_type_symbol)
+                        && (x[0] == Shen.type_symbol)
                         && (x[1] != "false"))
 }
 
-function shenjs_absvector_ref(x, i) {
+Shen.absvector_ref = function(x, i) {
   if (x.length <= i || i < 0)
-    shenjs_error("out of range")
+    Shen.error("out of range")
   return x[i]
 }
 
-function shenjs_absvector_set(x, i, v) {
+Shen.absvector_set = function(x, i, v) {
   if (x.length <= i || i < 0)
-    shenjs_error("out of range")
+    Shen.error("out of range")
   x[i] = v
   return x
 }
 
-function shenjs_value(x) {
-  var y = shenjs_globals["shen_" + s[1]]
+Shen.value = function(x) {
+  var y = Shen.globals[s[1]]
   if (y === undefined)
-    shenjs_error("The variable " + x + " is unbound.")
+    Shen.error("The variable " + x + " is unbound.")
   else
     return y
 }
 
-function shenjs_vector(n) {
+Shen.vector = function(n) {
   var r = new Array(n + 1)
   r[0] = n
   for (var i = 1; i <= n; ++i)
-    r[i] = shen_fail_obj
+    r[i] = Shen.fail_obj
   return r
 }
 
-function shenjs_esc(x) {
+Shen.esc = function(x) {
   var ret = ""
   for (var i = 0; i < x.length; ++i)
     switch (x[i]) {
@@ -296,12 +299,12 @@ function shenjs_esc(x) {
   return ret
 }
 
-shenjs_sym_map_shen = []
-shenjs_sym_map_js = []
+Shen.sym_map_shen = []
+Shen.sym_map_js = []
 
-shenjs_word_restricted = []
+Shen.word_restricted = []
 
-function shenjs_init_restricted () {
+Shen.init_restricted  = function() {
   var words = [
     "return", "new", "delete", "function", "while", "for", "var", "if", "do",
     "in", "super", "load", "print", "eval", "read", "readline", "write",
@@ -309,57 +312,57 @@ function shenjs_init_restricted () {
   ];
   var nwords = words.length;
   for (var i = 0; i < nwords; ++i)
-    shenjs_word_restricted[words[i]] = 1
+    Shen.word_restricted[words[i]] = 1
 }
-shenjs_init_restricted()
+Shen.init_restricted()
 
-function shenjs_register_sym_map(js, shen) {
-  shenjs_sym_map_js[shen] = js
-  shenjs_sym_map_shen[js] = shen
-}
-
-function shenjs_str_shen_from_js(s) {
-  return shenjs_str_map([], shenjs_sym_map_shen, s)
+Shen.register_sym_map = function(js, shen) {
+  Shen.sym_map_js[shen] = js
+  Shen.sym_map_shen[js] = shen
 }
 
-function shenjs_str_js_from_shen(s) {
-  return shenjs_str_map(shenjs_word_restricted, shenjs_sym_map_js, s)
+Shen.str_shen_from_js = function(s) {
+  return Shen.str_map([], Shen.sym_map_shen, s)
 }
 
-shenjs_register_sym_map("_", "-")
-shenjs_register_sym_map("$_", "_")
-shenjs_register_sym_map("$$", "$")
-shenjs_register_sym_map("$quote$", "'")
-shenjs_register_sym_map("$bquote$", "`")
-shenjs_register_sym_map("$slash$", "/")
-shenjs_register_sym_map("$asterisk$", "*")
-shenjs_register_sym_map("$plus$", "+")
-shenjs_register_sym_map("$percent$", "%")
-shenjs_register_sym_map("$eq$", "=")
-shenjs_register_sym_map("$question$", "?")
-shenjs_register_sym_map("$excl$", "!")
-shenjs_register_sym_map("$gt$", ">")
-shenjs_register_sym_map("$lt$", "<")
-shenjs_register_sym_map("$dot$", ".")
-shenjs_register_sym_map("$bar$", "|")
-shenjs_register_sym_map("$sharp$", "#")
-shenjs_register_sym_map("$tilde$", "~")
-shenjs_register_sym_map("$colon$", ":")
-shenjs_register_sym_map("$sc$", ";")
-shenjs_register_sym_map("$amp$", "&")
-shenjs_register_sym_map("$at$", "@")
-shenjs_register_sym_map("$cbraceopen$", "{")
-shenjs_register_sym_map("$cbraceclose$", "}")
-shenjs_register_sym_map("$shen$", "")
+Shen.str_js_from_shen = function(s) {
+  return Shen.str_map(Shen.word_restricted, Shen.sym_map_js, s)
+}
 
-function shenjs_str_starts_with(s, start) {
+Shen.register_sym_map("_", "-")
+Shen.register_sym_map("$_", "_")
+Shen.register_sym_map("$$", "$")
+Shen.register_sym_map("$quote$", "'")
+Shen.register_sym_map("$bquote$", "`")
+Shen.register_sym_map("$slash$", "/")
+Shen.register_sym_map("$asterisk$", "*")
+Shen.register_sym_map("$plus$", "+")
+Shen.register_sym_map("$percent$", "%")
+Shen.register_sym_map("$eq$", "=")
+Shen.register_sym_map("$question$", "?")
+Shen.register_sym_map("$excl$", "!")
+Shen.register_sym_map("$gt$", ">")
+Shen.register_sym_map("$lt$", "<")
+Shen.register_sym_map("$dot$", ".")
+Shen.register_sym_map("$bar$", "|")
+Shen.register_sym_map("$sharp$", "#")
+Shen.register_sym_map("$tilde$", "~")
+Shen.register_sym_map("$colon$", ":")
+Shen.register_sym_map("$sc$", ";")
+Shen.register_sym_map("$amp$", "&")
+Shen.register_sym_map("$at$", "@")
+Shen.register_sym_map("$cbraceopen$", "{")
+Shen.register_sym_map("$cbraceclose$", "}")
+Shen.register_sym_map("$shen$", "")
+
+Shen.str_starts_with = function(s, start) {
   var len = start.length
   if (s.length < len)
     return false
   return (s.substring(0, len) == start)
 }
 
-function shenjs_str_map(word_tbl, sym_tbl, s) {
+Shen.str_map = function(word_tbl, sym_tbl, s) {
   if (word_tbl[s])
     return "$shen$" + s
   var ret = ""
@@ -367,7 +370,7 @@ function shenjs_str_map(word_tbl, sym_tbl, s) {
   while (s != "") {
     replaced = false
     for (k in sym_tbl)
-      if (k != "" && shenjs_str_starts_with(s, k)) {
+      if (k != "" && Shen.str_starts_with(s, k)) {
         ret += sym_tbl[k]
         s = s.substring(k.length, s.length)
         replaced = true
@@ -381,62 +384,62 @@ function shenjs_str_map(word_tbl, sym_tbl, s) {
   return ret
 }
 
-function shenjs_str(x) {
+Shen.str = function(x) {
   var err = " is not an atom in Shen; str cannot print it to a string."
   switch (typeof(x)) {
-    case "string": return "\"" + shenjs_esc(x) + "\""
+    case "string": return "\"" + Shen.esc(x) + "\""
     case "number":
     case "boolean": return "" + x
     case "function":
       if (x.name.length > 0)
-        return shenjs_str_shen_from_js(x.name)
+        return Shen.str_shen_from_js(x.name)
       return "#<function>"
     case "object":
-      if (x == shen_fail_obj)
+      if (x == Shen.fail_obj)
         return "fail!"
       if (x instanceof Array) {
         if (x.length <= 0) {
-          shenjs_error("[]" + err)
-          return shen_fail_obj
+          Shen.error("[]" + err)
+          return Shen.fail_obj
         }
         switch (x[0]) {
-          case shen_type_symbol: return x[1]
-          case shen_type_func:
+          case Shen.type_symbol: return x[1]
+          case Shen.type_func:
             if (!x[3].length && x[4] != undefined)
               return x[4]
-            if (shenjs_is_true(shenjs_globals['shen_shen-*show-func-js*']))
-              shenjs_puts("\n func: " + x + "\n\n")
+            if (Shen.is_true(Shen.globals['shen-*show-func-js*']))
+              Shen.io.puts("\n func: " + x + "\n\n")
             return (x[3].length == 0) ? "#<function>" : "#<closure>"
         }
       }
   }
-  shenjs_error([x + err])
-  return shen_fail_obj
+  Shen.error([x + err])
+  return Shen.fail_obj
 }
 
-function shenjs_intern(x) {
+Shen.intern = function(x) {
   switch (x) {
   case "true": return true
   case "false": return false
-  default: return [shen_type_symbol, x]
+  default: return [Shen.type_symbol, x]
   }
 }
 
-function shenjs_tlstr(x) {
+Shen.tlstr = function(x) {
   if (x == "")
-    return [shen_type_symbol, "shen_eos"]
+    return [Shen.type_symbol, "shen_eos"]
   return x.substring(1, x.length)
 }
 
-function shenjs_n_$gt$string(x) {
+Shen.n_$gt$string = function(x) {
   return String.fromCharCode(x)
 }
 
-function shenjs_string_$gt$n(x) {
+Shen.string_$gt$n = function(x) {
   return x.charCodeAt(0)
 }
 
-function shenjs_eval_in_global(x) {
+Shen.eval_in_global = function(x) {
   try {
     var g = window;
   } catch (e) {
@@ -448,46 +451,183 @@ function shenjs_eval_in_global(x) {
     return eval.call(null, x);
 }
 
-function shenjs_eval_kl(x) {
+Shen.eval_kl = function(x) {
   var log = false
-  if (shenjs_is_true(shenjs_globals['shen_shen-*show-eval-js*']))
+  if (Shen.is_true(Shen.globals['shen-*show-eval-js*']))
     log = true
   if (log) {
-    shenjs_puts("# eval-kl[KL]: " + "\n")
-    shenjs_puts(shenjs_call(shen_intmake_string,
-                            ["~R~%", [shen_tuple, x, []]]))
+    Shen.io.puts("# eval-kl[KL]: " + "\n")
+    Shen.io.puts(Shen.call(Shen.fns["intmake-string"],
+                           ["~R~%", [Shen.fns["shen_tuple"], x, []]]))
   }
-  var js = shenjs_call(js_from_kl, [x])
+  var js = Shen.call(Shen.fns["js-from-kl"], [x])
   if (log)
-    shenjs_puts("eval-kl[JS]:\n" + js + "\n\n")
-  var ret = shenjs_eval_in_global(js)
+    Shen.io.puts("eval-kl[JS]:\n" + js + "\n\n")
+  var ret = Shen.eval_in_global(js)
   if (log)
-    shenjs_puts("eval-kl => '" + ret + "'\n\n")
+    Shen.io.puts("eval-kl => '" + ret + "'\n\n")
   if (ret === undefined)
-    shenjs_error("evaluated '" + js + "' to undefined")
+    Shen.error("evaluated '" + js + "' to undefined")
   return ret
 }
 
-shenjs_load = shenjs_mkfunction("shenjs-load", 1, function self(x) {
-  if (x.length < 1) return [shen_type_func, self, 1, x]
+Shen.mkfunction("shenjs-load", 1, function self(x) {
+  if (x.length < 1) return [Shen.type_func, self, 1, x]
   return (function() {
     load(x)
     return []
   })
 })
 
-shenjs_exit = shenjs_mkfunction("shenjs-exit", 1, function self(x) {
-  quit()
-})
+Shen.file_instream_get = function(stream, s, pos) {
+  if (s.length <= pos) {
+    stream[1] = (function() {return -1})
+    return -1
+  }
+  stream[1] = (function() {
+    return Shen.file_instream_get(stream, s, pos + 1)
+  })
+  return s.charCodeAt(pos)
+}
 
-shenjs_globals["shen_*language*"] = "Javascript"
-shenjs_globals["shen_*implementation*"] = "cli"
-shenjs_globals["shen_*port*"] = "0.9.2"
-shenjs_globals["shen_*porters*"] = "Ramil Farkhshatov"
-shenjs_globals["shen_js-skip-internals"] = true
+Shen.read_byte = function(stream) {
+ switch (stream[0]) {
+    case Shen.type_stream_in: return stream[1]()
+    case Shen.type_stream_inout: return Shen.read_byte(stream[1])
+    default:
+      Shen.error("read-byte: Wrong stream type.")
+      return -1;
+  }
+}
 
-shenjs_globals["shen_shen-*show-error-js*"] = false
-shenjs_globals["shen_shen-*show-eval-js*"] = false
-shenjs_globals["shen_shen-*show-func-js*"] = false
-shenjs_globals["shen_shen-*dbg-js*"] = false
-shenjs_globals["shen_shenjs-*show-error-stack*"] = false
+Shen.write_byte = function(byte, stream) {
+ switch (stream[0]) {
+    case Shen.type_stream_out: stream[1](byte); break;
+    case Shen.type_stream_inout: Shen.write_byte(byte, stream[2]); break;
+    default: Shen.error("write-byte: Wrong stream type.")
+  }
+  return []
+}
+
+Shen.close = function(stream) {
+  switch (stream[0]) {
+    case Shen.type_stream_in:
+      stream[2]()
+      stream[1] = (function() {return -1});
+      break;
+    case Shen.type_stream_out:
+      stream[2]()
+      stream[1] = (function(_) {return []});
+      break;
+    case Shen.type_stream_inout:
+      Shen.close(stream[1])
+      Shen.close(stream[2])
+      break;
+  }
+  return []
+}
+
+Shen.repl_write_byte = function(byte) {
+  Shen.io.puts(String.fromCharCode(byte))
+}
+
+Shen.repl_read_byte = function (stream, s, pos) {
+  if (s == null) {
+    stream[1] = (function() {return -1})
+    quit()
+    return -1
+  } else if (pos >= s.length) {
+    stream[1] = (function() {
+      return Shen.repl_read_byte(stream, Shen.io.gets(), 0)
+    })
+    return Shen.call(Shen.fns["shen-newline"], [])
+  } else {
+    stream[1] = (function() {
+      return Shen.repl_read_byte(stream, s, pos + 1)
+    })
+  }
+  return s.charCodeAt(pos)
+}
+
+Shen.pr = function(s, stream) {
+  for (i = 0; i < s.length; ++i)
+    Shen.write_byte(s.charCodeAt(i), stream)
+  return s
+}
+
+Shen.mkfunction("shenjs-exit", 1, function self(x) {quit()})
+Shen.globals["js-skip-internals"] = true
+
+Shen.globals["shen-*show-error-js*"] = false
+Shen.globals["shenjs-*show-error-stack*"] = false
+Shen.globals["shen-*show-eval-js*"] = false
+Shen.globals["shen-*show-func-js*"] = false
+Shen.globals["shen-*dbg-js*"] = false
+Shen.globals["*home-directory*"] = ""
+
+/* dummy functions to bypass defstruct's declarations */
+Shen.mkfunction("shen-process-datatype", 2, function(_) {return []})
+Shen.mkfunction("compile", 3, function(_) {return []})
+Shen.mkfunction("declare", 2, function(_) {return []})
+
+Shen.console_io = {
+  open: function(type, name, dir) {
+    if (type[1] != "file")
+      return Shen.fail_obj
+    var filename = Shen.globals["*home-directory*"] + name
+    if (dir[1] == "in") {
+      try {
+        var s = read(filename)
+      } catch(e) {
+        Shen.error(e)
+        return Shen.fail_obj
+      }
+      var stream = [Shen.type_stream_in, null, function(){}]
+      stream[1] = (function() {
+        return Shen.file_instream_get(stream, s, 0)
+      })
+      return stream
+    } else if (dir[1] == "out") {
+      Shen.error("Writing files is not supported in cli interpreter")
+      return Shen.fail_obj
+    }
+    Shen.error("Unsupported open flags")
+    return Shen.fail_obj
+  },
+
+  init: function() {
+    try {
+      this.puts = putstr;
+    } catch (e) {
+      this.puts = write;
+    }
+    this.gets = readline;
+    var fout = [Shen.type_stream_out,
+                function(byte) {return Shen.repl_write_byte(byte)},
+                function() {}]
+    Shen.globals["*stoutput*"] = fout
+    
+    var fin = [Shen.type_stream_in, null, quit]
+    fin[1] = (function() {
+      return Shen.repl_read_byte(fin, Shen.io.gets(), 0)
+    })
+    
+    var finout = [Shen.type_stream_inout, fin, fout]
+    Shen.globals["*stinput*"] = finout
+  }
+}
+
+Shen.init = function(conf) {
+  Shen.io = conf.io
+  Shen.io.init()
+  if (conf.start_repl)
+    Shen.call(Shen.fns["shen-shen"], [])
+}
+
+Shen.console_repl = function () {
+  Shen.init({io: Shen.console_io, start_repl: true})
+}
+
+try {
+  module.exports = Shen
+} catch (e) {}

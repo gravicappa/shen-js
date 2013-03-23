@@ -5,10 +5,7 @@ runtime_dir = runtime
 shen_dir = shenjs/
 
 rt_src = \
-  $runtime_dir/runtime.js \
-  $runtime_dir/io-cli.js \
-  $runtime_dir/io.js \
-  $runtime_dir/dummy.js
+  $runtime_dir/runtime.js
 
 runtime_src = $rt_src $shen_dir/primitives.js
 
@@ -31,8 +28,6 @@ shen_src = \
   $shen_dir/t-star.kl.js \
   $shen_dir/toplevel.kl.js
 
-repl_src = $runtime_dir/repl.js
-
 all:V: $name
 
 $shen_dir/stamp:
@@ -40,7 +35,7 @@ $shen_dir/stamp:
   shen_run -ne ./make.shen $shen_dir
   touch $target
 
-$name: $shen_dir/stamp $rt_src $repl_src
+$name: $shen_dir/stamp $rt_src
   {
     echo '/*'
     cat LICENSE
@@ -52,7 +47,6 @@ $name: $shen_dir/stamp $rt_src $repl_src
       /^$/ {str=0}
       str {next}
       {print}'
-    cat $repl_src
   } >shen.js
 
 shen_repl_html.tar.gz: $name shen.html shen.css shen-repl-html.js io-html5.js

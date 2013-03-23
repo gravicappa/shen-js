@@ -1,13 +1,5 @@
 (package shenjs- [js-int-funcs js-from-kl js-dump-to-file js-skip-internals]
 
-(define cut-shen-prefix
-  (@s "shen-" S) -> S
-  (@s "shen_" S) -> S
-  S -> S)
-
-(define js-name
-  X -> (cn "shenjs_" (cut-shen-prefix (str X))))
-
 (define mk-op-defs-n
   F _ [] Acc -> Acc
   F Args [D | Defs] Acc -> (let K (js-from-kl [defun D Args [D | Args]])
