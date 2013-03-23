@@ -1,1 +1,2 @@
 *.kl
+./node_modules/*
