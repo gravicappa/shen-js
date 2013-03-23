@@ -1,0 +1,9 @@
+{
+  "name": "shen-js-node",
+  "version": "0.0.1",
+  "author": "xkxx <xukexiang@gmail.com>",
+  "description": "Shen Node.js Port",
+  "dependencies" : {
+    "commander": "1.1.x"
+  }
+}
