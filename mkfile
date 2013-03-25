@@ -30,12 +30,13 @@ shen_src = \
 
 all:V: $name
 
-$shen_dir/stamp:
+$shen_dir/stamp:Q:
+  rm -f $target
   mkdir -p $shen_dir
   shen_run -ne ./make.shen $shen_dir
   touch $target
 
-$name: $shen_dir/stamp $rt_src
+$name:Q: $shen_dir/stamp $rt_src
   {
     echo '/*'
     cat LICENSE
@@ -49,7 +50,8 @@ $name: $shen_dir/stamp $rt_src
       {print}'
   } >shen.js
 
-shen_repl_html.tar.gz: $name shen.html shen.css shen-repl-html.js io-html5.js
+shen_repl_html.tar.gz: $name shen.html shen.css shen-repl-html.js \
+                       fileio-html5.js
 	dir=shen_repl_html
 	rm -rf $dir
 	mkdir $dir

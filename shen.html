@@ -5,19 +5,22 @@
   </head>
   <body>
     <div id='shen'></div>
-    <div id='shen_fs'></div>
+    <div id='shen_fs' style='visibility:hidden'></div>
     <script type='text/javascript'>
     <!--
-    Shen_repl.init({
-                     div: 'shen', 
-                     src: 'shen.js',
-                     iosrc: 'io-html5.js',
-                     start: 1,
-                     onready: function() {
-                       Shen_fs.init('shen_fs')
-                       Shen_repl.start()
-                     }
-                   })
+    console.log("Loading Shen files")
+    Shen_html_repl.init({
+      div: 'shen', 
+      src: ['shen.js', 'fileio-html5.js'],
+      onready: function() {
+        console.log("starting shen")
+        Shen_fs_html5.init({
+          div: 'shen_fs',
+          io: Shen_html_repl.io
+        })
+        Shen_html_repl.start()
+      }
+    })
     -->
     </script>
   </body>

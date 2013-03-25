@@ -6,18 +6,22 @@ Shen.globals["*implementation*"] = "cli"
 Shen.globals["*port*"] = Shen.version = "0.9.3"
 Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
 
-Shen.tag = function() {}
+Shen.Tag = function(name) {
+  this.toString = function() {
+    return "#<Shen.Tag " + name + ">"
+  }
+}
 
 Shen.fail_obj = new Object
 Shen.fns = {}
 
-Shen.type_func = new Shen.tag
-Shen.type_symbol = new Shen.tag
-Shen.type_cons = new Shen.tag
-Shen.type_stream_in = new Shen.tag
-Shen.type_stream_out = new Shen.tag
-Shen.type_stream_inout = new Shen.tag
-Shen.type_error = new Shen.tag
+Shen.type_func = new Shen.Tag('func')
+Shen.type_symbol = new Shen.Tag('sym')
+Shen.type_cons = new Shen.Tag('cons')
+Shen.type_stream_in = new Shen.Tag('stream_in')
+Shen.type_stream_out = new Shen.Tag('stream_out')
+Shen.type_stream_inout = new Shen.Tag('stream_inout')
+Shen.type_error = new Shen.Tag('error')
 
 Shen.true = true
 Shen.false = false
@@ -70,6 +74,16 @@ Shen.call = function(x, args) {
   while (typeof(x) == "function")
     x = x()
   return x
+}
+
+Shen.call_by_name = function(x, args) {
+  return Shen.call(Shen.fns[x], args)
+}
+
+Shen.call_toplevel = function(name) {
+  var ret = Shen.call(Shen.fns[name], [])
+  delete Shen.fns[name]
+  return ret
 }
 
 Shen.unwind_tail = function(x) {
@@ -234,7 +248,7 @@ Shen.vector$question$ = function(x) {
 
 Shen.absvector$question$ = function(x) {
   return ((x instanceof Array) && x.length > 0
-          && (!(x[0] instanceof Shen.tag)))
+          && (!(x[0] instanceof Shen.Tag)))
 }
 
 Shen.absvector = function(n) {
@@ -299,91 +313,6 @@ Shen.esc = function(x) {
   return ret
 }
 
-Shen.sym_map_shen = []
-Shen.sym_map_js = []
-
-Shen.word_restricted = []
-
-Shen.init_restricted  = function() {
-  var words = [
-    "return", "new", "delete", "function", "while", "for", "var", "if", "do",
-    "in", "super", "load", "print", "eval", "read", "readline", "write",
-    "putstr", "let", "Array", "Object", "document"
-  ];
-  var nwords = words.length;
-  for (var i = 0; i < nwords; ++i)
-    Shen.word_restricted[words[i]] = 1
-}
-Shen.init_restricted()
-
-Shen.register_sym_map = function(js, shen) {
-  Shen.sym_map_js[shen] = js
-  Shen.sym_map_shen[js] = shen
-}
-
-Shen.str_shen_from_js = function(s) {
-  return Shen.str_map([], Shen.sym_map_shen, s)
-}
-
-Shen.str_js_from_shen = function(s) {
-  return Shen.str_map(Shen.word_restricted, Shen.sym_map_js, s)
-}
-
-Shen.register_sym_map("_", "-")
-Shen.register_sym_map("$_", "_")
-Shen.register_sym_map("$$", "$")
-Shen.register_sym_map("$quote$", "'")
-Shen.register_sym_map("$bquote$", "`")
-Shen.register_sym_map("$slash$", "/")
-Shen.register_sym_map("$asterisk$", "*")
-Shen.register_sym_map("$plus$", "+")
-Shen.register_sym_map("$percent$", "%")
-Shen.register_sym_map("$eq$", "=")
-Shen.register_sym_map("$question$", "?")
-Shen.register_sym_map("$excl$", "!")
-Shen.register_sym_map("$gt$", ">")
-Shen.register_sym_map("$lt$", "<")
-Shen.register_sym_map("$dot$", ".")
-Shen.register_sym_map("$bar$", "|")
-Shen.register_sym_map("$sharp$", "#")
-Shen.register_sym_map("$tilde$", "~")
-Shen.register_sym_map("$colon$", ":")
-Shen.register_sym_map("$sc$", ";")
-Shen.register_sym_map("$amp$", "&")
-Shen.register_sym_map("$at$", "@")
-Shen.register_sym_map("$cbraceopen$", "{")
-Shen.register_sym_map("$cbraceclose$", "}")
-Shen.register_sym_map("$shen$", "")
-
-Shen.str_starts_with = function(s, start) {
-  var len = start.length
-  if (s.length < len)
-    return false
-  return (s.substring(0, len) == start)
-}
-
-Shen.str_map = function(word_tbl, sym_tbl, s) {
-  if (word_tbl[s])
-    return "$shen$" + s
-  var ret = ""
-  var replaced
-  while (s != "") {
-    replaced = false
-    for (k in sym_tbl)
-      if (k != "" && Shen.str_starts_with(s, k)) {
-        ret += sym_tbl[k]
-        s = s.substring(k.length, s.length)
-        replaced = true
-        break
-      }
-    if (!replaced) {
-      ret += s[0]
-      s = s.substring(1, s.length)
-    }
-  }
-  return ret
-}
-
 Shen.str = function(x) {
   var err = " is not an atom in Shen; str cannot print it to a string."
   switch (typeof(x)) {
@@ -391,8 +320,6 @@ Shen.str = function(x) {
     case "number":
     case "boolean": return "" + x
     case "function":
-      if (x.name.length > 0)
-        return Shen.str_shen_from_js(x.name)
       return "#<function>"
     case "object":
       if (x == Shen.fail_obj)
@@ -457,10 +384,10 @@ Shen.eval_kl = function(x) {
     log = true
   if (log) {
     Shen.io.puts("# eval-kl[KL]: " + "\n")
-    Shen.io.puts(Shen.call(Shen.fns["intmake-string"],
-                           ["~R~%", [Shen.fns["shen_tuple"], x, []]]))
+    Shen.io.puts(Shen.call_by_name("intmake-string",
+                                   ["~R~%", [Shen.fns["shen_tuple"], x, []]]))
   }
-  var js = Shen.call(Shen.fns["js-from-kl"], [x])
+  var js = Shen.call_by_name("js-from-kl", [x])
   if (log)
     Shen.io.puts("eval-kl[JS]:\n" + js + "\n\n")
   var ret = Shen.eval_in_global(js)
@@ -540,7 +467,7 @@ Shen.repl_read_byte = function (stream, s, pos) {
     stream[1] = (function() {
       return Shen.repl_read_byte(stream, Shen.io.gets(), 0)
     })
-    return Shen.call(Shen.fns["shen-newline"], [])
+    return Shen.call_by_name("shen-newline", [])
   } else {
     stream[1] = (function() {
       return Shen.repl_read_byte(stream, s, pos + 1)
@@ -620,8 +547,15 @@ Shen.console_io = {
 Shen.init = function(conf) {
   Shen.io = conf.io
   Shen.io.init()
+  function assert_io(func) {
+    if (Shen.io[func] === undefined)
+      throw new Error("Shen: IO has no method " + func)
+  }
+  assert_io('gets')
+  assert_io('puts')
+  assert_io('open')
   if (conf.start_repl)
-    Shen.call(Shen.fns["shen-shen"], [])
+    Shen.call_by_name("shen-shen", [])
 }
 
 Shen.console_repl = function () {

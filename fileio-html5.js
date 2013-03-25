@@ -1,12 +1,13 @@
-Shen_fs = {
+Shen_fs_html5 = {
   files: [],
   files_cnt: 0,
   bufsize: 65536,
 
-  init: function(div) {
-    var div = document.getElementById(div)
+  init: function(arg) {
+    var div = document.getElementById(arg.div)
     if (div == null)
       return
+    div.style.visibility = "visible"
     div.innerHTML = ""
 
     var title = document.createElement("div")
@@ -14,22 +15,20 @@ Shen_fs = {
     title.appendChild(document.createTextNode("Filesystem"))
 
     var help = document.getElementById("shenjs_repl_help")
-    if (help) {
-      var helpi = document.createElement("li")
-      var txt = "Click on button below to add file to filesystem"
-      helpi.appendChild(document.createTextNode(txt))
-      help.appendChild(helpi)
-      var helpi = document.createElement("li")
-      var txt = "Click on file to save to local drive"
-      helpi.appendChild(document.createTextNode(txt))
-      help.appendChild(helpi)
-    }
-
+    var help_items = [
+      "Click on button below to add file to filesystem",
+      "Click on file to save to local drive"
+    ]
+    if (help)
+      for (var i = 0; i < help_items.length; ++i) {
+        var helpi = document.createElement("li")
+        helpi.appendChild(document.createTextNode(help_items[i]))
+        help.appendChild(helpi)
+      }
     var input = document.createElement("input")
     input.name = "dir[]"
     input.type = "file"
     input.multiple = 1
-    //input.directory = input.webkitdirectory = input.mozdirectory = 1
     input.addEventListener('change', this.onchange);
 
     var fs = document.createElement("table")
@@ -39,8 +38,7 @@ Shen_fs = {
     div.appendChild(input)
     div.appendChild(fs)
 
-    shenjs_open_repl = Shen_fs.shen_open_repl
-    shenjs_open = Shen_fs.shen_open
+    arg.io.open = Shen_fs_html5.open
   },
 
   add_file: function(name, data) {
@@ -76,7 +74,7 @@ Shen_fs = {
     var td_rm = document.createElement("rm")
     var rm = document.createElement("button")
     rm.appendChild(document.createTextNode("del"))
-    rm.onclick = (function() {Shen_fs.rm(name)})
+    rm.onclick = (function() {Shen_fs_html5.rm(name)})
     td_rm.appendChild(rm)
 
     row.appendChild(td_name)
@@ -100,7 +98,7 @@ Shen_fs = {
     for (var i = 0, f; f = files[i]; ++i) {
       var reader = new FileReader()
       reader.onload = (function (f) {
-        return function(e) {Shen_fs.add_file(f.name, e.target.result)}
+        return function(e) {Shen_fs_html5.add_file(f.name, e.target.result)}
       })(f)
       reader.readAsBinaryString(f)
     }
@@ -135,7 +133,7 @@ Shen_fs = {
     var f = this.files["/" + name]
     if (!f)
       return
-    Shen_fs.append_file(name, f.buf)
+    Shen_fs_html5.append_file(name, f.buf)
   },
 
   write: function(name, data) {
@@ -144,53 +142,37 @@ Shen_fs = {
       return ""
     f.buf += data
     if (f.buf.length >= f.bufsize) {
-      Shen_fs.append_file(name, f.buf)
+      Shen_fs_html5.append_file(name, f.buf)
       f.buf = ""
     }
   },
 
-  shen_open: function(type, name, dir) {
+  open: function(type, name, dir) {
     if (type[1] != "file")
-      return shen_fail_obj
-    var filename = shenjs_globals["shen_*home-directory*"] + name
+      return Shen.fail_obj
+    var filename = Shen.globals["*home-directory*"] + name
     if (dir[1] == "in") {
       try {
-        var s = Shen_fs.cat(filename)
+        var s = Shen_fs_html5.cat(filename)
       } catch(e) {
-        shenjs_error(e)
-        return shen_fail_obj
+        Shen.error(e)
+        return Shen.fail_obj
       }
-      var stream = [shen_type_stream_in, null, function(){}]
+      var stream = [Shen.type_stream_in, null, function(){}]
       stream[1] = (function() {
-        return shenjs_file_instream_get(stream, s, 0)
+        return Shen.file_instream_get(stream, s, 0)
       })
       return stream
     } else if (dir[1] == "out") {
-      Shen_fs.add_file(name, "")
-      var s = [shen_type_stream_out, null, null]
-      s[1] = (function(byte) {Shen_fs.write(name, String.fromCharCode(byte))})
-      s[2] = (function() {Shen_fs.close(name)})
+      Shen_fs_html5.add_file(name, "")
+      var s = [Shen.type_stream_out, null, null]
+      s[1] = (function(byte) {
+        Shen_fs_html5.write(name, String.fromCharCode(byte))
+      })
+      s[2] = (function() {Shen_fs_html5.close(name)})
       return s
     }
-    shenjs_error("Unsupported open flags")
-    return shen_fail_obj
-  },
-
-  shen_open_repl: function() {
-    var fout = [shen_type_stream_out, null, null]
-    fout[1] = (function(byte) {
-      return shenjs_repl_write_byte(byte)
-    })
-    fout[2] = (function() {})
-    shenjs_globals["shen_*stoutput*"] = fout
-
-    var fin = [shen_type_stream_in, null, null]
-    fin[1] = (function() {
-      return shenjs_repl_read_byte(fin, Shen_repl.gets(), 0)
-    })
-    fin[2] = (function() {Shen_repl.quit()})
-
-    var finout = [shen_type_stream_inout, fin, fout]
-    shenjs_globals["shen_*stinput*"] = finout
+    Shen.error("Unsupported open flags")
+    return Shen.fail_obj
   }
 }

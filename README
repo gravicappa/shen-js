@@ -3,7 +3,7 @@ Shen-js
 
 ## Running provided REPL
 
-Put `shen.html`, `shen.css`, `shen.js`, `shen-repl-html.js`, `io-html5,js`
+Put `shen.html`, `shen.css`, `shen.js`, `shen-repl-html.js`, `fileio-html5,js`
 into a directory of your choice. Then open `shen.html` in your browser. It's
 been tested in Firefox and WebKit-based browsers (Chrome and Surf).
 
@@ -16,9 +16,9 @@ name manually.
 
 ## JS integration
 
-To define a Shen function from javascript use `shenjs_mkfunction`.
+To define a Shen function from javascript use `Shen.mkfunction`.
 
-shenjs_mkfunction takes three arguments:
+Shen.mkfunction takes three arguments:
 
   - name of a function
   - number of arguments
@@ -28,15 +28,15 @@ shenjs_mkfunction takes three arguments:
 If length is less than expected it must return function object which is
 a four element vector with elements:
 
-    1. `shen_type_func`,
+    1. `Shen.type_func`,
     2. function object,
     3. number of arguments,
     4. closure vector.
 
 Example:
 
-    shenjs_mkfunction("plus", 2, function f(args) {
-      if (args.length < 2) return [shen_type_func, f, 2, args]
+    Shen.mkfunction("plus", 2, function f(args) {
+      if (args.length < 2) return [Shen.type_func, f, 2, args]
       return args[0] + args[1]
     })
 
@@ -44,41 +44,29 @@ To load javascript file from Shen use `shenjs-load` function.
 
 ## Making your own REPL and I/O
 
-To write your own Shen-js REPL and I/O the following four functions must be
-redefined:
+To write your own Shen-js REPL and I/O you have to pass your io class to
+`Shen.init`. Your class must have the following members:
 
-  * shenjs_open
-  * shenjs_puts
-  * shenjs_gets
-  * shenjs_open_repl
+  * init — called from `Shen.init`. Initializes IO class instance. It also
+    initializes `*stinput*` and `*stoutput*` streams.
+  * puts — prints a line. It must not implicitely add a trailing newline.
+  * gets — reads a line from repl.
+  * open — is a `function(type, name, direction)` and is a direct mapping of
+    shen's `open` function.
 
-### shenjs_open(type, name, direction)
+### Stream type
+Objects (stream in) or a (stream out) are represented in Shen-js as following.
 
-Represents Shen's 'open' function. Returns a (stream in) or a (stream out)
-objects. In Shen-js those objects are
-
-  [shen_type_stream_in, read_byte(), close()]
-  [shen_type_stream_out, write_byte(byte), close()]
+  * (stream in) — `[Shen.type_stream_in, read_byte(), close()]`
+  * (stream out) — `[Shen.type_stream_out, write_byte(byte), close()]`
 
   * `read_byte` function returns numeric value of a next byte from a stream or
      -1 as end of file marker.
   * `write_byte` function writes a byte to a stream. `byte` is a number.
   * `close` closes a stream.
 
-### shenjs_puts(str)
-
-Puts `str` to REPL. It does not append newline itself.
-
-### shenjs_gets()
-
-Reads a string from REPL.
-
-### shenjs_open_repl()
-
-Initializes *stinput* and *stoutput*.
-
-You can use `runtime/io.js`, `runtine/io-cli.js` or `shen-repl-html.js`,
-`io-html5.js` as a references.
+You can look at `Shen.console_io` object and `Shen.console_repl` function as a
+references.
 
 Current implementation sets `*stinput*` as in/out stream as a workaround of
 Shen using `*stinput*` for output.

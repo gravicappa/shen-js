@@ -1,43 +1,64 @@
-shenjs_external_repl = true
-
-Shen_repl = {
+Shen_html_repl = {
   buf: "",
   ctrl_enter_to_send: 0,
 
-  gets: function() {
-    if (Shen_repl.buf.length <= 0)
-      return -1
-    var s = Shen_repl.buf
-    Shen_repl.buf = ""
-    return s
-  },
+  io: {
+    gets: function() {
+      if (Shen_html_repl.buf.length <= 0)
+        return -1
+      var s = Shen_html_repl.buf
+      Shen_html_repl.buf = ""
+      return s
+    },
+    puts: function(s) {
+      var out = document.getElementById("shenjs_repl_out")
+      if (out == null)
+        return
+      do {
+        var pos = s.indexOf("\n")
+        if (pos < 0)
+          out.appendChild(document.createTextNode(s))
+        else {
+          out.appendChild(document.createTextNode(s.substring(0, pos)))
+          out.appendChild(document.createElement("br"))
+          s = s.substring(pos + 1)
+        }
+      } while (pos >= 0)
+    },
+    open: function(type, name, dir) {
+      Shen.error("File access is unsupported")
+      return Shen.fail_obj
+    },
+    init: function() {
+      var fout = [Shen.type_stream_out, null, null]
+      fout[1] = (function(byte) {
+        return Shen.repl_write_byte(byte)
+      })
+      fout[2] = (function() {})
+      Shen.globals["*stoutput*"] = fout
 
-  puts: function(s) {
-    var out = document.getElementById("shenjs_repl_out")
-    if (out == null)
-      return
-    do {
-      var pos = s.indexOf("\n")
-      if (pos < 0)
-        out.appendChild(document.createTextNode(s))
-      else {
-        out.appendChild(document.createTextNode(s.substring(0, pos)))
-        out.appendChild(document.createElement("br"))
-        s = s.substring(pos + 1)
-      }
-    } while (pos >= 0)
+      var fin = [Shen.type_stream_in, null, null]
+      fin[1] = (function() {
+        return Shen.repl_read_byte(fin, Shen_html_repl.io.gets(), 0)
+      })
+      fin[2] = (function() {})
+
+      var finout = [Shen.type_stream_inout, fin, fout]
+      Shen.globals["*stinput*"] = finout
+    }
   },
 
   start: function() {
     document.getElementById("shenjs_repl_out").innerHTML = ""
 
-    shenjs_globals["shen_*implementation*"] = "html5"
-    shenjs_call(shenjs_open_repl, [])
-    shenjs_call(shen_credits, [])
-    shenjs_call(shen_initialise$_environment, [])
-    shenjs_call(shen_prompt, [])
+    Shen.init({io: Shen_html_repl.io})
+    Shen.globals["*implementation*"] = "html5"
+    Shen.call_by_name("shen-credits", [])
+    Shen.call_by_name("shen-initialise_environment", [])
+    Shen.call_by_name("shen-prompt", [])
 
-    document.getElementById("shenjs_repl_input_pane").style.visibility = "visible"
+    var input_pane = document.getElementById("shenjs_repl_input_pane")
+    input_pane.style.visibility = "visible"
     var input = document.getElementById("shenjs_repl_in")
     input.disabled = false
     input.focus()
@@ -45,7 +66,7 @@ Shen_repl = {
 
   implode: function(list) {
     var ret = ""
-    while (list.length == 3 && list[0] == shen_type_cons) {
+    while (list.length == 3 && list[0] == Shen.type_cons) {
       ret += String.fromCharCode(list[1])
       list = list[2]
     }
@@ -63,43 +84,44 @@ Shen_repl = {
 
   consume_line: function(s) {
     var buf, rest, bytes, x
-    Shen_repl.buf += s
+    Shen_html_repl.buf += s
 
     while (1) {
-      buf = Shen_repl.buf
+      buf = Shen_html_repl.buf
       bytes = []
       for (var i = buf.length - 1; i >= 0; --i)
-        bytes = [shen_type_cons, buf.charCodeAt(i), bytes]
-      x = shenjs_call(shenjs_repl_split_input, [bytes])
-      if (x.length != 3 || x[0] != shen_tuple)
+        bytes = [Shen.type_cons, buf.charCodeAt(i), bytes]
+      x = Shen.call_by_name("shenjs-repl-split-input", [bytes])
+      if (x.length != 3 || x[0] != Shen.fns["shen-tuple"])
         break
-      Shen_repl.buf = Shen_repl.implode(x[1])
-      shenjs_puts(Shen_repl.buf + "\n")
-      buf = Shen_repl.implode(x[2])
+      Shen_html_repl.buf = Shen_html_repl.implode(x[1])
+      Shen.io.puts(Shen_html_repl.buf + "\n")
+      buf = Shen_html_repl.implode(x[2])
       try {
-        shenjs_call(shen_read_evaluate_print, [])
+        Shen.call_by_name("shen-read-evaluate-print", [])
       } catch (e) {
-        shenjs_puts(shenjs_error_to_string(e))
+        Shen.io.puts(Shen.error_to_string(e))
       }
-      if (Shen_repl.is_empty(buf)) {
-        Shen_repl.buf = ""
+      if (Shen_html_repl.is_empty(buf)) {
+        Shen_html_repl.buf = ""
         break
       }
-      Shen_repl.buf = buf
+      Shen_html_repl.buf = buf
     }
-    shenjs_call(shen_initialise$_environment, [])
-    shenjs_call(shen_prompt, [])
-    shenjs_puts(Shen_repl.buf)
+    Shen.call_by_name("shen-initialise_environment", [])
+    Shen.call_by_name("shen-prompt", [])
+    Shen.io.puts(Shen_html_repl.buf)
   },
 
   load: function(src, onload) {
+    console.log("loading " + src)
     var s = document.createElement("script")
     s.type = "text/javascript"
     s.src = src
     if (onload) {
       s.onload = onload
       s.onreadystatechange = function() {
-        var state = Shen_repl.readyState || this.readyState
+        var state = Shen_html_repl.readyState || this.readyState
         if (state == 'complete')
           onload()
       }
@@ -107,19 +129,16 @@ Shen_repl = {
     document.getElementsByTagName("head")[0].appendChild(s)
   },
 
-  ensure_shen_loaded: function(arg) {
-    try {
-      if (shenjs_globals["shen_*language*"])
-        return
-    } catch (e) {
-    }
-    arg.src = arg.src || "shen.js"
-    arg.iosrc = arg.iosrc || "io-html.js"
-    arg.onready = arg.onready || function() {Shen_repl.start()}
-    arg.start = arg.start || 1
-    Shen_repl.load(arg.iosrc, function() {
-      Shen_repl.load(arg.src, arg.onready)
-    })
+  load_files: function(files, i, donefunc) {
+    if (typeof(files) == "string")
+      files = [files]
+    console.log("load_files files: " + files + " i: " + i)
+    if (i < files.length)
+      Shen_html_repl.load(files[i], function() {
+        Shen_html_repl.load_files(files, i + 1, donefunc)
+      })
+    else
+      donefunc()
   },
 
   init: function(arg) {
@@ -148,24 +167,27 @@ Shen_repl = {
     text.disabled = true
     text.setAttribute("cols", 72)
     text.setAttribute("rows", 5)
-    text.setAttribute("onkeypress", "return Shen_repl.onkey(event)")
+    text.setAttribute("onkeypress", "return Shen_html_repl.onkey(event)")
 
     var btn_submit = document.createElement("button")
     btn_submit.appendChild(document.createTextNode("Enter"))
-    btn_submit.setAttribute("onclick", "Shen_repl.enter()")
+    btn_submit.setAttribute("onclick", "Shen_html_repl.enter()")
 
     var btn_clear = document.createElement("button")
     btn_clear.appendChild(document.createTextNode("Clear"))
-    btn_clear.setAttribute("onclick", "Shen_repl.clear()")
+    btn_clear.setAttribute("onclick", "Shen_html_repl.clear()")
 
     var help = document.createElement("ul")
     help.id = "shenjs_repl_help"
-    var hi = document.createElement("li")
-    hi.appendChild(document.createTextNode("Press 'Enter' to send text to interpreter"))
-    help.appendChild(hi)
-    var hi = document.createElement("li")
-    hi.appendChild(document.createTextNode("Press 'Ctrl+Enter' to add new line"))
-    help.appendChild(hi)
+    var help_items = [
+      "Press 'Enter' to send text to interpreter",
+      "Press 'Ctrl+Enter' to add new line"
+    ]
+    for (var i = 0; i < help_items.length; ++i) {
+      var hi = document.createElement("li")
+      hi.appendChild(document.createTextNode(help_items[i]))
+      help.appendChild(hi)
+    }
 
     var end = document.createElement("div")
     end.id = "shenjs_repl_end"
@@ -180,10 +202,7 @@ Shen_repl = {
     div.appendChild(p)
     div.appendChild(input)
 
-    Shen_repl.ensure_shen_loaded(arg)
-
-    shenjs_gets = Shen_repl.gets
-    shenjs_puts = Shen_repl.puts
+    Shen_html_repl.load_files(arg.src, 0, arg.onready)
   },
 
   onkey: function(ev) {
@@ -194,7 +213,7 @@ Shen_repl = {
       var input = document.getElementById("shenjs_repl_in")
       input.value += "\n"
     } else
-      Shen_repl.enter()
+      Shen_html_repl.enter()
     return false
   },
 
@@ -204,18 +223,17 @@ Shen_repl = {
   },
 
   enter: function() {
+    console.log("enter()")
     var input = document.getElementById("shenjs_repl_in")
     if (input.value.length) {
       var lines = input.value.split("\n")
       var nlines = lines.length
       for (var i = 0; i < nlines; ++i)
-        Shen_repl.consume_line(lines[i] + "\n")
+        Shen_html_repl.consume_line(lines[i] + "\n")
     }
     input.value = ""
     window.location = "#shenjs_repl_end"
     window.location = "#shenjs_repl_in"
     input.focus()
-  },
-
-  quit: function() {}
+  }
 }
