@@ -1,4 +1,4 @@
-(package shenjs- [js-int-funcs js-from-kl js-dump-to-file js-skip-internals]
+(package shenjs [js.int-funcs js-from-kl js.dump-to-file js.skip-internals]
 
 (define mk-op-defs-n
   F _ [] Acc -> Acc
@@ -12,7 +12,7 @@
 
 (define mk-op-defs-to-file
   Filename -> (let F (open file Filename out)
-                   S (mk-op-defs F (value js-int-funcs) "")
+                   S (mk-op-defs F (value js.int-funcs) "")
                    T2 (close F)
                 _))
 
@@ -26,24 +26,24 @@
 (define call-with-install-flags
   F -> (let Prev (value *maximum-print-sequence-size*)
          (unwind-protect
-           (freeze (do (set shen-*installing-kl* true)
+           (freeze (do (set shen.*installing-kl* true)
                        (set *maximum-print-sequence-size* -1)
                      (thaw F)))
-           (freeze (do (set shen-*installing-kl* false)
+           (freeze (do (set shen.*installing-kl* false)
                        (set *maximum-print-sequence-size* Prev))))))
 
 (define mk-primitives
   Dir -> (call-with-install-flags
            (freeze
              (unwind-protect
-               (freeze (do (set js-skip-internals false)
+               (freeze (do (set js.skip-internals false)
                            (mk-op-defs-to-file (cn Dir "primitives.js"))))
-               (freeze (set js-skip-internals true))))))
+               (freeze (set js.skip-internals true))))))
 
 (define process-file
   Src Dir -> (let Dst (make-string "~A/~A.js" Dir Src)
                   O1 (output "== ~A -> ~A~%" Src Dst)
-               (js-dump-to-file (read-file Src) Dst)))
+               (js.dump-to-file (read-file Src) Dst)))
 
 (define translate-shen
   -> (do (output "== Translating Shen~%")

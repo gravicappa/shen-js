@@ -112,7 +112,7 @@ Shen.thaw = function(f) {
 }
 
 Shen.error = function(s) {
-  if (Shen.is_true(Shen.globals['shen-*show-error-js*']))
+  if (Shen.is_true(Shen.globals['shenjs.*show-error-js*']))
     Shen.io.puts("# err: " + s + "\n")
   throw new Error(s);
   return Shen.fail_obj
@@ -121,7 +121,7 @@ Shen.error = function(s) {
 Shen.error_to_string = function(s) {
   var stack = s.stack;
   var show = (stack !== undefined);
-  show &= Shen.is_true(Shen.globals["shenjs-*show-error-stack*"]);
+  show &= Shen.is_true(Shen.globals["shenjs.*show-error-stack*"]);
   return (show) ? ("" + s + " " + stack) : ("" + s);
 }
 
@@ -264,7 +264,7 @@ Shen.dbg_princ = function(s, x) {
 }
 
 Shen.dbg_print = function(s) {
-  if (Shen.is_true(Shen.globals['shen-*show-error-js*']))
+  if (Shen.is_true(Shen.globals['shenjs.*show-error-js*']))
     Shen.io.puts(s + "\n")
 }
 
@@ -334,7 +334,7 @@ Shen.str = function(x) {
           case Shen.type_func:
             if (!x[3].length && x[4] != undefined)
               return x[4]
-            if (Shen.is_true(Shen.globals['shen-*show-func-js*']))
+            if (Shen.is_true(Shen.globals['shenjs.*show-func-js*']))
               Shen.io.puts("\n func: " + x + "\n\n")
             return (x[3].length == 0) ? "#<function>" : "#<closure>"
         }
@@ -380,7 +380,7 @@ Shen.eval_in_global = function(x) {
 
 Shen.eval_kl = function(x) {
   var log = false
-  if (Shen.is_true(Shen.globals['shen-*show-eval-js*']))
+  if (Shen.is_true(Shen.globals['shenjs.*show-eval-js*']))
     log = true
   if (log) {
     Shen.io.puts("# eval-kl[KL]: " + "\n")
@@ -398,7 +398,7 @@ Shen.eval_kl = function(x) {
   return ret
 }
 
-Shen.mkfunction("shenjs-load", 1, function self(x) {
+Shen.mkfunction("shenjs.load", 1, function self(x) {
   if (x.length < 1) return [Shen.type_func, self, 1, x]
   return (function() {
     load(x)
@@ -467,7 +467,7 @@ Shen.repl_read_byte = function (stream, s, pos) {
     stream[1] = (function() {
       return Shen.repl_read_byte(stream, Shen.io.gets(), 0)
     })
-    return Shen.call_by_name("shen-newline", [])
+    return Shen.call_by_name("shen.newline", [])
   } else {
     stream[1] = (function() {
       return Shen.repl_read_byte(stream, s, pos + 1)
@@ -482,18 +482,18 @@ Shen.pr = function(s, stream) {
   return s
 }
 
-Shen.mkfunction("shenjs-exit", 1, function self(x) {quit()})
-Shen.globals["js-skip-internals"] = true
+Shen.mkfunction("shenjs.exit", 1, function self(x) {quit()})
+Shen.globals["js.skip-internals"] = true
 
-Shen.globals["shen-*show-error-js*"] = false
-Shen.globals["shenjs-*show-error-stack*"] = false
-Shen.globals["shen-*show-eval-js*"] = false
-Shen.globals["shen-*show-func-js*"] = false
-Shen.globals["shen-*dbg-js*"] = false
+Shen.globals["shenjs.*show-error-js*"] = false
+Shen.globals["shenjs.*show-error-stack*"] = false
+Shen.globals["shenjs.*show-eval-js*"] = false
+Shen.globals["shenjs.*show-func-js*"] = false
+Shen.globals["shenjs.*dbg-js*"] = false
 Shen.globals["*home-directory*"] = ""
 
 /* dummy functions to bypass defstruct's declarations */
-Shen.mkfunction("shen-process-datatype", 2, function(_) {return []})
+Shen.mkfunction("shen.process-datatype", 2, function(_) {return []})
 Shen.mkfunction("compile", 3, function(_) {return []})
 Shen.mkfunction("declare", 2, function(_) {return []})
 
@@ -555,7 +555,7 @@ Shen.init = function(conf) {
   assert_io('puts')
   assert_io('open')
   if (conf.start_repl)
-    Shen.call_by_name("shen-shen", [])
+    Shen.call_by_name("shen.shen", [])
 }
 
 Shen.console_repl = function () {

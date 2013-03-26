@@ -40,7 +40,7 @@ Example:
       return args[0] + args[1]
     })
 
-To load javascript file from Shen use `shenjs-load` function.
+To load javascript file from Shen use `shenjs.load` function.
 
 ## Making your own REPL and I/O
 

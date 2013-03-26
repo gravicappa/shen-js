@@ -53,9 +53,9 @@ Shen_html_repl = {
 
     Shen.init({io: Shen_html_repl.io})
     Shen.globals["*implementation*"] = "html5"
-    Shen.call_by_name("shen-credits", [])
-    Shen.call_by_name("shen-initialise_environment", [])
-    Shen.call_by_name("shen-prompt", [])
+    Shen.call_by_name("shen.credits", [])
+    Shen.call_by_name("shen.initialise_environment", [])
+    Shen.call_by_name("shen.prompt", [])
 
     var input_pane = document.getElementById("shenjs_repl_input_pane")
     input_pane.style.visibility = "visible"
@@ -91,14 +91,14 @@ Shen_html_repl = {
       bytes = []
       for (var i = buf.length - 1; i >= 0; --i)
         bytes = [Shen.type_cons, buf.charCodeAt(i), bytes]
-      x = Shen.call_by_name("shenjs-repl-split-input", [bytes])
-      if (x.length != 3 || x[0] != Shen.fns["shen-tuple"])
+      x = Shen.call_by_name("shenjs.repl-split-input", [bytes])
+      if (x.length != 3 || x[0] != Shen.fns["shen.tuple"])
         break
       Shen_html_repl.buf = Shen_html_repl.implode(x[1])
       Shen.io.puts(Shen_html_repl.buf + "\n")
       buf = Shen_html_repl.implode(x[2])
       try {
-        Shen.call_by_name("shen-read-evaluate-print", [])
+        Shen.call_by_name("shen.read-evaluate-print", [])
       } catch (e) {
         Shen.io.puts(Shen.error_to_string(e))
       }
@@ -108,8 +108,8 @@ Shen_html_repl = {
       }
       Shen_html_repl.buf = buf
     }
-    Shen.call_by_name("shen-initialise_environment", [])
-    Shen.call_by_name("shen-prompt", [])
+    Shen.call_by_name("shen.initialise_environment", [])
+    Shen.call_by_name("shen.prompt", [])
     Shen.io.puts(Shen_html_repl.buf)
   },
 
