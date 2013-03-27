@@ -1,7 +1,14 @@
 Shen-js
 =======
 
-## Running provided REPL
+## Running console REPL
+
+Type in your terminal (choose a line depending on your js interpreter):
+
+    d8 -e 'load("shen.js"); Shen.console_repl()'
+    js -e 'load("shen.js"); Shen.console_repl()'
+
+## Running provided REPL in browser
 
 Put `shen.html`, `shen.css`, `shen.js`, `shen-repl-html.js`, `fileio-html5,js`
 into a directory of your choice. Then open `shen.html` in your browser. It's
@@ -18,7 +25,7 @@ name manually.
 
 To define a Shen function from javascript use `Shen.mkfunction`.
 
-Shen.mkfunction takes three arguments:
+`Shen.mkfunction` takes three arguments:
 
   - name of a function
   - number of arguments
@@ -41,6 +48,8 @@ Example:
     })
 
 To load javascript file from Shen use `shenjs.load` function.
+To call Shen function `(some-func Arg1 Arg2)` from javascript use
+`Shen.call_by_name("some-func", [Arg1, Arg2])`.
 
 ## Making your own REPL and I/O
 

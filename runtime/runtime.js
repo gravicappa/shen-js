@@ -1,9 +1,10 @@
 Shen = {}
+
 Shen.globals = {}
 
 Shen.globals["*language*"] = "Javascript"
 Shen.globals["*implementation*"] = "cli"
-Shen.globals["*port*"] = Shen.version = "0.10.0"
+Shen.globals["*port*"] = Shen.version = "0.10.1"
 Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
 
 Shen.Tag = function(name) {
@@ -22,9 +23,6 @@ Shen.type_stream_in = new Shen.Tag('stream_in')
 Shen.type_stream_out = new Shen.Tag('stream_out')
 Shen.type_stream_inout = new Shen.Tag('stream_inout')
 Shen.type_error = new Shen.Tag('error')
-
-Shen.true = true
-Shen.false = false
 
 Shen.Freeze = function(vars, fn) {
   this.vars = vars
