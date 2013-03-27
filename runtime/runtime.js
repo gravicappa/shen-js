@@ -3,7 +3,7 @@ Shen.globals = {}
 
 Shen.globals["*language*"] = "Javascript"
 Shen.globals["*implementation*"] = "cli"
-Shen.globals["*port*"] = Shen.version = "0.9.3"
+Shen.globals["*port*"] = Shen.version = "0.10.0"
 Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
 
 Shen.Tag = function(name) {
