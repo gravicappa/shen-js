@@ -114,7 +114,6 @@ Shen_html_repl = {
   },
 
   load: function(src, onload) {
-    console.log("loading " + src)
     var s = document.createElement("script")
     s.type = "text/javascript"
     s.src = src
@@ -132,7 +131,6 @@ Shen_html_repl = {
   load_files: function(files, i, donefunc) {
     if (typeof(files) == "string")
       files = [files]
-    console.log("load_files files: " + files + " i: " + i)
     if (i < files.length)
       Shen_html_repl.load(files[i], function() {
         Shen_html_repl.load_files(files, i + 1, donefunc)
@@ -223,7 +221,6 @@ Shen_html_repl = {
   },
 
   enter: function() {
-    console.log("enter()")
     var input = document.getElementById("shenjs_repl_in")
     if (input.value.length) {
       var lines = input.value.split("\n")

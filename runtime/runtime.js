@@ -396,6 +396,16 @@ Shen.eval_kl = function(x) {
   return ret
 }
 
+Shen.eval_string = function(str) {
+  var x = Shen.call_by_name("read-from-string", [str])
+  if (!Shen.is_type(x, Shen.type_cons)) {
+    Shen.error("Broken read-from-string return value")
+    return Shen.fail_obj
+  }
+  var js = Shen.call_by_name("js-from-shen", [x[1]])
+  return eval(js)
+}
+
 Shen.mkfunction("shenjs.load", 1, function self(x) {
   if (x.length < 1) return [Shen.type_func, self, 1, x]
   return (function() {

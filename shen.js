@@ -163,7 +163,7 @@ Shen.thaw = function(f) {
 Shen.error = function(s) {
   if (Shen.is_true(Shen.globals['shenjs.*show-error-js*']))
     Shen.io.puts("# err: " + s + "\n")
-  throw new Error(s);
+  throw new Error(s)
   return Shen.fail_obj
 }
 
@@ -3350,7 +3350,7 @@ Shen.call_toplevel("reg-kl.shen-toplevel-5565")
 
 
 
-Shen.fns["shenjs-repl-split-input-aux"] = [Shen.type_func, function shen_user_lambda5573(Arg5572) {
+Shen.fns["shenjs.repl-split-input-aux"] = [Shen.type_func, function shen_user_lambda5573(Arg5572) {
   if (Arg5572.length < 3) return [Shen.type_func, shen_user_lambda5573, 3, Arg5572];
   var Arg5572_0 = Arg5572[0], Arg5572_1 = Arg5572[1], Arg5572_2 = Arg5572[2];
   var R0, R1, R2;
@@ -3359,30 +3359,25 @@ Shen.fns["shenjs-repl-split-input-aux"] = [Shen.type_func, function shen_user_la
   : ((Shen.is_type(Arg5572_0, Shen.type_cons))
   ? ((R0 = [Shen.type_cons, Arg5572_0[1], Arg5572_1]),
   (R1 = Shen.call(Shen.fns["reverse"], [R0])),
-  (R2 = Shen.call(Shen.fns["compile"], [[Shen.type_symbol, "shen-<st_input>"], R1, [Shen.type_func, function shen_user_lambda5575(Arg5574) {
+  (R2 = Shen.call(Shen.fns["compile"], [[Shen.type_symbol, "shen.<st_input>"], R1, [Shen.type_func, function shen_user_lambda5575(Arg5574) {
   if (Arg5574.length < 1) return [Shen.type_func, shen_user_lambda5575, 1, Arg5574];
-  var Arg5574_0 = Arg5574[0];
-  return ((Shen.is_type(Arg5574_0, Shen.type_cons))
-  ? (function() {
-  return Shen.simple_error(("parse error here: " + Shen.call(Shen.fns["shen.app"], [Arg5574_0, "\x0a", [Shen.type_symbol, "shen.s"]])));})
-  : (function() {
-  return Shen.simple_error("parse error\x0a");}))}, 1, [], undefined]])),
+  return Shen.fail_obj}, 1, [], undefined]])),
   (function() {
-  return Shen.call_tail(Shen.fns["shenjs-repl-split-input-aux"], [Arg5572_0[2], R0, (((Shen.unwind_tail(Shen.$eq$(R2, Shen.fail_obj)) || Shen.empty$question$(R2)))
+  return Shen.call_tail(Shen.fns["shenjs.repl-split-input-aux"], [Arg5572_0[2], R0, (((Shen.unwind_tail(Shen.$eq$(R2, Shen.fail_obj)) || Shen.empty$question$(R2)))
   ? Arg5572_2
   : [Shen.fns['shen.tuple'], R1, Arg5572_0[2]])]);}))
   : (function() {
-  return Shen.call_tail(Shen.fns["shen.f_error"], [[Shen.type_symbol, "shenjs-repl-split-input-aux"]]);})))}, 3, [], "shenjs-repl-split-input-aux"];
+  return Shen.call_tail(Shen.fns["shen.f_error"], [[Shen.type_symbol, "shenjs.repl-split-input-aux"]]);})))}, 3, [], "shenjs.repl-split-input-aux"];
 
 
 
 
 
-Shen.fns["shenjs-repl-split-input"] = [Shen.type_func, function shen_user_lambda5578(Arg5577) {
+Shen.fns["shenjs.repl-split-input"] = [Shen.type_func, function shen_user_lambda5578(Arg5577) {
   if (Arg5577.length < 1) return [Shen.type_func, shen_user_lambda5578, 1, Arg5577];
   var Arg5577_0 = Arg5577[0];
   return (function() {
-  return Shen.call_tail(Shen.fns["shenjs-repl-split-input-aux"], [Arg5577_0, [], []]);})}, 1, [], "shenjs-repl-split-input"];
+  return Shen.call_tail(Shen.fns["shenjs.repl-split-input-aux"], [Arg5577_0, [], []]);})}, 1, [], "shenjs.repl-split-input"];
 
 
 
