@@ -1,29 +1,15 @@
 #!/usr/bin/env node
 
 var repl = require('repl'),
-	vm = require('vm'),
+	Shen = require('./shen'),
 	fs = require('fs'),
+	lib = require('./runtime-node/lib.js'),
 	program = require('commander');
 
-/*
- * shen.js hacks
- * because the current runtime is not CommomJS compatible,
- * loading it via `require` will fail
- * Also, because the js port is incapable of handling strings,
- * we have to feed it via streams
- */
-var shenJS = fs.readFileSync('./shen.js', 'utf-8');
-var shenLib = fs.readFileSync('./runtime-node/lib.js', 'utf-8');
-
-var shenVM = repl.REPLServer.prototype.createContext.call(null, {});
-vm.runInContext(shenLib, shenVM, './runtime-node/lib.js');
-
-console.info("Initializing Shen.js...");
-
-vm.runInContext(shenJS, shenVM, 'shen.js');
-vm.runInContext('runtime_init()', shenVM, 'runtime_init()');
-
-// --end of shen.js hacks
+Shen.init({'io':lib.consoleIO});
+Shen.globals["shen_*implementation*"] = "nodejs";
+Shen.call(Shen.fns["shen.credits"], []);
+Shen.call(Shen.fns["shen.initialise_environment"], []);
 
 program
 	.version('0.0.1')
@@ -54,8 +40,7 @@ function startRepl() {
 		ignoreUndefined: true,
 		eval: evalWrapper
 	});
-	shenRepl.context = shenVM;
-	vm.runInContext('displayPrompt();', shenVM, './runtime-node/lib.js');
+	lib.displayPrompt();
 }
 
 function compileShen(file, print) {
@@ -67,7 +52,7 @@ function runShen(file) {
 }
 
 function evalWrapper(cmd, context, filename, callback) {
-	var ret = vm.runInContext('reqFuncs.buffer = decodeURI("' + encodeURI(cmd.slice(1,-1)) + '");repl_line()', shenVM, './runtime-node/lib.js');
+	var ret = lib.repl_line(cmd);
 	if(ret[0] === null) {
 		callback(null); // Shen is better at displaying the results, so we won't interfere
 	}
@@ -85,6 +70,6 @@ repl.REPLServer.prototype.displayPrompt = function() {
 			process.stdout.write('...');
 		}
 		else {
-			vm.runInContext('displayPrompt();', shenVM, './runtime-node/lib.js');
+			lib.displayPrompt();
 		}
 	};

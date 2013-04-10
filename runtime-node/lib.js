@@ -1,6 +1,7 @@
 /*global shen_fail_obj, shenjs_error, shen_type_stream_in, shen_type_stream_out, shen_type_stream_inout, shenjs_globals*/
 
 var fs = require('fs');
+var Shen = require('../shen');
 
 var DEBUG = false;
 
@@ -11,32 +12,32 @@ else {
 	var debug = function() {};
 }
 
-var reqFuncs = {
+var consoleIO = {
 	buffer: '',
-	shenjs_open: function(type, name, direction) {
+	open: function(type, name, direction) {
 		if (type[1] != "file")
-			return shen_fail_obj;
+			return Shen.fail_obj;
 		if (direction[1] == "in") {
 			try {
-				var fileObj = fs.readFileSync(name);
+				var file = fs.readFileSync(name);
 			}
 			catch(e) {
-				shenjs_error(e);
-				return shen_fail_obj;
+				Shen.error(e);
+				return Shen.fail_obj;
 			}
 			var index = 0;
 			var read_byte = function() {
-				if(index >= fileObj.byteLength()) {
+				if(index >= file.byteLength()) {
 					return -1;
 				}
-				var byte = fileObj[index];
+				var byte = file.charCodeAt(index);
 				index++;
 				return byte;
 			};
 			var close_read = function() {
-				fileObj = null;
+				file = null;
 			};
-		return [shen_type_stream_in, read_byte, close_read];
+		return [Shen.type_stream_in, read_byte, close_read];
 		}
 		else if (direction[1] == "out") {
 			var stream = fs.createWriteStream(name);
@@ -46,111 +47,57 @@ var reqFuncs = {
 			var close_write = function() {
 				stream.end();
 			};
-			return [shen_type_stream_out, write_byte, close_write];
+			return [Shen.type_stream_out, write_byte, close_write];
 		}
-		shenjs_error("Unsupported open flags");
-		return shen_fail_obj;
+		Shen.error("Unsupported open flags");
+		return Shen.fail_obj;
 	},
 
-	shenjs_puts: function(str) {
+	puts: function(str) {
 		//console.trace();
 		process.stdout.write(str.toString());
 	},
-	shenjs_gets: function() {
-		var ret = reqFuncs.buffer;
-		reqFuncs.buffer = '';
+	gets: function() {
+		var ret = consoleIO.buffer;
+		consoleIO.buffer = '';
 		return ret;
 	},
 
-	shenjs_open_repl: function() {
-		var read_string = '', index = 0;
-		var repl_read_byte = function() {
-			if(index >= read_string.length) {
-				read_string = shenjs_gets();
-				if(read_string.length === 0) {
-					return -1;
-				}
-				index = 0;
-				return shenjs_call(shen_newline, []);
-			}
-			else {
-				var byte = read_string.charCodeAt(index);
-				//console.info('byte: ', byte, index);
-				index++;
-				return byte;
-			}
-		};
-		var repl_write_byte = function (byte) {
-			process.stdout.write(new Buffer([byte]));
-		};
+	init: function() {
+		var fout = [Shen.type_stream_out,
+					function(byte) {return Shen.repl_write_byte(byte);},
+					function() {}];
+		Shen.globals["*stoutput*"] = fout;
 
-		var fout = [shen_type_stream_out, repl_write_byte, function(){}];
+		var fin = [Shen.type_stream_in,
+					function() {return Shen.repl_read_byte(fin, Shen.io.gets(), 0);},
+					function(){process.exit();}];
 
-		var fin = [shen_type_stream_in, repl_read_byte, function() {process.exit();}];
-
-		var finout = [shen_type_stream_inout, fin, fout];
-
-		shenjs_globals["shen_*stoutput*"] = fout;
-		shenjs_globals["shen_*stinput*"] = finout;
+		var finout = [Shen.type_stream_inout, fin, fout];
+		Shen.globals["*stinput*"] = finout;
 	}
 };
 
-for (var i in reqFuncs) {
-	global[i] = reqFuncs[i];
+exports.consoleIO = consoleIO;
+
+function repl_line (cmd) {
+	consoleIO.buffer = cmd;
+	// try {
+		Shen.call(Shen.fns["shen.read-evaluate-print"], []);
+		return [null, null];
+	// }
+	// catch (e) {
+	// 	return [Shen.error_to_string(e)];
+	// }
 }
 
-function repl_line () {
-	var buffer = reqFuncs.buffer, bytes = [];
-	for (var i = buffer.length - 1; i >= 0; --i) {
-		bytes = [shen_type_cons, buffer.charCodeAt(i), bytes];
-	}
-	var tokens = shenjs_call(shenjs_repl_split_input, [bytes]);
-	if (tokens.length != 3 || tokens[0] != shen_tuple) {
-		return ['incomplete_input'];
-	}
-	try {
-		return [null, shenjs_call(shen_read_evaluate_print, [])];
-	}
-	catch (e) {
-		return [shenjs_error_to_string(e)];
-	}
-}
-
-function implode(list) {
-    var ret = "";
-    while (list.length == 3 && list[0] == shen_type_cons) {
-      ret += String.fromCharCode(list[1]);
-      list = list[2];
-    }
-    return ret;
-  }
-
-function is_empty(s) {
-    var n = s.length, i;
-    var space = " ".charCodeAt(0);
-    for (i = 0; i < n ; ++i)
-      if (s.charCodeAt(i) > space)
-        return false;
-    return true;
-  }
-
-function runtime_init() {
-	for (var i in reqFuncs) {
-		global[i] = reqFuncs[i];
-	}
-	shenjs_globals["shen_*implementation*"] = "html5";
-    shenjs_call(shenjs_open_repl, []);
-    shenjs_call(shen_credits, []);
-    shenjs_call(shen_initialise$_environment, []);
-}
+exports.repl_line = repl_line;
 
 function displayPrompt() {
-	shenjs_call(shen_prompt, []);
+	Shen.call(Shen.fns["shen.prompt"], []);
 }
+
+exports.displayPrompt = displayPrompt;
 
 function quit() {
 }
-
-// if this is not set, shen.js will attempt setting
-// up its repl and cause a bloody mess
-global.shenjs_external_repl = true;
