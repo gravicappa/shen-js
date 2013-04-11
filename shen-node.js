@@ -8,7 +8,7 @@ var Shen = require('./shen'),
 	lib =  require('./runtime-node/lib.js').setup(Shen);
 
 program
-	.version('0.0.1')
+	.version('0.10.1')
 	.usage('[options] <file ...>')
 	.option('-c, --compile', 'Compile to JavaScript and save as .js files')
 	.option('-i, --interactive', 'Run an interactive Shen REPL')
