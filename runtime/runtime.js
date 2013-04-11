@@ -490,6 +490,10 @@ Shen.pr = function(s, stream) {
   return s
 }
 
+Shen.shenstr = function(x) {
+  return Shen.call_by_name("shen.app", [x, "", [Shen.type_symbol, "shen.s"]])
+}
+
 Shen.mkfunction("shenjs.exit", 1, function self(x) {quit()})
 Shen.globals["js.skip-internals"] = true
 
