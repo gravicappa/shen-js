@@ -1,36 +1,18 @@
 #!/usr/bin/env node
 
-var repl = require('repl'),
+var Shen = require('./shen'),
+	repl = require('repl'),
 	vm = require('vm'),
 	fs = require('fs'),
-	program = require('commander');
-
-/*
- * shen.js hacks
- * because the current runtime is not CommomJS compatible,
- * loading it via `require` will fail
- * Also, because the js port is incapable of handling strings,
- * we have to feed it via streams
- */
-var shenJS = fs.readFileSync('./shen.js', 'utf-8');
-var shenLib = fs.readFileSync('./runtime-node/lib.js', 'utf-8');
-
-var shenVM = repl.REPLServer.prototype.createContext.call(null, {});
-vm.runInContext(shenLib, shenVM, './runtime-node/lib.js');
-
-console.info("Initializing Shen.js...");
-
-vm.runInContext(shenJS, shenVM, 'shen.js');
-vm.runInContext('runtime_init()', shenVM, 'runtime_init()');
-
-// --end of shen.js hacks
+	program = require('commander'),
+	lib =  require('./runtime-node/lib.js').setup(Shen);
 
 program
-	.version('0.0.1')
+	.version('0.10.1')
 	.usage('[options] <file ...>')
 	.option('-c, --compile', 'Compile to JavaScript and save as .js files')
 	.option('-i, --interactive', 'Run an interactive Shen REPL')
-	.option('-p, --print', 'Print version information and exit')
+	.option('-p, --print', 'Print compiled JavaScript instead of writing to file')
 	.parse(process.argv);
 
 if(program.compile) {
@@ -48,43 +30,112 @@ else {
 
 function startRepl() {
 	var shenRepl = repl.start({
-		prompt: "",
+		prompt: "(Shen)",
 		input: process.stdin,
 		output: process.stdout,
 		ignoreUndefined: true,
-		eval: evalWrapper
+		eval: shenEval
 	});
-	shenRepl.context = shenVM;
-	vm.runInContext('displayPrompt();', shenVM, './runtime-node/lib.js');
+	// since shen.js takes a long time to load, it's faster copying it over than re-requiring it
+	shenRepl.context = vm.createContext({'Shen': Shen});
 }
 
-function compileShen(file, print) {
-	console.info('Work In Progress');
-}
-
-function runShen(file) {
-	console.info('Work In Progress');
-}
-
-function evalWrapper(cmd, context, filename, callback) {
-	var ret = vm.runInContext('reqFuncs.buffer = decodeURI("' + encodeURI(cmd.slice(1,-1)) + '");repl_line()', shenVM, './runtime-node/lib.js');
-	if(ret[0] === null) {
-		callback(null); // Shen is better at displaying the results, so we won't interfere
+function compileShen(filelist, print) {
+	if (filelist.length === 0) {
+		return console.error('Please specify source file to compile');
 	}
-	else if(ret[0] === 'incomplete_input') {
-		callback('SyntaxError'); // will show ... prompt
-	}
-	else {
-		callback(ret[0]);
-	}
-}
+	filelist.forEach(function(filename) {
+		var hasExtension = false, kl, js;
 
-// shen.js demands using its own prompt
-repl.REPLServer.prototype.displayPrompt = function() {
-		if (this.bufferedCommand.length) {
-			process.stdout.write('...');
+		if(filename.slice(-5) === '.shen') {
+			hasExtension = true;
+		}
+		if(!fs.existsSync(filename)) {
+			if(hasExtension === false && fs.existsSync(filename + '.shen')) {
+				filename += '.shen';
+				hasExtension = true;
+			}
+			else {
+				return console.error('Error:', filename, "doesn't exist!");
+			}
+		}
+
+		try {
+			kl = Shen.call_by_name("read-from-string", [fs.readFileSync(filename, 'utf-8')]);
+		}
+		catch(err) {
+			return console.error('Error:', err.message);
+		}
+		js = Shen.call_by_name("js-from-shen", [kl[1]]);
+
+		if(print) {
+			console.info(js);
 		}
 		else {
-			vm.runInContext('displayPrompt();', shenVM, './runtime-node/lib.js');
+			var jsPath = (hasExtension? filename.slice(0,-5) : filename) + '.js';
+			fs.writeFileSync(jsPath, js, 'utf-8');
 		}
-	};
+	});
+	console.info("========================================\n\n"+
+		"All compilation done. Don't forget to include shen.js in your source library.");
+}
+
+function runShen(filename) {
+	if (filename.length === 0) {
+		return console.error('Please specify source file to execute');
+	}
+	filename = filename[0];
+	if(!fs.existsSync(filename)) {
+		if(filename.slice(-5) !== '.shen' && fs.existsSync(filename + '.shen')) {
+			filename += '.shen';
+		}
+		else {
+			return console.error('Error:', filename, "doesn't exist!");
+		}
+	}
+	runCode(fs.readFileSync(filename, 'utf-8'), vm.createContext({'Shen': Shen}), filename, function(err, result) {
+		if(err) {
+			throw err;
+		}
+	});
+}
+
+function shenEval(cmd, context, filename, callback) {
+	if(cmd[cmd.length-1] != ')') {
+		// stop the trippy repl module from resending illegal commands
+		return callback('SyntaxError');
+	}
+
+	// prevent repl from adding () around commands
+	runCode(cmd.slice(1,-1), context, filename, function(err, result) {
+		if (err) {
+			if(err.message.indexOf('read error') != -1) {
+				callback('SyntaxError');
+			}
+			else {
+				callback(err);
+			}
+		}
+		else {
+			callback(null, result);
+		}
+	});
+}
+
+function runCode(cmd, context, filename, callback) {
+	var kl, js, result = null, error = null;
+	try {
+		kl = Shen.call_by_name("read-from-string", [cmd]);
+	}
+	catch(err) {
+		return callback(err);
+	}
+	js = Shen.call_by_name("js-from-shen", [kl[1]]);
+	try {
+		result = vm.runInContext(js, context, filename);
+	}
+	catch (err) {
+		error = err;
+	}
+	callback(error, result);
+}

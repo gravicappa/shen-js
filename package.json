@@ -1,9 +1,22 @@
 {
   "name": "shen-js-node",
-  "version": "0.0.1",
+  "version": "0.10.1",
   "author": "xkxx <xukexiang@gmail.com>",
   "description": "Shen Node.js Port",
+  "keywords": [
+    "javascript",
+    "language",
+    "Shen",
+    "compiler"
+  ],
   "dependencies" : {
     "commander": "1.1.x"
+  },
+  "bin": {
+    "shen-js": "shen-node.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gravicappa/shen-js"
   }
 }
