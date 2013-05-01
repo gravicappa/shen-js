@@ -77,6 +77,15 @@ var setup = function(Shen) {
 	Shen.init({'io':io});
 	Shen.call_by_name("shen.initialise_environment", []);
 
+	Shen.eval_to_shenstr = function(code) {
+		var result = eval(code);
+		if(typeof result === 'undefined') {
+			return 'undefined';
+		}
+		var string = Shen.shenstr(result);
+		return string;
+	};
+
 };
 
 exports.setup = setup;

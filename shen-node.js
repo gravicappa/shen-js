@@ -34,7 +34,8 @@ function startRepl() {
 		input: process.stdin,
 		output: process.stdout,
 		ignoreUndefined: true,
-		eval: shenEval
+		eval: shenEval,
+		writer: function(x) {return x;}
 	});
 	// since shen.js takes a long time to load, it's faster copying it over than re-requiring it
 	shenRepl.context = vm.createContext({'Shen': Shen});
@@ -130,9 +131,13 @@ function runCode(cmd, context, filename, callback) {
 	catch(err) {
 		return callback(err);
 	}
+	if(kl.length === 0) {
+		return callback(null, '');
+	}
 	js = Shen.call_by_name("js-from-shen", [kl[1]]);
 	try {
-		result = vm.runInContext(js, context, filename);
+		// shen obj must be in the same context as lib for shenstr() to function correctly
+		result = vm.runInContext('Shen.eval_to_shenstr('+JSON.stringify(js)+');', context, filename);
 	}
 	catch (err) {
 		error = err;
