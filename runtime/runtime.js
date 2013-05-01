@@ -4,7 +4,7 @@ Shen.globals = {}
 
 Shen.globals["*language*"] = "Javascript"
 Shen.globals["*implementation*"] = "cli"
-Shen.globals["*port*"] = Shen.version = "0.10.1"
+Shen.globals["*port*"] = Shen.version = "0.10.2"
 Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
 
 Shen.Tag = function(name) {
@@ -13,7 +13,7 @@ Shen.Tag = function(name) {
   }
 }
 
-Shen.fail_obj = new Object
+Shen.fail_obj = new Shen.Tag('fail_obj')
 Shen.fns = {}
 
 Shen.type_func = new Shen.Tag('func')
@@ -78,10 +78,8 @@ Shen.call_by_name = function(x, args) {
   return Shen.call(Shen.fns[x], args)
 }
 
-Shen.call_toplevel = function(name) {
-  var ret = Shen.call(Shen.fns[name], [])
-  delete Shen.fns[name]
-  return ret
+Shen.call_toplevel = function(fn) {
+  return Shen.call(fn, [])
 }
 
 Shen.unwind_tail = function(x) {
@@ -364,31 +362,16 @@ Shen.string_$gt$n = function(x) {
   return x.charCodeAt(0)
 }
 
-Shen.eval_in_global = function(x) {
-  try {
-    var g = window;
-  } catch (e) {
-    var g = this;
-  }
-  if (g.execScript) // eval in global scope for IE
-    return g.execScript(x);
-  else // other browsers
-    return eval.call(null, x);
-}
-
 Shen.eval_kl = function(x) {
   var log = false
   if (Shen.is_true(Shen.globals['shenjs.*show-eval-js*']))
     log = true
-  if (log) {
-    Shen.io.puts("# eval-kl[KL]: " + "\n")
-    Shen.io.puts(Shen.call_by_name("intmake-string",
-                                   ["~R~%", [Shen.fns["shen_tuple"], x, []]]))
-  }
+  if (log)
+    Shen.io.puts("# eval-kl[KL]: " + "\n" + Shen.shenstr(x) + "\n\n")
   var js = Shen.call_by_name("js-from-kl", [x])
   if (log)
     Shen.io.puts("eval-kl[JS]:\n" + js + "\n\n")
-  var ret = Shen.eval_in_global(js)
+  var ret = eval(js)
   if (log)
     Shen.io.puts("eval-kl => '" + ret + "'\n\n")
   if (ret === undefined)
@@ -398,6 +381,8 @@ Shen.eval_kl = function(x) {
 
 Shen.eval_string = function(str) {
   var x = Shen.call_by_name("read-from-string", [str])
+  if (Shen.empty$question$(x))
+    return []
   if (!Shen.is_type(x, Shen.type_cons)) {
     Shen.error("Broken read-from-string return value")
     return Shen.fail_obj
