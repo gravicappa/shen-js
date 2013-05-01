@@ -79,6 +79,9 @@ var setup = function(Shen) {
 
 	Shen.eval_to_shenstr = function(code) {
 		var result = eval(code);
+		if(typeof result === 'undefined') {
+			return 'undefined';
+		}
 		var string = Shen.shenstr(result);
 		return string;
 	};
