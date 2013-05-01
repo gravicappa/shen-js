@@ -131,6 +131,9 @@ function runCode(cmd, context, filename, callback) {
 	catch(err) {
 		return callback(err);
 	}
+	if(kl.length === 0) {
+		return callback(null, '');
+	}
 	js = Shen.call_by_name("js-from-shen", [kl[1]]);
 	try {
 		result = vm.runInContext('Shen.eval_to_shenstr('+JSON.stringify(js)+');', context, filename);
