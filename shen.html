@@ -4,16 +4,15 @@
     <script type='text/javascript' src='shen-repl-html.js'></script>
   </head>
   <body>
+    <noscript>No javascript, no shen-js</noscript>
     <div id='shen'></div>
     <div id='shen_fs' style='visibility:hidden'></div>
     <script type='text/javascript'>
     <!--
-    console.log("Loading Shen files")
     Shen_html_repl.init({
       div: 'shen', 
       src: ['shen.js', 'fileio-html5.js'],
       onready: function() {
-        console.log("starting shen")
         Shen_fs_html5.init({
           div: 'shen_fs',
           io: Shen_html_repl.io

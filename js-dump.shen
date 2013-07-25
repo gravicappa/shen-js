@@ -11,7 +11,7 @@
   F [[A | Ops] | R] Acc -> (mk-op-defs F R (mk-op-defs-n F A Ops Acc)))
 
 (define mk-op-defs-to-file
-  Filename -> (let F (open file Filename out)
+  Filename -> (let F (open Filename out)
                    S (mk-op-defs F (value js.int-funcs) "")
                    T2 (close F)
                 _))

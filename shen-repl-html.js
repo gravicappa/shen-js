@@ -30,21 +30,20 @@ Shen_html_repl = {
       return Shen.fail_obj
     },
     init: function() {
-      var fout = [Shen.type_stream_out, null, null]
-      fout[1] = (function(byte) {
-        return Shen.repl_write_byte(byte)
+      var writer = new Shen.Utf8_writer(function(char) {
+        Shen.io.puts(String.fromCharCode(char))
       })
-      fout[2] = (function() {})
-      Shen.globals["*stoutput*"] = fout
+      var stoutput = [Shen.type_stream_out,
+                      function(byte) {return writer.write_byte(byte)},
+                      function() {}]
+      Shen.globals["*stoutput*"] = stoutput
 
-      var fin = [Shen.type_stream_in, null, null]
-      fin[1] = (function() {
-        return Shen.repl_read_byte(fin, Shen_html_repl.io.gets(), 0)
+      var strbuf = new Shen.Utf8_reader(null)
+      var stinput = [Shen.type_stream_in, null, function() {}]
+      stinput[1] = (function() {
+        return Shen.repl_read_byte(stinput, strbuf)
       })
-      fin[2] = (function() {})
-
-      var finout = [Shen.type_stream_inout, fin, fout]
-      Shen.globals["*stinput*"] = finout
+      Shen.globals["*stinput*"] = stinput
     }
   },
 

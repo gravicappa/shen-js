@@ -399,15 +399,107 @@ Shen.mkfunction("shenjs.load", 1, function self(x) {
   })
 })
 
-Shen.file_instream_get = function(stream, s, pos) {
-  if (s.length <= pos) {
+Shen.Utf8_reader = function (str) {
+  this.str = (str == null) ? "" : str
+  this.strpos = 0
+  this.bytes = Array(6)
+  this.bytepos = 0
+  this.nbytes = 0
+  this.read_byte = function () {
+    if (this.bytepos < this.nbytes)
+      return this.bytes[this.bytepos++]
+    if (this.strpos >= this.str.length)
+      return -1
+    var c = this.str.charCodeAt(this.strpos++)
+    this.bytepos = 0
+    this.nbytes = 0
+    if (c <= 0x7f)
+      return c
+    if (c <= 0x7ff) {
+      var n = 1
+      var c0 = (c >> 6) | 192
+    } else if (c <= 0xffff) {
+      var n = 2
+      var c0 = (c >> 12) | 224
+    } else if (c <= 0x1fffff) {
+      var n = 3
+      var c0 = (c >> 18) | 240
+    } else if (c <= 0x3ffffff) {
+      var n = 4
+      var c0 = (c >> 24) | 248
+    } else if (c <= 0x7fffffff) {
+      var n = 5
+      var c0 = (c >> 30) | 252
+    } else {
+      return Shen.error('Character ' + c + ' cannot be coded to UTF-8')
+    }
+    this.nbytes = n
+    var shift = (n - 1) * 6
+    for (i = 0; i < n; ++i, shift -= 6)
+      this.bytes[i] = ((c >> shift) & 63) | 128
+    return c0
+  }
+}
+
+Shen.Utf8_writer = function(char_fn) {
+  this.nbytes = 0
+  this.char = 0
+  this.bytespos = 0
+  this.write_byte = function(byte) {
+    if (!(byte & 0x80)) {
+      char_fn(byte)
+      this.bytespos = 0
+    } else if ((byte & 224) == 192) {
+      this.char = byte & 31
+      this.nbytes = 2
+      this.bytespos = 1
+    } else if ((byte & 240) == 224) {
+      this.char = byte & 15
+      this.nbytes = 3
+      this.bytespos = 1
+    } else if ((byte & 248) == 240) {
+      this.char = byte & 7
+      this.nbytes = 4
+      this.bytespos = 1
+    } else if ((byte & 252) == 248) {
+      this.char = byte & 3
+      this.nbytes = 5
+      this.bytespos = 1
+    } else if ((byte & 254) == 252) {
+      this.char = byte & 1
+      this.nbytes = 6
+      this.bytespos = 1
+    } else {
+      this.char = (this.char << 6) | (byte & 0x7f)
+      this.bytespos++
+      if (this.bytespos >= this.nbytes) {
+        char_fn(this.char)
+        this.bytespos = 0
+        this.nbytes = 0
+      }
+    }
+  }
+}
+
+Shen.str_from_utf8 = function(s) {
+  var ret = ""
+  function emit(x) {ret += String.fromCharCode(x)}
+  var w = new Shen.Utf8_writer(emit)
+  var n = s.length
+  for (var i = 0; i < n; ++i)
+    w.write_byte(s[i])
+  return ret
+}
+
+Shen.file_instream_get_buf = function(stream, buf, pos) {
+  if (buf.byteLength <= pos) {
     stream[1] = (function() {return -1})
     return -1
   }
   stream[1] = (function() {
-    return Shen.file_instream_get(stream, s, pos + 1)
+    return Shen.file_instream_get_buf(stream, buf, pos + 1)
   })
-  return s.charCodeAt(pos)
+  return buf[pos]
 }
 
 Shen.read_byte = function(stream) {
@@ -447,26 +539,24 @@ Shen.close = function(stream) {
   return []
 }
 
-Shen.repl_write_byte = function(byte) {
-  Shen.io.puts(String.fromCharCode(byte))
+Shen.open = function() {
+  return this.io.open.apply(this.io, arguments)
 }
 
-Shen.repl_read_byte = function (stream, s, pos) {
-  if (s == null) {
-    stream[1] = (function() {return -1})
+Shen.repl_read_byte = function (stream, strbuf) {
+  var x = strbuf.read_byte()
+  if (x >= 0)
+    return x
+  var str = Shen.io.gets()
+  if (str == null) {
     quit()
     return -1
-  } else if (pos >= s.length) {
-    stream[1] = (function() {
-      return Shen.repl_read_byte(stream, Shen.io.gets(), 0)
-    })
-    return Shen.call_by_name("shen.newline", [])
-  } else {
-    stream[1] = (function() {
-      return Shen.repl_read_byte(stream, s, pos + 1)
-    })
   }
-  return s.charCodeAt(pos)
+  strbuf = new Shen.Utf8_reader(str + '\n')
+  stream[1] = (function() {
+    return Shen.repl_read_byte(stream, strbuf)
+  })
+  return stream[1]()
 }
 
 Shen.pr = function(s, stream) {
@@ -495,21 +585,28 @@ Shen.mkfunction("compile", 3, function(_) {return []})
 Shen.mkfunction("declare", 2, function(_) {return []})
 
 Shen.console_io = {
-  open: function(type, name, dir) {
-    if (type[1] != "file")
-      return Shen.fail_obj
+  open: function(name, dir) {
     var filename = Shen.globals["*home-directory*"] + name
     if (dir[1] == "in") {
       try {
-        var s = read(filename)
+        var buf = readbuffer(filename)
       } catch(e) {
-        Shen.error(e)
-        return Shen.fail_obj
+        try {
+          var buf = read(filename, 'binary')
+        } catch (e) {
+          Shen.error(e)
+          return Shen.fail_obj
+        }
       }
       var stream = [Shen.type_stream_in, null, function(){}]
-      stream[1] = (function() {
-        return Shen.file_instream_get(stream, s, 0)
-      })
+      if (buf.byteLength !== undefined) {
+        stream[1] = (function() {
+          return Shen.file_instream_get_buf(stream, buf, 0)
+        })
+      } else {
+        var strbuf = new Shen.Utf8_reader(buf)
+        stream[1] = (function() {return strbuf.read_byte()})
+      }
       return stream
     } else if (dir[1] == "out") {
       Shen.error("Writing files is not supported in cli interpreter")
@@ -526,14 +623,18 @@ Shen.console_io = {
       this.puts = write;
     }
     this.gets = readline;
+    var writer = new Shen.Utf8_writer(function(char) {
+       Shen.io.puts(String.fromCharCode(char))
+    })
     var fout = [Shen.type_stream_out,
-                function(byte) {return Shen.repl_write_byte(byte)},
+                function(byte) {return writer.write_byte(byte)},
                 function() {}]
     Shen.globals["*stoutput*"] = fout
     
     var fin = [Shen.type_stream_in, null, quit]
+    var strbuf = new Shen.Utf8_reader(null)
     fin[1] = (function() {
-      return Shen.repl_read_byte(fin, Shen.io.gets(), 0)
+      return Shen.repl_read_byte(fin, strbuf)
     })
     
     var finout = [Shen.type_stream_inout, fin, fout]
