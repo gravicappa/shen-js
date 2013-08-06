@@ -4,7 +4,7 @@ Shen.globals = {}
 
 Shen.globals["*language*"] = "Javascript"
 Shen.globals["*implementation*"] = "cli"
-Shen.globals["*port*"] = Shen.version = "0.10.2"
+Shen.globals["*port*"] = Shen.version = "13.0.2"
 Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
 
 Shen.Tag = function(name) {
@@ -33,6 +33,15 @@ Shen.mkfunction = function(name, nargs, fn) {
   var x = [Shen.type_func, fn, nargs, [], name]
   Shen.fns[name] = x
   return x
+}
+
+Shen.defun = function(name, nargs, fn) {
+  var partfn = {}
+  partfn = (function (args) {
+    if (args.length < nargs) return [Shen.type_func, partfn, nargs, args]
+    return fn(args)
+  })
+  return Shen.mkfunction(name, nargs, partfn)
 }
 
 Shen.call_tail = function(x, args) {
