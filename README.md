@@ -48,31 +48,27 @@ name manually.
 
 ## JS integration
 
-To define a Shen function from javascript use `Shen.mkfunction`.
+To call a javascript function from Shen you need to create a binding by using
+`Shen.defun` function.
 
-`Shen.mkfunction` takes three arguments:
+`Shen.defun` takes three arguments:
 
   - name of a function
   - number of arguments
   - function
 
-`function` takes a vector as an argument and must check its length.
-If length is less than expected it must return function object which is
-a four element vector with elements:
-
-    1. `Shen.type_func`,
-    2. function object,
-    3. number of arguments,
-    4. closure vector.
+`function` takes a vector as an arguments.
 
 Example:
 
-    Shen.mkfunction("plus", 2, function f(args) {
-      if (args.length < 2) return [Shen.type_func, f, 2, args]
+    Shen.defun("plus", 2, function(args) {
       return args[0] + args[1]
     })
 
-To load javascript file from Shen use `shenjs.load` function.
+You can put such definitions in some file which can be loaded by `shenjs.load`
+function or for browser shen-js such file can be loaded using standard methods
+(<script>).
+
 To call Shen function `(some-func Arg1 Arg2)` from javascript use
 `Shen.call_by_name("some-func", [Arg1, Arg2])`.
 
