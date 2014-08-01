@@ -10,7 +10,7 @@ rt_src = \
 runtime_src = $rt_src $shen_dir/primitives.js
 
 shen_src = \
-  $shen_dir/reg-kl.shen.js \
+  $shen_dir/regkl.shen.js \
   $shen_dir/js-kl.shen.js \
   $shen_dir/shen-js.shen.js \
   $shen_dir/core.kl.js \

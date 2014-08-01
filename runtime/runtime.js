@@ -1,33 +1,28 @@
-Shen = {}
+Shen = {};
 
-Shen.globals = {}
+Shen.globals = {};
 
-Shen.globals["*language*"] = "Javascript"
-Shen.globals["*implementation*"] = "cli"
-Shen.globals["*port*"] = Shen.version = "13.0.2"
-Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov"
+Shen.globals["*language*"] = "Javascript";
+Shen.globals["*implementation*"] = "cli";
+Shen.globals["*port*"] = Shen.version = "13.0.2";
+Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov";
 
 Shen.Tag = function(name) {
   this.toString = function() {
-    return "#<Shen.Tag " + name + ">"
+    return "#<Shen.Tag " + name + ">";
   }
 }
 
-Shen.fail_obj = new Shen.Tag('fail_obj')
-Shen.fns = {}
+Shen.fail_obj = new Shen.Tag('fail_obj');
+Shen.fns = {};
 
-Shen.type_func = new Shen.Tag('func')
-Shen.type_symbol = new Shen.Tag('sym')
-Shen.type_cons = new Shen.Tag('cons')
-Shen.type_stream_in = new Shen.Tag('stream_in')
-Shen.type_stream_out = new Shen.Tag('stream_out')
-Shen.type_stream_inout = new Shen.Tag('stream_inout')
-Shen.type_error = new Shen.Tag('error')
-
-Shen.Freeze = function(vars, fn) {
-  this.vars = vars
-  this.fn = fn
-}
+Shen.type_func = new Shen.Tag('func');
+Shen.type_symbol = new Shen.Tag('sym');
+Shen.type_cons = new Shen.Tag('cons');
+Shen.type_stream_in = new Shen.Tag('stream_in');
+Shen.type_stream_out = new Shen.Tag('stream_out');
+Shen.type_stream_inout = new Shen.Tag('stream_inout');
+Shen.type_error = new Shen.Tag('error');
 
 Shen.mkfunction = function(name, nargs, fn) {
   var x = [Shen.type_func, fn, nargs, [], name]
@@ -116,6 +111,8 @@ Shen.thaw = function(f) {
   return f.fn(f.vars)
 }
 
+Shen.thaw = function(f) {return this.call(f, []);}
+
 Shen.error = function(s) {
   if (Shen.is_true(Shen.globals['shenjs.*show-error-js*']))
     Shen.io.puts("# err: " + s + "\n")
@@ -131,36 +128,36 @@ Shen.error_to_string = function(s) {
 }
 
 Shen.get_time = function(x) {
-  return (new Date()).getTime() / 1000.0
+  return (new Date()).getTime() / 1000.0;
 }
 
-Shen.simple_error = Shen.error
-Shen.log_eq = false
+Shen.simple_error = Shen.error;
+Shen.log_eq = false;
 
 Shen.trap_error = function(fn, handler) {
   try {
-    return fn()
+    return Shen.call(fn, []);
   } catch (e) {
-    return Shen.call(handler, [e])
+    return Shen.call(handler, [e]);
   }
 }
 
 Shen.notrap_error = function(fn, handler) {
-  return fn()
+  return fn();
 }
 
 Shen.equal_boolean = function(b, x) {
   return ((x instanceof Array)
           && x[0] == Shen.type_symbol
           && ((x[1] == "true" && b === true)
-              || (x[1] == "false" && b === false)))
+              || (x[1] == "false" && b === false)));
 }
 
 Shen.equal_function = function(f, x) {
   return (x[0] == Shen.type_symbol && f[0] == Shen.type_func && x[1] == f[4])
 }
 
-Shen.$eq$ = function(x, y) {
+Shen.is_equal = function(x, y) {
   if (x === y)
     return true
   var tx = typeof(x), ty = typeof(y)
@@ -231,6 +228,8 @@ Shen.$eq$ = function(x, y) {
   default: return false;
   }
 }
+
+Shen.$eq$ = Shen.is_equal;
 
 Shen.empty$question$ = function(x) {
   return ((x instanceof Array) && !x.length)
@@ -666,7 +665,45 @@ Shen.init = function(conf) {
 }
 
 Shen.console_repl = function () {
-  Shen.init({io: Shen.console_io, start_repl: true})
+  Shen.init({io: Shen.console_io, start_repl: true});
+}
+
+Shen.xstr_list = function(x) {
+  var lst = [];
+  while (!this.empty$question$(x)) {
+    lst.push(this.xstr(x[1]));
+    x = x[2];
+  }
+  return "[" + lst.join(" ") + "]";
+}
+
+Shen.xstr = function(x) {
+  switch (typeof(x)) {
+    case 'string': return x;
+    case 'number': return '' + x;
+    case 'boolean': return '' + x;
+  }
+  if (this.is_type(x, this.type_symbol))
+    return x[1];
+  if (this.is_type(x, this.type_cons))
+    return this.xstr_list(x);
+  if (this.empty$question$(x))
+    return "[]";
+  function str(x) {
+    return Shen.xstr(x);
+  }
+  if (this.vector$question$(x))
+    return "<" + x.map(str).join(" ") + ">";
+  if (x instanceof Array)
+    return "<<" + x.map(str).join(" ") + ">>";
+  return '' + x;
+}
+
+Shen.list = function(x) {
+  var ret = [];
+  for (var i = x.length - 1; i >= 0; --i)
+    ret = [Shen.type_cons, x[i], ret];
+  return ret;
 }
 
 try {
