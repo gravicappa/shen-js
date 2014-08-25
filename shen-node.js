@@ -67,7 +67,16 @@ function compileShen(filelist, print) {
 		catch(err) {
 			return console.error('Error:', err.message);
 		}
-		js = Shen.call_by_name("js-from-shen", [kl[1]]);
+
+                var curr = kl;
+                js = "";
+                while (curr.length !== 0) {
+                  var compiled = Shen.call_by_name("js-from-shen", [curr[1]]);
+                  if (typeof(compiled) !== "undefined") {
+                    js = js + compiled;
+                  }
+                  curr = curr[2];
+                }
 
 		if(print) {
 			console.info(js);
