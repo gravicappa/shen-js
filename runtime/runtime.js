@@ -30,45 +30,45 @@ Shen.mkfunction = function(name, nargs, fn) {
   return x
 }
 
-Shen.defun = function(name, nargs, fn) {
-  var partfn = {}
-  partfn = (function (args) {
-    if (args.length < nargs) return [Shen.type_func, partfn, nargs, args]
-    return fn(args)
-  })
-  return Shen.mkfunction(name, nargs, partfn)
+Shen.defun = function(name, arity, func) {
+  function f(args) {
+    if (args.length < arity) return [Shen.type_func, f, arity, args]
+    return func(args)
+  }
+  return Shen.mkfunction(name, arity, f)
 }
 
 Shen.call_tail = function(x, args) {
-  var j = 0, nargs = args.length
+  var j = 0, nargs = args.length;
   for (;;) {
     if (typeof(x) == "function") {
-      x = x([args[j++]])
+      x = x([args[j++]]);
     } else if (x[0] == Shen.type_func) {
-      var c = x[3], n = c.length, k = x[2], a
-      if (!j && !n && nargs <= k) {
-        a = args
-        j += nargs
+      var c = x[3], n = c.length, arity = x[2], a;
+      if (!j && !n && nargs <= arity) {
+        a = args;
+        j += nargs;
       } else {
-        k = (k > n + nargs) ? n + nargs : k
-        a = new Array(k)
-
-        for (var i = 0; i < n; ++i)
-          a[i] = c[i]
-        for (;i < k && j < nargs; ++j, ++i)
-          a[i] = args[j]
+        if (arity > n + nargs) {
+          arity = n + nargs;
+          e = nargs;
+        } else {
+          e = arity - n;
+        }
+        a = c.concat(args.slice(j, e));
+        j = e;
       }
-      x = (x[1])(a)
+      x = (x[1])(a);
     } else if (x[0] == Shen.type_symbol) {
-      x = Shen.get_fn(x)
+      x = Shen.get_fn(x);
     } else
-      return Shen.error("Shen.call: Wrong function: '" + x + "'")
+      return Shen.error("Shen.call: Wrong function: '" + x + "'");
     if (j >= nargs)
-      return x
+      return x;
     while (typeof(x) == "function")
-      x = x()
+      x = x();
   }
-  return x
+  return x;
 }
 
 Shen.call = function(x, args) {

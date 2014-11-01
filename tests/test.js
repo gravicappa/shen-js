@@ -28,19 +28,21 @@ Test = {
     var msgfn = [fn].concat(args.map(function(x) {return Shen.xstr(x);}));
     var ret = Shen.call(Shen.fns[fn], args);
     var eq = Shen.$eq$(expected, ret);
-    var result = eq ? "[OK]" : "[ERROR: expected " + Shen.xstr(expected) + "]";
+    var result = eq ? "" : "[ERROR: expected " + Shen.xstr(expected) + "]";
     print('# (' + msgfn.join(' ') + ') => ' + Shen.xstr(ret) + ' ' + result);
     return eq;
   },
 
   run: function() {
+    var t = new Date().getTime();
     var nerr = 0, nok = 0
     for (var i in this.cases)
       if (this.runcase(this.cases[i]))
         ++nok;
       else
         ++nerr;
-    print('DONE');
+    var t = (new Date().getTime()) - t;
+    print('DONE ' + t + 'ms');
     if (nerr)
       print('Errors: ' + nerr);
     else
