@@ -67,7 +67,7 @@ Example:
 
 You can put such definitions in some file which can be loaded by `shenjs.load`
 function or for browser shen-js such file can be loaded using standard methods
-(<script>).
+`(<script>)`.
 
 To call Shen function `(some-func Arg1 Arg2)` from javascript use
 `Shen.call_by_name("some-func", [Arg1, Arg2])`.
@@ -102,12 +102,13 @@ Current implementation sets `*stinput*` as in/out stream as a workaround of
 Shen using `*stinput*` for output.
 
 ## Building shen.js from sources
-Fist ensure that you have latest shen-libs[1], klvm[2], js-kl[3] and
-shen-js[4]. Then if you have shen_run[5] you can just call 'make.shen
-new_shen.js' have Shen-js built into new_shen.js file.
+Fist ensure that you have latest
+[shen-libs](https://github.com/vasil-sd/shen-libs),
+[klvm](https://github.com/gravicappa/klvm),
+[js-kl](https://github.com/gravicappa/js-kl) and
+[shen-js](https://github.com/gravicappa/shen-js). Then if you have
+[shen_run](https://github.com/gravicappa/shen_run) you can just call
 
-1. https://github.com/vasil-sd/shen-libs
-2. https://github.com/gravicappa/klvm
-3. https://github.com/gravicappa/js-kl
-4. https://github.com/gravicappa/shen-js
-t. https://github.com/gravicappa/shen_run
+    ./make.shen new_shen.js
+    
+have Shen-js built into new_shen.js file.
