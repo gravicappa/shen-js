@@ -1,34 +1,22 @@
-(register-module [[name: shen-js]
-                  [depends: js-kl]
+(register-module [[depends: "js-kl"]
                   [author: "Ramil Farkshatov"]
-                  [license: "Shen license"]
-                  [desc: "Shen-JS."]
-                  [load: "js-dump.shen"]
-                  [dump-fn: js.dump-shen]])
+                  [load: "translation.shen"]
+                  [translate-fn: js.translate-shen]])
 
-(define js.dump-files
-  {A --> (list string)}
-  _ -> [
-        "t-star.kl"
-        "core.kl"
-        "declarations.kl"
-        "load.kl"
-        "macros.kl"
-        "prolog.kl"
-        "reader.kl"
-        "sequent.kl"
-        "sys.kl"
-        "toplevel.kl"
-        "track.kl"
-        "types.kl"
-        "writer.kl"
-        "yacc.kl"])
-
-(define js.dump-shen
-  {symbol --> symbol --> string --> string --> boolean}
-  javascript _ Sdir Ddir -> (do (js.dump Sdir "shen-js.shen" Ddir)
-                                (shenjs.mk-primitives Ddir)
-                                (shenjs.call-with-install-flags
-                                  (freeze (map (/. X (js.dump Sdir X Ddir))
-                                               (js.dump-files _))))
-                                true))
+(define js.translate-shen
+  {string --> string --> (list string)}
+  "javascript" _ -> (do (shenjs.mk-primitives "primitives.js")
+                        ["toplevel.kl"
+                         "core.kl"
+                         "sys.kl"
+                         "sequent.kl"
+                         "yacc.kl"
+                         "reader.kl"
+                         "prolog.kl"
+                         "track.kl"
+                         "load.kl"
+                         "writer.kl"
+                         "macros.kl"
+                         "declarations.kl"
+                         "types.kl"
+                         "t-star.kl"]))

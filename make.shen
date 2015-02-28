@@ -1,7 +1,12 @@
-#!/usr/bin/env shen_run
+#!/usr/bin/env shen_run_sbcl
 
 (define main
-  [Dir] -> (do (use-modules [shen-js])
-               (dump-module shen-js javascript all "shenjs/")
-               true)
-  _ -> (error "Usage: make.shen destdir"))
+  [Target] -> (let Files (module.files-to-translate
+                          "shen-js" "javascript" "all")
+                (shenjs.call-with-install-flags
+                 (freeze (js.dump ["LICENSE.js"
+                                   "runtime/runtime.js"
+                                   "primitives.js"
+                                   | Files]
+                                  Target))))
+  _ -> (error "Usage: make.shen target"))

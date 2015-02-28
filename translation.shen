@@ -33,12 +33,12 @@
                        (set *maximum-print-sequence-size* Prev))))))
 
 (define mk-primitives
-  Dir -> (call-with-install-flags
-           (freeze
-             (unwind-protect
-               (freeze (do (set js.skip-internals false)
-                           (mk-op-defs-to-file (cn Dir "primitives.js"))))
-               (freeze (set js.skip-internals true))))))
+  Target -> (call-with-install-flags
+             (freeze
+              (unwind-protect
+                  (freeze (do (set js.skip-internals false)
+                              (mk-op-defs-to-file Target)))
+                (freeze (set js.skip-internals true))))))
 
 (define process-file
   Src Dir -> (let Dst (make-string "~A/~A.js" Dir Src)
