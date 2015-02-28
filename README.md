@@ -100,3 +100,14 @@ references.
 
 Current implementation sets `*stinput*` as in/out stream as a workaround of
 Shen using `*stinput*` for output.
+
+## Building shen.js from sources
+Fist ensure that you have latest shen-libs[1], klvm[2], js-kl[3] and
+shen-js[4]. Then if you have shen_run[5] you can just call 'make.shen
+new_shen.js' have Shen-js built into new_shen.js file.
+
+1. https://github.com/vasil-sd/shen-libs
+2. https://github.com/gravicappa/klvm
+3. https://github.com/gravicappa/js-kl
+4. https://github.com/gravicappa/shen-js
+t. https://github.com/gravicappa/shen_run
