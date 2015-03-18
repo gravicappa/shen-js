@@ -14,3 +14,11 @@
 
 (define shenjs.repl-split-input
   Bytes -> (shenjs.repl-split-input-aux Bytes [] []))
+
+(defun eval-kl (X)
+  (trap-error (let . (set js.in-repl true)
+                (let R (js.eval (js.from-kl (cons X ())))
+                  (let . (set js.in-repl false)
+                    R)))
+              (lambda E (do (set js.in-repl false)
+                            (error (error-to-string E))))))

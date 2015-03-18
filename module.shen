@@ -1,12 +1,12 @@
 (register-module [[depends: "js-kl"]
                   [author: "Ramil Farkshatov"]
-                  [load: "translation.shen"]
                   [translate-fn: js.translate-shen]])
 
 (define js.translate-shen
   {string --> string --> (list string)}
-  "javascript" _ -> (do (shenjs.mk-primitives "primitives.js")
-                        ["toplevel.kl"
+  "javascript" _ -> (do (write-to-file "primitives.js" (js.generate-primitives))
+                        ["shen-js.shen"
+                         "toplevel.kl"
                          "core.kl"
                          "sys.kl"
                          "sequent.kl"
