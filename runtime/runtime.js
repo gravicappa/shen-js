@@ -16,16 +16,21 @@ Shen.globals["*language*"] = "Javascript";
 Shen.globals["*implementation*"] = "cli";
 Shen.globals["*port*"] = Shen.version = "17.2.1";
 Shen.globals["*porters*"] = Shen.author = "Ramil Farkhshatov";
+Shen.globals["*home-directory*"] = "";
 Shen.globals["js.show-error"] = false;
 Shen.globals["js.show-error-stack"] = false;
 
 Shen.Tag = function(name) {
+  if (!(this instanceof Shen.Tag))
+    return new Shen.Tag(name);
   this.toString = function() {
     return "#<Shen.Tag " + name + ">";
   }
 }
 
 Shen.Func = function(name, arity, fn, vars) {
+  if (!(this instanceof Shen.Func))
+    return new Shen.Func(name, arity, fn, vars);
   this.name = name;
   this.arity = arity;
   this.fn = fn;
@@ -33,22 +38,36 @@ Shen.Func = function(name, arity, fn, vars) {
 }
 
 Shen.Sym = function(str) {
+  if (!(this instanceof Shen.Sym))
+    return new Shen.Sym(str);
   this.str = str;
 }
 
 Shen.Cons = function(head, tail) {
+  if (!(this instanceof Shen.Cons))
+    return new Shen.Cons(head, tail);
+  if (head === undefined || tail === undefined)
+    this.error("indefined cons elements!");
   this.head = head;
   this.tail = tail;
 }
 
 Shen.Stream = function(dir, fn, close) {
-  this.dir = dir || '';
+  if (!(this instanceof Shen.Stream))
+    return new Shen.Stream(dir, fn, close);
+  this.dir = dir || "";
   this.close = close || (function() {});
+  this.read_byte = function() {
+    return Shen.error("read-byte: Wrong stream type.");
+  };
+  this.write_byte = function() {
+    Shen.error("write-byte: Wrong stream type.");
+  };
   switch (dir) {
-  case 'r': this.read_byte = fn; break;
-  case 'w': this.write_byte = fn; break;
-  case 'rw':
-  case 'wr':
+  case "r": this.read_byte = fn; break;
+  case "w": this.write_byte = fn; break;
+  case "rw":
+  case "wr":
     this.in = fn[0];
     this.out = fn[1];
     this.read_byte = function() {return this.in.read_byte();};
@@ -98,6 +117,8 @@ Shen.run_loop = function() {
         pc = pc(this);
       }
     } catch (e) {
+      if (this.is_true(this.globals["js.show-error"]))
+        this.io.puts("# err: " + e + "\n");
       if (e !== this.break_obj)
         start = this.handle_exception(e);
       else
@@ -117,6 +138,8 @@ Shen.run_step = function() {
       pc = pc(this);
     this.start = pc;
   } catch (e) {
+    if (this.is_true(this.globals["js.show-error"]))
+      this.io.puts("# err: " + e + "\n");
     if (e !== this.break_obj)
       this.start = this.handle_exception(e);
   }
@@ -153,12 +176,12 @@ Shen.find_func = function(name) {
     name = name.str;
   var ret = this.fns[name];
   if (ret === undefined)
-    return this.error('No such function: ' + name);
+    return this.error("No such function: " + name);
   return ret;
 }
 
 Shen.call = function(proc, args) {
-  if (typeof(proc) === 'string')
+  if (typeof(proc) === "string")
     proc = this.find_func(proc);
 
   // DBG
@@ -239,14 +262,14 @@ Shen.untrace = function(name) {
 Shen.is_equal = function(x, y) {
   if (x === y)
     return true;
-  var tx = typeof(x), ty = typeof(y);
-  if (tx != ty)
-    return ((tx == "boolean" && this.equal_boolean(x, y))
-            || (ty == "boolean" && this.equal_boolean(y, x)));
   if ((x instanceof Array) && (y instanceof Array))
     return this.is_array_equal(x, y);
   if ((x instanceof Shen.Sym) && (y instanceof Shen.Sym))
     return x.str === y.str;
+  if (typeof(x) === "boolean" && this.equal_boolean(x, y))
+    return true;
+  if (typeof(y) === "boolean" && this.equal_boolean(y, x))
+    return true;
   if ((x instanceof Shen.Cons) && (y instanceof Shen.Cons))
     return this.is_equal(x.head, y.head) && this.is_equal(x.tail, y.tail);
   if ((x instanceof Shen.Func) && (y instanceof Shen.Func))
@@ -352,11 +375,9 @@ Shen.str = function(x) {
       if (x instanceof Shen.Sym)
         return x.str;
       if (x instanceof Shen.Func) {
-        if (!x.vars.length && x.name != undefined)
+        if (!x.vars.length && x.name !== undefined)
           return x.name;
-        //if (this.is_true(this.globals['js.*show-func*']))
-        //  this.io.puts("\n func: " + x + "\n\n")
-        var n = (x.name === undefined) ? (' ' + x.name) : ' [nil]';
+        var n = (x.name === undefined) ? (" " + x.name) : " [nil]";
         return (!x.vars.length) ? "#<func" + n + ">" : "#<closure" + n + ">";
       }
   }
@@ -386,16 +407,13 @@ Shen.n_from_str = function(x) {
 }
 
 Shen.wipe_stack = function(start) {
-  /*
-  var n = this.reg.length;
-  for (var i = start; i < n; ++i)
-    delete this.reg[i];
-  */
+  var r = this.reg;
+  var n = this.sp_top;
+  for (var i = this.sp + start; i < n; ++i)
+    delete r[i];
 }
 
 Shen.error = function(s) {
-  if (this.is_true(this.globals['js.show-error']))
-    this.io.puts("# err: " + s + "\n");
   throw new Error(s);
   return this.fail_obj;
 }
@@ -407,38 +425,30 @@ Shen.error_to_string = function(s) {
   return (show) ? ("" + s + " " + stack) : ("" + s);
 }
 
-Shen.get_time = function(x) {
-  return Date.now() / 1000.0;
-}
-
 Shen.bootstrap_eval_str = function(s) {
   this._bs_eval_buf += s + "\n";
 };
 
-
-Shen.file_instream_get_buf = function(stream, buf, pos) {
-  if (buf.byteLength <= pos) {
-    stream.read_byte = (function() {return -1});
-    return -1;
+Shen.buf_stream = function(buf) {
+  var arr = new Uint8Array(buf);
+  function r() {
+    var buf = this.buf;
+    if (this.pos >= buf.length)
+      return -1;
+    return buf[this.pos++];
   }
-  stream.read_byte = (function() {
-    return this.file_instream_get_buf(stream, buf, pos + 1);
-  });
-  return buf[pos];
+  var stream = new Shen.Stream('r', r, function() {});
+  stream.pos = 0;
+  stream.buf = arr;
+  return stream;
 }
 
 Shen.read_byte = function(stream) {
-  if (stream.dir.indexOf('r') >= 0)
-    return stream.read_byte();
-  Shen.error("read-byte: Wrong stream type.");
-  return -1;
+  return stream.read_byte();
 }
 
 Shen.write_byte = function(byte, stream) {
-  if (stream.dir.indexOf('w') >= 0)
-    return stream.write_byte(byte);
-  Shen.error("write-byte: Wrong stream type.");
-  return [];
+  return stream.write_byte(byte);
 }
 
 Shen.close = function(stream) {
@@ -459,7 +469,7 @@ Shen.repl_read_byte = function (stream, strbuf) {
     quit();
     return -1;
   }
-  strbuf = new Shen.Utf8_reader(str + '\n');
+  strbuf = new Shen.Utf8_reader(str + "\n");
   stream.read_byte = (function() {
     return Shen.repl_read_byte(stream, strbuf);
   })
@@ -472,26 +482,28 @@ Shen.write_string = function(s, stream) {
   return s;
 }
 
-Shen.shenstr = function(x) {
-  return Shen.call("shen.app", [x, "", new Shen.Sym("shen.s")]);
-}
-
 Shen.defun_x = function(name, arity, fn) {
   var fobj = new Shen.Func(name, arity, fn);
   Shen.fns[name] = fobj;
   return fobj;
 }
 
-Shen.defun = function(def) {
+Shen.defun = function() {
   function dashify(s) {
     return s.replace(/_/g, "-");
   }
-  if (typeof(def) === "function") {
-    var fn = def;
+  var arg0 = arguments[0], arg1 = arguments[1];
+  switch (typeof(arg0)) {
+  case "function":
+    var fn = arg0;
     var name = dashify(fn.name);
-  } else {
-    var fn = def.fn;
-    var name = def.name || dashify(fn.name);
+    break;
+  case "string":
+    var name = arguments[0];
+    var fn = arguments[1];
+    break;
+  default:
+    return this.error("defun: wrong arguments");
   }
   var arity = fn.length;
   var fobj = new Shen.Func(name, arity, function f(vm) {
@@ -510,7 +522,7 @@ Shen.partial_func = function(name, arity, fn) {
   return new Shen.Func(name, arity, fn, vars);
 }
 
-Shen.defun_x("klvm.mk-closure", -1, function fn(vm) {
+Shen.defun_x("klvm.mk-closure", -1, function mk_closure(vm) {
   var r = vm.reg, sp = vm.sp, n = vm.nargs;
   var fn = r[sp + n - 1];
   if (fn instanceof vm.Func)
@@ -519,15 +531,18 @@ Shen.defun_x("klvm.mk-closure", -1, function fn(vm) {
   return vm.next;
 });
 
-Shen.eval = function(s) {
-  this.ret = this.next;
+Shen.eval = Shen.eval_str = function(s) {
+  this.ret = false;
+  var vm = this;
+  var toplevel_next = this.next;
+  if (this.dbg_dump_eval)
+    print("EVAL:\n" + s + "\n");
   eval(s);
-  return this.ret;
+  return toplevel_next;
 }
 
-Shen.defun_x("js.eval", 1, function fn(vm) {
-  vm.eval(vm.reg[this.sp]);
-  return vm.next;
+Shen.defun_x("js.eval", 1, function js_eval(vm) {
+  return vm.eval_str(vm.reg[vm.sp]);
 });
 
 Shen._bs_obj = function(x) {
@@ -565,12 +580,12 @@ Shen._bs_obj = function(x) {
 }
 
 Shen._bs_var = function(name, obj) {
-  this.io.puts("Shen." + name + " = function() {\n  return {\n");
+  this.io.puts("Shen." + name + " = (function() {\n  return {\n");
   for (var key in obj) {
     var repr = this._bs_obj(obj[key]);
     this.io.puts('    "' + this.esc(key) + '": ' + repr + ",\n");
   }
-  this.io.puts("  };\n};\n");
+  this.io.puts("  };\n})();\n");
 }
 
 Shen.bootstrap = function() {
@@ -585,24 +600,31 @@ Shen.xstr_arr = function(x) {
   return x.map(xstr).join(" ");
 }
 
-Shen.xstr_list = function(x) {
+Shen.xstr_cons = function(x) {
   var lst = [];
-  while (!this.is_empty(x)) {
+  do {
     lst.push(this.xstr(x.head));
     x = x.tail;
-  }
-  return "[" + lst.join(" ") + "]";
+  } while (x instanceof this.Cons);
+  var str = lst.join(" ");
+  if (!this.is_empty(x))
+    str += " | " + this.xstr(x);
+  return "[" + str + "]";
 }
 
 Shen.xstr = function(x) {
   switch (typeof(x)) {
-    case 'string': return x;
-    case 'boolean': case 'number': return String(x);
+    case "string": return '"' + this.esc(x) + '"';
+    case "boolean": case "number": return String(x);
+    case "function": 
+      if (x.name)
+        return "#<jsfunc " + x.name + ">";
+      return "#<jsfunc>";
   }
   if (x instanceof this.Sym)
     return x.str;
   if (x instanceof this.Cons)
-    return this.xstr_list(x);
+    return this.xstr_cons(x);
   if (x instanceof this.Func)
     return "#<func " + x.name + " <" + this.xstr_arr(x.vars) + ">>";
   if (this.is_empty(x))
@@ -621,17 +643,25 @@ Shen.list = function(x) {
   return ret;
 }
 
+Shen.dbg_printer = function() {
+  try {return this.io.puts;} catch (e) {}
+  try {return putstr;} catch (e) {}
+  try {return write;} catch (e) {}
+  return this.error("No printer");
+}
+
 Shen.dump_regs = function(start) {
+  var pr = this.dbg_printer();
   var r = this.reg, io = this.io;
   var start = (start === undefined) ? this.sp : start;
   for (var i = start, j = start; i < r.length; ++i) {
     if (r[i] !== undefined) {
       if (j + 1 == i - 1)
-        io.puts("    " + (i - 1) + ": nil\n");
+        pr("    " + (i - 1) + ": nil\n");
       else if (j + 1 < i)
-        io.puts("    " + (j + 1) + ".." + (i - 1) + ": nil\n");
+        pr("    " + (j + 1) + ".." + (i - 1) + ": nil\n");
       var x = this.dbg_str_prefixed(this.xstr(r[i]), "      ");
-      io.puts("    " + i + ": " + x + "\n");
+      pr("    " + i + ": " + x + "\n");
       j = i;
     }
   }
@@ -646,17 +676,17 @@ Shen.dbg_str_prefixed = function(x, prefix) {
 }
 
 Shen.dump_state = function(extra) {
-  var io = this.io;
-  io.puts("# STEP ################\n");
+  var pr = this.dbg_printer();
+  pr("# STEP ################\n");
   for (var x in extra)
-    io.puts("  " + x + ": " + this.dbg_str_prefixed(extra[x], "    ") + "\n");
-  io.puts("  next: " + this.dbg_str_prefixed(this.next, "    ") + "\n");
-  io.puts("  ret: " + this.xstr(this.ret) + "\n");
-  io.puts("  nargs: " + this.nargs + "\n");
-  io.puts("  sp: " + this.sp + "\n");
-  io.puts("  regs:\n");
-  this.dump_regs(0);
-  io.puts("\n\n");
+    pr("  " + x + ": " + this.xstr(extra[x]) + "\n");
+  pr("  next: " + this.xstr(this.next) + "\n");
+  pr("  ret: " + this.xstr(this.ret) + "\n");
+  pr("  nargs: " + this.nargs + "\n");
+  pr("  sp: " + this.sp + "\n");
+  pr("  regs:\n");
+  this.dump_regs(this.sp);
+  pr("\n\n");
 }
 
 Shen.str_dbg_obj = function(obj) {
@@ -702,7 +732,7 @@ Shen.Utf8_reader = function (str) {
       var n = 5;
       var c0 = (c >> 30) | 252;
     } else
-      return Shen.error('Character ' + c + ' cannot be coded to UTF-8');
+      return Shen.error("Character " + c + " cannot be coded to UTF-8");
     this.nbytes = n;
     var shift = (n - 1) * 6;
     for (var i = 0; i < n; ++i, shift -= 6)
@@ -762,51 +792,56 @@ Shen.str_from_utf8 = function(s) {
 }
 
 Shen.console_io = {
+  file_reader: function() {
+    try {
+      return readbuffer;
+    } catch(e) {
+      read;
+      return function(name) {return read(name, "binary")};
+    }
+  },
+
   open: function(name, dir) {
     var filename = Shen.globals["*home-directory*"] + name;
     if (dir.str === "in") {
-      try {
-        var buf = readbuffer(filename);
-      } catch(e) {
-        try {
-          var buf = read(filename, 'binary');
-        } catch (e) {
-          return Shen.error(e);
-        }
-      }
-      var stream = new Shen.Stream('r', null, function(){});
-      if (buf.byteLength !== undefined) {
-        stream.read_byte = (function() {
-          return Shen.file_instream_get_buf(stream, buf, 0);
-        });
-      } else {
+      print("file: " + filename);
+      var buf = this.file_reader()(filename);
+      if (buf instanceof ArrayBuffer)
+        return Shen.buf_stream(buf);
+      else if (typeof(buf) === "string") {
         var strbuf = new Shen.Utf8_reader(buf);
-        stream.read_byte = (function() {return strbuf.read_byte();});
-      }
-      return stream;
+        return new Shen.Stream("r",
+                               function() {return strbuf.read_byte();},
+                               function(){});
+      } else
+        return Shen.error("Unsupported file read result");
     } else if (dir.str === "out")
       return Shen.error("Writing files is not supported in cli interpreter");
-    return Shen.error("Unsupported open flags");
+    return Shen.error("Unsupported 'open' flags");
   },
 
-  init: function() {
+  init: function(vm) {
     try {
       this.puts = putstr;
     } catch (e) {
       this.puts = write;
     }
     this.gets = readline;
-    var stdout = new Shen.Stream('w',
+
+    var writer = new Shen.Utf8_writer(function(char) {
+      vm.io.puts(String.fromCharCode(char));
+    });
+    var stdout = new Shen.Stream("w",
                                  function(byte) {
-                                  return writer.write_byte(byte);
+                                   return writer.write_byte(byte);
                                  });
-    var stdin = new Shen.Stream('r', null, quit);
+    var stdin = new Shen.Stream("r", null, quit);
     var strbuf = new Shen.Utf8_reader(null);
     stdin.read_byte = (function() {
-      return Shen.repl_read_byte(stdin, strbuf);
+      return vm.repl_read_byte(stdin, strbuf);
     });
-    Shen.globals["*stinput*"] = stdin;
-    Shen.globals["*stoutput*"] = stdout;
+    vm.globals["*stinput*"] = stdin;
+    vm.globals["*stoutput*"] = stdout;
   }
 };
 
@@ -823,12 +858,21 @@ Shen.defun_x("compile", 3, Shen.nop);
 Shen.defun_x("declare", 2, Shen.nop);
 Shen.defun_x("adjoin", 2, Shen.nop);
 
+Shen.defun(function get_time(type) {
+  switch (type.str) {
+  case "run": return Date.now();
+  case "unix": return Math.floor(Date.now() / 1000);
+  default: return this.error("get-time does not understand the parameter "
+                              + type.str);
+  }
+});
+
 Shen.init = function(opts) {
   this.io = opts.io;
   if (!this.io)
     return this.error("Shen: IO is not set");
-  this.io.init();
-  var keys = ['gets', 'puts', 'open'];
+  this.io.init(this);
+  var keys = ["gets", "puts", "open"];
   for (var i in keys)
     if (this.io[keys[i]] === undefined)
       throw new Error("Shen: IO has no method " + keys[i]);

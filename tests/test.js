@@ -5,13 +5,11 @@ Test = {
     load("runtime.js");
     load("primitives.js");
     Shen.init({io: Shen.console_io});
-    Shen.defun({name: "vector->",
-                fn: function(v, i, x) {
-                  v[i] = x;
-                  return v;
-                }});
-    Shen.defun({name: "<-vector",
-                fn: function(v, i) {return this.absvector_ref(v, i);}});
+    Shen.defun("vector->", function(v, i, x) {
+                             v[i] = x;
+                             return v;
+                           });
+    Shen.defun("<-vector", function(v, i) {return this.absvector_ref(v, i);});
     load("test1.js");
   },
 
