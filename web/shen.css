@@ -1,0 +1,136 @@
+.shen_text {
+	font-family: fixed, monospace;
+}
+
+#shen_input {
+  border: 0;
+  border-bottom: 1px solid #573;
+}
+
+#shen_edit_entry {
+  border: 1px solid #573;
+}
+
+#shen_output {
+  background: #fff;
+  color: #000;
+  border: 0;
+}
+
+#shen_input {
+  resize: horizontal;
+}
+
+#shen_fs, #shen_edit {
+  display: inline-block;
+}
+
+#shen_fs {
+  vertical-align: top;
+  width: 20%;
+  height: 100%;
+  border: 1px solid #aab;
+}
+
+.shenfs {
+}
+
+.shenfs_ctl {
+  width: 100%;
+  background: #123;
+  padding: 2px 0;
+}
+
+.shenfs_ctl_icon_btn {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.shenfs_ctl_icon_btn:active {
+  background: #fff;
+}
+
+.shenfs_ctl_icon_btn:hover {
+  border: 1px solid #fff;
+  margin: -1px;
+}
+
+.shenfs ul {
+  padding-left: 1em;
+  list-style: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1.1em;
+}
+
+.shenfs_file_name:hover, .shenfs_dir_name:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.shenfs_file_name, .shenfs_dir_name {
+  font-size: 14px;
+  font-family: Fixed, monospace;
+}
+
+.shenfs_selection > .shenfs_dir_name, .shenfs_selection > .shenfs_file_name {
+  background: #dde;
+  border: 1px solid #bbc;
+  margin: -1px;
+}
+
+.shenfs_icon {
+  margin: 0;
+  padding: 0;
+  margin-top: auto;
+  margin-right: 8px;
+  vertical-align: center;
+}
+
+.shenfs_file_entry {
+  font-weight: normal;
+}
+
+.shenfs_dir_entry {
+  font-weight: bold;
+}
+
+.shenfs_entry_ctl {
+  display: none;
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  vertical-align: top;
+  transform: translate(0, -25%);
+}
+
+.shenfs_entry_ctl_content {
+  border: 1px solid #777777;
+  margin: 0;
+  margin-left: 8px;
+  background: #eef;
+  padding: 8px;
+}
+
+.shenfs_entry_ctl button {
+  border: 0;
+  border-bottom: 1px dashed #030;
+  color: #030;
+  padding: 0;
+  margin: 8px 4px;
+  cursor: pointer;
+  background: #eef;
+  font-weight: normal;
+  font-family: sans-serif;
+}
+
+.shenfs_dir_name:hover >.shenfs_entry_ctl,
+.shenfs_file_name:hover > .shenfs_entry_ctl {
+  display: inline;
+}
+
+.shen_edit_ctl {
+  float: right;
+}
