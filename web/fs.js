@@ -170,26 +170,6 @@ Shen_web_fs = {
     root.put("one/four/eight", "one hundred and forty eight");
   },
 
-  fake2: function(root) {
-    root.put(".doc/repl", "# REPL");
-    root.put(".doc/welcome.html", " \
-      <html> \
-        <body> \
-          <h1>Welcome to Shen-js</h1> \
-          And behold this <em>magnificent</em> UI! \
-        </body> \
-      </html> \
-    ");
-    root.put(".lessons/01/repl.shen", "\\* First let's learn how to use REPL *\\");
-    root.put(".lessons/01/basics.shen", "\\* Basics *\\");
-    root.put(".lessons/01/expr.shen", "\\* Expressions *\\");
-    root.put("one/two/three/six", "one thousand two hundreds and thirty six");
-    root.put("one/two/three/seven", "one thousand two hundreds and thirty seven");
-    root.mkdir("one/four/");
-    root.put("one/four/eight", "one hundred and forty eight");
-    root.put("one/four/file with very long name", "and short content");
-  },
-
   download: function(file, path) {
     if (!file)
       return;
@@ -454,13 +434,21 @@ Shen_web_fs = {
     div.appendChild((fs.file_ctl = file_ctl()));
     div.appendChild((fs.dir_ctl = dir_ctl()));
 
-    var handle = document.createElement("div");
-    handle.className = "shenfs_handle";
-    div.appendChild(handle);
-
     var dir = document.createElement("div");
     dir.className += " shenfs_tree";
     fs.file_ctl.style["display"] = "none";
+
+    var handle = document.createElement("div");
+    handle.className = "shenfs_handle";
+    handle.onclick = function() {
+      console.log("handle.onclick", Shen_web.in_class("shenfs_opened", div),
+                  div.className);
+      if (Shen_web.in_class("shenfs_opened", div))
+        Shen_web.rm_class("shenfs_opened", div);
+      else
+        div.className += " shenfs_opened";
+    };
+    div.appendChild(handle);
 
     div.appendChild(dir);
     oncreate_dir(this.root, "", dir);

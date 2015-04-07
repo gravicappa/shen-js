@@ -4,21 +4,6 @@
   box-sizing: border-box;
 }
 
-#shen_input {
-  border: 0;
-  border-bottom: 1px solid #573;
-}
-
-#shen_output {
-  background: #fff;
-  color: #000;
-  border: 0;
-}
-
-#shen_input {
-  resize: horizontal;
-}
-
 .shen_edit {
   position: absolute;
   top: 0;
@@ -35,6 +20,11 @@
   right: 0;
 }
 
+.shen_tt_font {
+  font-size: 14px;
+  font-family: Courier, Fixed, monospace;
+}
+
 
 /* SHEN FS { */
 .shenfs {
@@ -48,34 +38,25 @@
   background: #456;
 }
 
+.shenfs_opened {
+  width: 15em;
+}
+
 .shenfs_handle {
   width: 18px;
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
-  border: 0;
   background: url(folder.png) #ccf no-repeat center;
   z-index: 1001;
+  cursor: pointer;
 }
 
-.shenfs:hover {
-  width: 15em;
-  border: 1px solid #aab;
-  transition: 0.4s;
+.shenfs_opened .shenfs_handle {
+  border-left: 1px solid #123;
+  border-right: 1px solid #123;
 }
-
-.shenfs:hover .shenfs_handle {
-  display: none;
-  transition: 0.4s;
-}
-
-/*
-.shenfs:hover .shenfs_tree, .shenfs:hover .shenfs_file_ctl,
-.shenfs:hover .shenfs_dir_ctl {
-  display: block;
-}
-*/
 
 .shenfs_file_ctl, .shenfs_dir_ctl {
   display: none;
@@ -84,7 +65,6 @@
 
 .shenfs_tree {
   overflow: auto;
-  width: 100%;
   position: absolute;
   left: 0;
   bottom: 0;
@@ -150,6 +130,10 @@
   vertical-align: middle;
 }
 
+.shenfs_icon:hover {
+  opacity: 0.6;
+}
+
 .shenfs_file_entry {
   font-weight: normal;
 }
@@ -176,23 +160,30 @@
   bottom: 0;
   right: 0;
   border: 1px solid #573;
-}
-
-.shen_edit_entry, .shen_edit_container {
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  top: 22px;
-}
-
-.shen_edit_entry {
-	font-family: fixed, monospace;
-  resize: none;
-  border: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .shen_edit_container {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  padding: 0;
+  margin: 0;
+  top: 22px;
+}
+
+.shen_edit_html {
   padding: 8px;
+}
+
+.shen_edit_entry {
+  resize: none;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  margin: 0;
 }
 
 .shen_edit_hdr {
@@ -210,6 +201,7 @@
   display: inline-block;
   float: right;
 }
+
 /* } SHEN TEXT */
 
 /* SHEN DLG { */
@@ -283,9 +275,11 @@
   margin: 0;
   border-bottom: 1px dashed #557;
 }
-/* } SHEN DLG */
 
+/* } SHEN DLG */
+
 /* SHEN REPL { */
+
 .shen_repl_out {
   background: #fff;
   position: absolute;
@@ -295,10 +289,10 @@
   bottom: 10%;
   white-space: pre;
   overflow: auto;
+  padding: 4px;
 }
 
 .shen_repl_in {
-  font-family: Fixed, monospace;
   position: absolute;
   overflow: hidden;
   width: 100%;

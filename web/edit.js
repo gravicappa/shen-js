@@ -2,6 +2,7 @@ Shen_web_edit = {
   file: null,
   path: null,
   touched: false,
+  welcome: ".doc/welcome.html",
 
   set_title: function(title) {
     var t = document.getElementById("shen_edit_title");
@@ -11,10 +12,9 @@ Shen_web_edit = {
 
   load: function(root, path) {
     var file = root.get(path),
-        text = document.getElementById("shen_edit_entry"),
         container = document.getElementById("shen_edit_container"),
         ctl = document.getElementById("shen_edit_ctl"),
-        html = false;
+        in_html = false;
     this.unload();
     if (!file)
       return;
@@ -24,18 +24,17 @@ Shen_web_edit = {
     try {
       var str = this.file.str_data();
     } catch(e) {
-      html = true;
+      in_html = true;
       var str = "<div class='warning'>File is binary</div>";
     }
-    if (html || path.match(/\.doc\/.*\.html/)) {
-      text.style["display"] = "none";
+    if (in_html || path.match(/\.doc\/.*\.html/)) {
       container.style["display"] = "block";
-      container.innerHTML 
-        = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
+      var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
+      container.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
     } else {
       ctl.style["visibility"] = "visible";
-      text.style["display"] = "block";
-      container.style["display"] = "none";
+      var text = this.ensure_text_entry();
+      container.appendChild(text);
       text.disabled = false;
       text.value = str;
       text.touched = false;
@@ -49,11 +48,8 @@ Shen_web_edit = {
     this.set_title("");
     this.file = null;
     this.path = null;
-    text.value = "";
-    text.disabled = true;
     ctl.style["visibility"] = "hidden";
     Shen_web.clean(container);
-    text.style["display"] = "block";
   },
 
   reload: function(force) {
@@ -75,6 +71,21 @@ Shen_web_edit = {
   run: function(fn) {
     if (this.path)
       fn(this.path);
+  },
+
+  ensure_text_entry: function() {
+    var text = document.getElementById("shen_edit_entry");
+    text = text || document.createElement("textarea");
+    text.id = "shen_edit_entry";
+    text.className = "shen_edit_entry shen_tt_font";
+    text.cols = 80;
+    text.rows = 25;
+    text.disabled = true;
+    text.wrap = "off";
+    text.spellcheck = false;
+    var fn = (function() {this.touched = true;}).bind(this);
+    text.oninput = function() {fn();};
+    return text;
   },
 
   mk: function(div, run) {
@@ -137,24 +148,16 @@ Shen_web_edit = {
     container.id = "shen_edit_container";
     container.className = "shen_edit_container";
 
-    var text = document.createElement("textarea");
-    text.id = "shen_edit_entry";
-    text.className = "shen_edit_entry";
-    text.cols = 80;
-    text.rows = 25;
-    text.disabled = true;
-    text.wrap = "off";
-    text.spellcheck = false;
-    text.style["display"] = "none";
-    var fn = (function() {this.touched = true;}).bind(this);
-    text.oninput = function() {fn();};
-
     hdr.appendChild(title);
     hdr.appendChild(mk_ctl());
     hdr.appendChild(Shen_web.clear_div());
 
     div.appendChild(hdr);
-    div.appendChild(text);
     div.appendChild(container);
+  },
+
+  load_initial(root) {
+    var start = location.hash.replace(/^#/, "");
+    this.load(root, start || this.welcome);
   }
 };

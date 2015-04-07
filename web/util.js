@@ -16,18 +16,18 @@ Shen_web = {
                      .trim());
   },
 
-  in_class: function(obj, cls) {
+  in_class: function(cls, obj) {
     return (" " + obj.className + " ").indexOf(cls) > -1;
   },
 
-  by_class: function(obj, classname) {
+  by_class: function(classname, obj) {
     if (obj.getElementsByClassName)
       return obj.getElementsByClassName(classname);
     else
       return obj.querySelectorAll('.' + classname);
   },
 
-  by_tag: function(obj, tag) {
+  by_tag: function(tag, obj) {
     for (var i = 0; i < obj.childNodes.length; i++) {
       var x = obj.childNodes[i];
       if (x.tagName === tag)

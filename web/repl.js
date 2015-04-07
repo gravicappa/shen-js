@@ -14,7 +14,7 @@ Shen_repl = function(div) {
   function mk_output() {
     var div = document.createElement("div");
     div.id = "shen_repl_out";
-    div.className = "shen_repl_out";
+    div.className = "shen_repl_out shen_tt_font";
     return div;
   }
 
@@ -41,9 +41,12 @@ Shen_repl = function(div) {
     function resize_textarea() {
       var st = (window.getComputedStyle === undefined)
                ? t.currentStyle : getComputedStyle(t);
-      var by = parseInt(st.borderTopWidth, 10);
+      var bt = parseInt(st.borderTopWidth, 10);
+      var bb = parseInt(st.borderBottomWidth, 10);
+      var mt = parseInt(st.marginTop, 10);
+      var mb = parseInt(st.marginBottom, 10);
       t.style.height = 0;
-      t.style.height = t.scrollHeight + by * 2 + "px";
+      t.style.height = t.scrollHeight + bt + bb + mt + mb + "px";
       var sd = out.scrollHeight - out.scrollTop;
       out.style.bottom = (out.parentNode.offsetHeight - t.offsetTop) + "px";
       if (Math.abs(sd - out.clientHeight) < 5)
@@ -53,7 +56,7 @@ Shen_repl = function(div) {
       setTimeout(resize_textarea, 1);
     }
     t.id = "shen_repl_in";
-    t.className += " shen_repl_in";
+    t.className += " shen_repl_in shen_tt_font";
     t.placeholder = ">";
     t.cols = 72;
     t.rows = 1;
