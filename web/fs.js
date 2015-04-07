@@ -77,7 +77,7 @@ function Jsfile(type, data, evhandlers) {
       return x;
     if (typeof(x) === "string")
       return new Uint8Array(bytes_from_str(x));
-    if (x instanceof Array)
+    if (x instanceof Array || x instanceof ArrayBuffer)
       return new Uint8Array(x);
     return new Uint8Array();
   }
@@ -171,31 +171,101 @@ Shen_web_fs = {
   },
 
   fake2: function(root) {
-    root.put(".doc/repl", "one hundred and twenty five");
-    root.put(".lessons/01/repl.shen", "one hundred and twenty five");
-    root.put(".lessons/01/basics.shen", "one hundred and twenty five");
-    root.put(".lessons/01/expr.shen", "one hundred and twenty five");
+    root.put(".doc/repl", "# REPL");
+    root.put(".doc/welcome.html", " \
+      <html> \
+        <body> \
+          <h1>Welcome to Shen-js</h1> \
+          And behold this <em>magnificent</em> UI! \
+        </body> \
+      </html> \
+    ");
+    root.put(".lessons/01/repl.shen", "\\* First let's learn how to use REPL *\\");
+    root.put(".lessons/01/basics.shen", "\\* Basics *\\");
+    root.put(".lessons/01/expr.shen", "\\* Expressions *\\");
     root.put("one/two/three/six", "one thousand two hundreds and thirty six");
     root.put("one/two/three/seven", "one thousand two hundreds and thirty seven");
     root.mkdir("one/four/");
     root.put("one/four/eight", "one hundred and forty eight");
+    root.put("one/four/file with very long name", "and short content");
+  },
+
+  download: function(file, path) {
+    if (!file)
+      return;
+    try {
+      var blob = new Blob([file.data], {type: "application/octet-stream"});
+    } catch (e) {
+      window.BlobBuilder = window.BlobBuilder
+                           || window.MozBlobBuilder
+                           || window.WebKitBlobBuilder
+                           || window.MSBlobBuilder;
+      var bb = new window.BlobBuilder();
+      bb.append(file.data.buffer);
+      var blob = bb.getBlob("application/octet-stream");
+    }
+    window.URL = window.URL || window.webkitURL;
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.style["display"] = "none";
+    a.target = "_blank";
+    a.href = url;
+    a.download = path.match(/[^/]*$/)[0];
+    if (document.createEvent) {
+      var ev = document.createEvent("MouseEvents");
+      ev.initMouseEvent("click", true, true, window, 1, 0, 0, 0, 0, false,
+                        false, false, false, 0, null);
+      a.dispatchEvent(ev);
+    } else if (a.click)
+      a.click();
+    setTimeout(function() {URL.revokeObjectURL(url)}, 100);
+  },
+
+  read_fileio: function(path, file) {
+    console.log("read_fileio", path, file);
+    var fs = this;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      fs.root.put(path, e.target.result);
+    };
+    reader.readAsArrayBuffer(file);
+  },
+
+  upload: function(path, multiple, fn) {
+    var fs = this;
+    Shen_web.dialog("Upload to file", function(dlg, content) {
+      var text = document.createElement("div");
+      text.appendChild(document.createTextNode("Choose a file to upload"));
+      text.className = "shenfs_dlg_msg";
+      var input = document.createElement("input");
+      input.type = "file";
+      if (multiple)
+        input.directory = input.webkitdirectory = input.multiple = true;
+      input.onchange = function(ev) {
+        var files = ev.target.files || ev.target.webkitEntries;
+        fn(files);
+        dlg.parentNode.removeChild(dlg);
+      };
+      content.appendChild(text);
+      content.appendChild(input);
+    });
+  },
+
+  upload_to: function(path) {
+    var fs = this;
+    this.upload(path, true, function(files) {
+      for (var i = 0; i < files.length; ++i) {
+        var f = files[i];
+        fs.read_fileio(path + "/" + f.name, f);
+      }
+    });
   },
 
   mk: function(div, file_fn) {
     var fs = this;
 
-    function img_btn(title, icon) {
-      var btn = document.createElement("button");
-      btn.className = "shenfs_ctl_btn shenfs_ctl_icon_btn";
-      btn.title = title;
-      var img = document.createElement("img");
-      img.src = icon;
-      btn.appendChild(img);
-      return btn;
-    }
-
     function ctl_rm(path) {
-      var btn = img_btn("Delete", "web/rm.png");
+      var btn = Shen_web.img_btn("Delete", "web/rm.png");
       btn.className += " shenfs_ctl_rm_btn";
       btn.onclick = function() {
         var path = fs.selected.path;
@@ -221,14 +291,14 @@ Shen_web_fs = {
       var btn;
       switch (type) {
       case "f":
-        btn = img_btn("Create file", "web/new.png");
+        btn = Shen_web.img_btn("Create file", "web/new.png");
         btn.className += " shenfs_ctl_mk_btn";
         btn.onclick = mkfile_dlg("Enter file name", function(path) {
           fs.root.put(path, "");
         });
         break;
       case "d":
-        btn = img_btn("Create dir", "web/folder_new.png");
+        btn = Shen_web.img_btn("Create dir", "web/folder_new.png");
         btn.className += " shenfs_ctl_mk_btn";
         btn.onclick = mkfile_dlg("Enter directory name", function(path) {
           fs.root.mkdir(path);
@@ -239,21 +309,31 @@ Shen_web_fs = {
     }
 
     function ctl_upload() {
-      var btn = img_btn("Upload file", "web/up.png");
+      var btn = Shen_web.img_btn("Upload file", "web/up.png");
       btn.className += " shenfs_ctl_upload_btn";
+      btn.onclick = function() {
+        console.log("fs.selected.path", fs.selected.path);
+        var path = fs.selected.path;
+        if (path || path === "")
+          fs.upload_to(path);
+      };
       return btn;
     }
 
     function ctl_download() {
-      var btn = img_btn("Download file", "web/down.png");
+      var btn = Shen_web.img_btn("Download file", "web/down.png");
       btn.className += " shenfs_ctl_download_btn";
+      btn.onclick = function() {
+        var path = fs.selected.path;
+        if (path)
+          fs.download(fs.root.get(path), path);
+      };
       return btn;
     }
 
     function file_ctl() {
       var ctl = document.createElement("div");
-      ctl.className = "shenfs_ctl shenfs_file_ctl";
-      ctl.appendChild(ctl_upload());
+      ctl.className = "shen_ctl shenfs_file_ctl";
       ctl.appendChild(ctl_download());
       ctl.appendChild(ctl_rm());
       return ctl;
@@ -261,9 +341,10 @@ Shen_web_fs = {
 
     function dir_ctl() {
       var ctl = document.createElement("div");
-      ctl.className = "shenfs_ctl shenfs_dir_ctl";
+      ctl.className = "shen_ctl shenfs_dir_ctl";
       ctl.appendChild(ctl_new("f"));
       ctl.appendChild(ctl_new("d"));
+      ctl.appendChild(ctl_upload());
       ctl.appendChild(ctl_rm());
       return ctl;
     }
@@ -282,10 +363,10 @@ Shen_web_fs = {
     }
 
     function item_onclick(entry, path) {
-      file_fn(fs.root, path);
       if (fs.selected.entry)
         Shen_web.rm_class("shenfs_selection", fs.selected.entry);
       var file = fs.root.get(path);
+      file_fn(file, path);
       switch (file.type) {
       case "f":
         fs.dir_ctl.style["display"] = "none";
@@ -323,6 +404,7 @@ Shen_web_fs = {
       name.className = "shenfs_dir_name";
       name.onclick = function() {item_onclick(entry, path);};
       var name_text = document.createElement("span");
+      name_text.className = "shenfs_entry_name";
       name_text.appendChild(document.createTextNode(basename(path) + "/"));
       var subdir = document.createElement("ul");
       var icon = file_icon(file, path);
@@ -340,6 +422,7 @@ Shen_web_fs = {
       name.className = "shenfs_file_name";
       name.onclick = function() {item_onclick(entry, path);};
       var name_text = document.createElement("span");
+      name_text.className = "shenfs_entry_name";
       name_text.appendChild(document.createTextNode(basename(path)));
       name.appendChild(file_icon(file, path));
       name.appendChild(name_text);
@@ -365,11 +448,20 @@ Shen_web_fs = {
       };
     }
 
-    var dir = document.createElement("div");
-    dir.className += " shenfs";
+    div = Shen_web.ensure_obj(div);
+    Shen_web.clean(div);
+    div.className += " shenfs";
     div.appendChild((fs.file_ctl = file_ctl()));
     div.appendChild((fs.dir_ctl = dir_ctl()));
+
+    var handle = document.createElement("div");
+    handle.className = "shenfs_handle";
+    div.appendChild(handle);
+
+    var dir = document.createElement("div");
+    dir.className += " shenfs_tree";
     fs.file_ctl.style["display"] = "none";
+
     div.appendChild(dir);
     oncreate_dir(this.root, "", dir);
   },

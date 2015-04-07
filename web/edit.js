@@ -10,15 +10,59 @@ Shen_web_edit = {
   },
 
   load: function(root, path) {
-    var file = root.get(path);
+    var file = root.get(path),
+        text = document.getElementById("shen_edit_entry"),
+        container = document.getElementById("shen_edit_container"),
+        ctl = document.getElementById("shen_edit_ctl"),
+        html = false;
+    this.unload();
     if (!file)
       return;
     this.path = path;
     this.set_title(path);
-    var text = document.getElementById("shen_edit_entry");
-    text.value = file.str_data();
     this.file = file;
-    this.touched = false;
+    try {
+      var str = this.file.str_data();
+    } catch(e) {
+      html = true;
+      var str = "<div class='warning'>File is binary</div>";
+    }
+    if (html || path.match(/\.doc\/.*\.html/)) {
+      text.style["display"] = "none";
+      container.style["display"] = "block";
+      container.innerHTML 
+        = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
+    } else {
+      ctl.style["visibility"] = "visible";
+      text.style["display"] = "block";
+      container.style["display"] = "none";
+      text.disabled = false;
+      text.value = str;
+      text.touched = false;
+    }
+  },
+
+  unload: function() {
+    var text = document.getElementById("shen_edit_entry"),
+        container = document.getElementById("shen_edit_container"),
+        ctl = document.getElementById("shen_edit_ctl");
+    this.set_title("");
+    this.file = null;
+    this.path = null;
+    text.value = "";
+    text.disabled = true;
+    ctl.style["visibility"] = "hidden";
+    Shen_web.clean(container);
+    text.style["display"] = "block";
+  },
+
+  reload: function(force) {
+    var s = "Do you want to restore file? All unsaved changes will be lost";
+    if (!force && !(this.file && this.touched && confirm(s)))
+      return;
+    var text = document.getElementById("shen_edit_entry");
+    text.value = this.file.str_data();
+    text.touched = false;
   },
 
   save: function() {
@@ -28,58 +72,89 @@ Shen_web_edit = {
     this.touched = false;
   },
 
-  mk: function(div) {
+  run: function(fn) {
+    if (this.path)
+      fn(this.path);
+  },
+
+  mk: function(div, run) {
     var self = this;
+
+    function mk_ctl() {
+      var ctl = document.createElement("div");
+      ctl.id = "shen_edit_ctl";
+      ctl.className = "shen_ctl shen_edit_ctl";
+      ctl.style["visibility"] = "hidden";
+
+      var btn_run = Shen_web.img_btn("Run", "web/run.png");
+      btn_run.className += " shen_edit_ctl_btn";
+      btn_run.onclick = function() {self.run(run);};
+      ctl.appendChild(btn_run);
+
+      ctl.appendChild(Shen_web.tool_sep());
+
+      var btn_save = Shen_web.img_btn("Save", "web/save.png");
+      btn_save.className += " shen_edit_ctl_btn";
+      btn_save.onclick = function() {self.save();};
+      ctl.appendChild(btn_save);
+
+      var btn_reload = Shen_web.img_btn("Reload", "web/refresh.png");
+      btn_reload.className += " shen_edit_ctl_btn";
+      btn_reload.onclick = function() {self.reload();};
+      ctl.appendChild(btn_reload);
+
+      var btn_down = Shen_web.img_btn("Download", "web/down.png");
+      btn_down.className += " shen_edit_ctl_btn";
+      btn_down.onclick = function() {Shen_web_fs.download(self.file, self.path);};
+      ctl.appendChild(btn_down);
+
+      var btn_up = Shen_web.img_btn("Upload", "web/up.png");
+      btn_up.className += " shen_edit_ctl_btn";
+      btn_up.onclick = function() {
+        if (self.file)
+          Shen_web_fs.upload(self.path, false, function(files) {
+            if (files[0]) {
+              Shen_web_fs.read_fileio(self.path, files[0]);
+              setTimeout(function() {self.load(Shen_web_fs.root, self.path);}, 50);
+            }
+          });
+      };
+      ctl.appendChild(btn_up);
+      return ctl;
+    }
+
+    div = Shen_web.ensure_obj(div);
     Shen_web.clean(div);
     var hdr = document.createElement("div");
-    hdr.className = "shen_edit";
+    hdr.className = "shen_edit_hdr";
 
-    var title = document.createElement("span");
+    var title = document.createElement("div");
     title.id = "shen_edit_title";
     title.className = "shen_edit_title";
-    title.appendChild(document.createTextNode("unnamed"));
+    title.appendChild(document.createTextNode(""));
+
+    var container = document.createElement("div");
+    container.id = "shen_edit_container";
+    container.className = "shen_edit_container";
 
     var text = document.createElement("textarea");
     text.id = "shen_edit_entry";
     text.className = "shen_edit_entry";
     text.cols = 80;
     text.rows = 25;
+    text.disabled = true;
+    text.wrap = "off";
+    text.spellcheck = false;
+    text.style["display"] = "none";
     var fn = (function() {this.touched = true;}).bind(this);
     text.oninput = function() {fn();};
 
-    var ctl = document.createElement("span");
-    ctl.className = "shen_edit_ctl";
-
     hdr.appendChild(title);
-
-    var btn_save = document.createElement("button");
-    btn_save.className = "shen_edit_ctl_btn";
-    btn_save.title = "Save";
-    btn_save.appendChild(document.createTextNode("Save"));
-    btn_save.onclick = function() {self.save();};
-    ctl.appendChild(btn_save);
-
-    var btn_reload = document.createElement("button");
-    btn_reload.className = "shen_edit_ctl_btn";
-    btn_reload.title = "Reload";
-    btn_reload.appendChild(document.createTextNode("Reload"));
-    ctl.appendChild(btn_reload);
-
-    var btn_download = document.createElement("button");
-    btn_download.className = "shen_edit_ctl_btn";
-    btn_download.title = "Download";
-    btn_download.appendChild(document.createTextNode("Download"));
-    ctl.appendChild(btn_download);
-
-    var btn_upload = document.createElement("button");
-    btn_upload.className = "shen_edit_ctl_btn";
-    btn_upload.title = "Upload";
-    btn_upload.appendChild(document.createTextNode("Upload"));
-    ctl.appendChild(btn_upload);
-
-    hdr.appendChild(ctl);
+    hdr.appendChild(mk_ctl());
+    hdr.appendChild(Shen_web.clear_div());
 
     div.appendChild(hdr);
     div.appendChild(text);
+    div.appendChild(container);
   }
 };

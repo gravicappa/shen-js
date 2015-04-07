@@ -1,14 +1,12 @@
-.shen_text {
-	font-family: fixed, monospace;
+*, *:before, *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #shen_input {
   border: 0;
   border-bottom: 1px solid #573;
-}
-
-#shen_edit_entry {
-  border: 1px solid #573;
 }
 
 #shen_output {
@@ -21,72 +19,135 @@
   resize: horizontal;
 }
 
-#shen_fs, #shen_edit {
-  display: inline-block;
+.shen_edit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 50%;
+  bottom: 0;
 }
 
-#shen_fs {
-  vertical-align: top;
-  width: 20%;
-  height: 100%;
-  border: 1px solid #aab;
+.shen_repl {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 0;
 }
 
+
+/* SHEN FS { */
 .shenfs {
+  height: 100%;
+  width: 18px;
+  vertical-align: top;
+  position: relative;
+  overflow: hidden;
+  z-index: 1000;
+  transition: 0.4s;
+  background: #456;
 }
 
-.shenfs_ctl {
+.shenfs_handle {
+  width: 18px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  border: 0;
+  background: url(folder.png) #ccf no-repeat center;
+  z-index: 1001;
+}
+
+.shenfs:hover {
+  width: 15em;
+  border: 1px solid #aab;
+  transition: 0.4s;
+}
+
+.shenfs:hover .shenfs_handle {
+  display: none;
+  transition: 0.4s;
+}
+
+/*
+.shenfs:hover .shenfs_tree, .shenfs:hover .shenfs_file_ctl,
+.shenfs:hover .shenfs_dir_ctl {
+  display: block;
+}
+*/
+
+.shenfs_file_ctl, .shenfs_dir_ctl {
+  display: none;
+  white-space: nowrap;
+}
+
+.shenfs_tree {
+  overflow: auto;
   width: 100%;
-  background: #123;
-  padding: 2px 0;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 22px;
+  right: 18px;
+  background: #fff;
 }
 
-.shenfs_ctl_icon_btn {
+.shen_ctl {
+  width: 100%;
+  background: #567;
+  padding: 3px 0;
+}
+
+.shen_ctl_icon_btn {
   border: 0;
   margin: 0;
   padding: 0;
   background: transparent;
 }
 
-.shenfs_ctl_icon_btn:active {
+.shen_ctl_icon_btn:active {
   background: #fff;
 }
 
-.shenfs_ctl_icon_btn:hover {
+.shen_ctl_icon_btn:hover {
   border: 1px solid #fff;
   margin: -1px;
 }
 
-.shenfs ul {
+.shen_ctl_sep {
+  display: inline-block;
+  width: 16px;
+}
+
+.shenfs_tree ul {
   padding-left: 1em;
   list-style: none;
   margin-top: 0;
   margin-bottom: 0;
-  line-height: 1.1em;
 }
 
 .shenfs_file_name:hover, .shenfs_dir_name:hover {
-  text-decoration: underline;
   cursor: pointer;
 }
 
 .shenfs_file_name, .shenfs_dir_name {
   font-size: 14px;
   font-family: Fixed, monospace;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .shenfs_selection > .shenfs_dir_name, .shenfs_selection > .shenfs_file_name {
   background: #dde;
   border: 1px solid #bbc;
-  margin: -1px;
 }
 
 .shenfs_icon {
   margin: 0;
   padding: 0;
-  margin-top: auto;
-  margin-right: 8px;
-  vertical-align: center;
+  margin: 4px;
+  vertical-align: middle;
 }
 
 .shenfs_file_entry {
@@ -97,40 +158,157 @@
   font-weight: bold;
 }
 
-.shenfs_entry_ctl {
-  display: none;
-  position: absolute;
-  padding: 0;
-  margin: 0;
-  vertical-align: top;
-  transform: translate(0, -25%);
+.shenfs_entry_name {
+  display: inline-block;
 }
 
-.shenfs_entry_ctl_content {
-  border: 1px solid #777777;
-  margin: 0;
-  margin-left: 8px;
-  background: #eef;
+.shenfs_dlg_msg {
+  margin-bottom: 8px;
+}
+/* } SHEN FS */
+
+/* SHEN TEXT { */
+
+.shen_text {
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  border: 1px solid #573;
+}
+
+.shen_edit_entry, .shen_edit_container {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  top: 22px;
+}
+
+.shen_edit_entry {
+	font-family: fixed, monospace;
+  resize: none;
+  border: 0;
+}
+
+.shen_edit_container {
   padding: 8px;
 }
 
-.shenfs_entry_ctl button {
-  border: 0;
-  border-bottom: 1px dashed #030;
-  color: #030;
-  padding: 0;
-  margin: 8px 4px;
-  cursor: pointer;
-  background: #eef;
-  font-weight: normal;
-  font-family: sans-serif;
+.shen_edit_hdr {
+  background: #567;
 }
 
-.shenfs_dir_name:hover >.shenfs_entry_ctl,
-.shenfs_file_name:hover > .shenfs_entry_ctl {
-  display: inline;
+.shen_edit_title {
+  color: #fff;
+  display: inline-block;
+  font-weight: bold;
 }
 
 .shen_edit_ctl {
+  width: auto;
+  display: inline-block;
   float: right;
 }
+/* } SHEN TEXT */
+
+/* SHEN DLG { */
+
+.shen_dlg_overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.shen_dlg_title {
+  background: #456;
+  color: #fff;
+  font-weight: bold;
+}
+
+.shen_dlg_close_btn {
+  float: right;
+}
+
+.shen_dlg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #778;
+  box-shadow: 1px 1px 10px #000;
+  text-align: center;
+  cursor: default;
+}
+
+.shen_dlg_content {
+  padding: 16px;
+}
+
+.shen_dlg_close {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font-weight: bold;
+  float: right;
+  background: transparent;
+  color: #f67;
+}
+
+.shen_dlg_btns {
+  margin: 16px 16px 0 16px;
+}
+
+.shen_dlg_btn_ok {
+  width: 50%;
+}
+
+.shen_dlg_btn_cancel {
+  width: 50%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 16px;
+}
+
+.shen_dlg_btn_cancel_text {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px dashed #557;
+}
+/* } SHEN DLG */
+
+/* SHEN REPL { */
+.shen_repl_out {
+  background: #fff;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10%;
+  white-space: pre;
+  overflow: auto;
+}
+
+.shen_repl_in {
+  font-family: Fixed, monospace;
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  resize: none;
+  padding: 8px 4px;
+  border: 1px solid #9ab;
+  margin: 0;
+}
+
+/* } SHEN REPL */
