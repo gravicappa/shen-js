@@ -330,14 +330,12 @@ Shen_web_fs = {
     }
 
     function dir_onclick_icon(icon, contents) {
-      switch (contents.style.display) {
-      case "none":
+      if (Shen_web.in_class("shenfs_subdir_collapsed", contents)) {
         icon.src = "web/folder_open.png";
-        contents.style.display = "block";
-        break;
-      default:
+        Shen_web.rm_class("shenfs_subdir_collapsed", contents);
+      } else {
         icon.src = "web/folder.png";
-        contents.style.display = "none";
+        contents.className += " shenfs_subdir_collapsed";
       }
       return true;
     }
@@ -349,12 +347,16 @@ Shen_web_fs = {
       file_fn(file, path);
       switch (file.type) {
       case "f":
-        fs.dir_ctl.style["display"] = "none";
-        fs.file_ctl.style["display"] = "block";
+        Shen_web.rm_class("shen_ctl_removed", fs.file_ctl);
+        Shen_web.rm_class("shen_ctl_removed", fs.dir_ctl);
+        fs.dir_ctl.className += " shen_ctl_removed";
+        fs.dir.style["top"] = fs.file_ctl.offsetHeight;
         break;
       case "d":
-        fs.dir_ctl.style["display"] = "block";
-        fs.file_ctl.style["display"] = "none";
+        Shen_web.rm_class("shen_ctl_removed", fs.file_ctl);
+        Shen_web.rm_class("shen_ctl_removed", fs.dir_ctl);
+        fs.file_ctl.className += " shen_ctl_removed";
+        fs.dir.style["top"] = fs.dir_ctl.offsetHeight;
         break;
       }
       fs.selected.entry = entry;
@@ -369,8 +371,10 @@ Shen_web_fs = {
     function file_icon(file, path) {
       var icon = document.createElement("img");
       icon.className = "shenfs_icon";
-      if (file.type === "d")
+      if (file.type === "d") {
         icon.src = "web/folder_open.png";
+      } else if (path.match(/\.html$/))
+        icon.src = "web/html.png";
       else if (path.match(/\.shen$/))
         icon.src = "web/shen_source.png";
       else
@@ -379,9 +383,9 @@ Shen_web_fs = {
     }
 
     function oncreate_dir(file, path, entry) {
-      entry.className += " shenfs_dir_entry";
+      entry.className += " shenfs_entry shenfs_dir_entry";
       var name = document.createElement("div");
-      name.className = "shenfs_dir_name";
+      name.className = "shenfs_name";
       name.onclick = function() {item_onclick(entry, path);};
       var name_text = document.createElement("span");
       name_text.className = "shenfs_entry_name";
@@ -397,9 +401,9 @@ Shen_web_fs = {
     }
 
     function oncreate_file(file, path, entry) {
-      entry.className += " shenfs_file_entry";
+      entry.className += " shenfs_entry shenfs_file_entry";
       var name = document.createElement("div");
-      name.className = "shenfs_file_name";
+      name.className = "shenfs_name";
       name.onclick = function() {item_onclick(entry, path);};
       var name_text = document.createElement("span");
       name_text.className = "shenfs_entry_name";
@@ -428,21 +432,25 @@ Shen_web_fs = {
       };
     }
 
+    function update_size() {
+    }
+
     div = Shen_web.ensure_obj(div);
     Shen_web.clean(div);
     div.className += " shenfs";
     div.appendChild((fs.file_ctl = file_ctl()));
     div.appendChild((fs.dir_ctl = dir_ctl()));
 
-    var dir = document.createElement("div");
-    dir.className += " shenfs_tree";
-    fs.file_ctl.style["display"] = "none";
+    fs.dir = document.createElement("div");
+    fs.dir.className += " shenfs_tree";
+
+    fs.dir.style["top"] = fs.dir_ctl.offsetHeight;
+    fs.dir_ctl.className += " shen_ctl_removed";
+    fs.file_ctl.className += " shen_ctl_removed";
 
     var handle = document.createElement("div");
     handle.className = "shenfs_handle";
     handle.onclick = function() {
-      console.log("handle.onclick", Shen_web.in_class("shenfs_opened", div),
-                  div.className);
       if (Shen_web.in_class("shenfs_opened", div))
         Shen_web.rm_class("shenfs_opened", div);
       else
@@ -450,7 +458,7 @@ Shen_web_fs = {
     };
     div.appendChild(handle);
 
-    div.appendChild(dir);
-    oncreate_dir(this.root, "", dir);
+    div.appendChild(fs.dir);
+    oncreate_dir(this.root, "", fs.dir);
   },
 };

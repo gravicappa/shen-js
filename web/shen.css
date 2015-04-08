@@ -25,57 +25,8 @@
   font-family: Courier, Fixed, monospace;
 }
 
-
-/* SHEN FS { */
-.shenfs {
-  height: 100%;
-  width: 18px;
-  vertical-align: top;
-  position: relative;
-  overflow: hidden;
-  z-index: 1000;
-  transition: 0.4s;
-  background: #456;
-}
-
-.shenfs_opened {
-  width: 15em;
-}
-
-.shenfs_handle {
-  width: 18px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  background: url(folder.png) #ccf no-repeat center;
-  z-index: 1001;
-  cursor: pointer;
-}
-
-.shenfs_opened .shenfs_handle {
-  border-left: 1px solid #123;
-  border-right: 1px solid #123;
-}
-
-.shenfs_file_ctl, .shenfs_dir_ctl {
-  display: none;
-  white-space: nowrap;
-}
-
-.shenfs_tree {
-  overflow: auto;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  top: 22px;
-  right: 18px;
-  background: #fff;
-}
-
 .shen_ctl {
-  width: 100%;
-  background: #567;
+  background: transparent;
   padding: 3px 0;
 }
 
@@ -87,12 +38,13 @@
 }
 
 .shen_ctl_icon_btn:active {
-  background: #fff;
+  background: #000;
+  transition: 0.2s;
 }
 
 .shen_ctl_icon_btn:hover {
-  border: 1px solid #fff;
-  margin: -1px;
+  background: rgba(1, 1, 1, 0.2);
+  transition: 0.2s;
 }
 
 .shen_ctl_sep {
@@ -100,33 +52,102 @@
   width: 16px;
 }
 
+.shen_ctl_removed {
+  display: none !important;
+}
+
+.shen_ctl_hidden {
+  visibility: none;
+}
+
+
+/* SHEN FS { */
+.shenfs {
+  width: 18px;
+  height: 100%;
+  vertical-align: top;
+  overflow: hidden;
+  z-index: 500;
+  transition: 0.4s;
+  background: #ccb;
+  position: absolute;
+}
+
+.shenfs_opened {
+  width: 15em;
+  box-shadow: 1px 0 5px #000;
+}
+
+.shenfs_handle {
+  width: 18px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: url(folder.png) #ffe no-repeat center;
+  z-index: 500;
+  cursor: pointer;
+  border-right: 2px solid #eed;
+}
+
+.shenfs_opened .shenfs_handle {
+  border-right: 1px solid #345;
+  background: #ffe;
+  box-shadow: 1px 0 5px #000;
+  background: url(left.png) #ffe no-repeat center;
+}
+
+.shenfs_file_ctl, .shenfs_dir_ctl {
+  white-space: nowrap;
+  background: #ccb !important;
+}
+
+.shenfs_tree {
+  overflow: auto;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 22px;
+  right: 18px;
+  background: #ffe;
+}
+
 .shenfs_tree ul {
   padding-left: 1em;
   list-style: none;
   margin-top: 0;
   margin-bottom: 0;
+  width: 100%;
+  display: block;
 }
 
-.shenfs_file_name:hover, .shenfs_dir_name:hover {
+.shenfs_subdir_collapsed {
+  display: none !important;
+}
+
+.shenfs_name:hover {
   cursor: pointer;
 }
 
-.shenfs_file_name, .shenfs_dir_name {
+.shenfs_name {
   font-size: 14px;
   font-family: Fixed, monospace;
   border: 1px solid transparent;
   white-space: nowrap;
+  display: inline-block;
+  padding: 0 6px 0 6px;
 }
 
-.shenfs_selection > .shenfs_dir_name, .shenfs_selection > .shenfs_file_name {
-  background: #dde;
-  border: 1px solid #bbc;
+.shenfs_selection > .shenfs_name {
+  border: 1px solid #665;
+  color: #fff;
+  background: #776;
 }
 
 .shenfs_icon {
   margin: 0;
   padding: 0;
-  margin: 4px;
+  margin: 2px 4px 2px 0px;
   vertical-align: middle;
 }
 
@@ -134,8 +155,13 @@
   opacity: 0.6;
 }
 
-.shenfs_file_entry {
+.shenfs_entry {
   font-weight: normal;
+}
+
+li.shenfs_entry {
+  width: 100%;
+  display: block;
 }
 
 .shenfs_dir_entry {
