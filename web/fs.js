@@ -432,10 +432,7 @@ Shen_web_fs = {
       };
     }
 
-    function update_size() {
-    }
-
-    div = Shen_web.ensure_obj(div);
+    div = document.getElementById(div);
     Shen_web.clean(div);
     div.className += " shenfs";
     div.appendChild((fs.file_ctl = file_ctl()));

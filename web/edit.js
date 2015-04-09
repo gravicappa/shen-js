@@ -11,6 +11,14 @@ Shen_web_edit = {
   },
 
   load: function(root, path) {
+    function load_html(html) {
+      var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
+      container.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
+      var scr = container.getElementsByTagName("script");
+      for (var i = 0; i < scr.length; ++i)
+        eval(scr[i].innerHTML);
+    }
+
     var file = root.get(path),
         container = document.getElementById("shen_edit_container"),
         ctl = document.getElementById("shen_edit_ctl"),
@@ -29,8 +37,7 @@ Shen_web_edit = {
     }
     if (in_html || path.match(/\.doc\/.*\.html/)) {
       container.style["display"] = "block";
-      var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
-      container.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
+      load_html(str);
     } else {
       ctl.style["visibility"] = "visible";
       var text = this.ensure_text_entry();
@@ -88,7 +95,7 @@ Shen_web_edit = {
     return text;
   },
 
-  mk: function(div, run) {
+  mk: function(where, run) {
     var self = this;
 
     function mk_ctl() {
@@ -134,7 +141,7 @@ Shen_web_edit = {
       return ctl;
     }
 
-    div = Shen_web.ensure_obj(div);
+    div = document.getElementById(where);
     Shen_web.clean(div);
     var hdr = document.createElement("div");
     hdr.className = "shen_edit_hdr";

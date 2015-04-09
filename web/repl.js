@@ -68,18 +68,13 @@ Shen_repl = function(div) {
   }
 
   function mk(div) {
-    div = Shen_web.ensure_obj(div);
+    div = document.getElementById(div);
     Shen_web.clean(div);
     var out = mk_output();
     var t = mk_input(out);
     div.appendChild(out);
     div.appendChild(t);
     resize_textarea(t, out);
-
-    puts("# Title\n");
-    puts("This is ");
-    puts("SHEN");
-    puts(" fake output\n");
   }
   mk(div);
 }

@@ -5,12 +5,6 @@ Shen_web = {
         obj.removeChild(obj.firstChild);
   },
 
-  ensure_obj: function(x) {
-    if (typeof(x) === "string")
-      return document.getElementById(x);
-    return x;
-  },
-
   rm_class: function(cls, obj) {
     obj.className = ((" " + obj.className + " ").replace(" " + cls + " ", "")
                      .trim());
@@ -128,13 +122,18 @@ Shen_web = {
     return div;
   },
 
-  query: function(url, fn) {
+  query: function(url, fn, errfn) {
     var req = new XMLHttpRequest();
     req.open('get', url, true);
     req.onreadystatechange = function() {
-      if (req.readyState === 4 && req.status === 200)
-        fn(req.responseText);
-    }
+      if (req.readyState === 4)
+        switch (req.status) {
+        case 200: fn(req.responseText); break;
+        default:
+          if (errfn)
+            errfn(req.statusText);
+        }
+    };
     req.send();
-  },
+  }
 };

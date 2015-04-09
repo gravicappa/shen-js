@@ -332,3 +332,41 @@ li.shenfs_entry {
 }
 
 /* } SHEN REPL */
+
+/* SHEN DOC { */
+.shen_edit_container h1 {font-size: 24px;}
+.shen_edit_container h2 {font-size: 20px;}
+.shen_edit_container h3 {font-size: 18px;}
+.shen_edit_container h4 {font-size: 14px;}
+/* } SHEN DOC */
+
+/* SHEN WAIT { */
+.shen_wait_overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: #113;
+  z-index: 1000;
+}
+
+.shen_wait_pane {
+  position: absolute;
+  background: #eff;
+  text-align: center;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translate(0, -50%);
+  padding: 16px;
+  border-top: 1px solid #dee;
+  border-bottom: 1px solid #dee;
+}
+
+.shen_wait_text {
+  font-family: serif;
+  font-size: 18px;
+}
+
+/* } SHEN WAIT */
