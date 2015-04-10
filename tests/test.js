@@ -2,8 +2,8 @@ Test = {
   cases: [],
 
   init_shen: function() {
-    load("runtime.js");
-    load("primitives.js");
+    load("../runtime.js");
+    load("../primitives.js");
     Shen.init({io: Shen.console_io});
     Shen.defun("vector->", function(v, i, x) {
                              v[i] = x;
