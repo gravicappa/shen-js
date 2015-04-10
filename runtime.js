@@ -66,11 +66,11 @@ Shen = (function() {
     if (!(this instanceof Stream))
       return new Stream(dir, fn, close);
     this.dir = dir || "";
-    this.close = close || (function(vm) {});
+    this.close = close || (function(vm) {return [];});
     this.read_byte = function(vm) {
       return vm.error("read-byte: Wrong stream type.");
     };
-    this.write_byte = function(vm) {
+    this.write_byte = function(byte, vm) {
       vm.error("write-byte: Wrong stream type.");
     };
     switch (dir) {
@@ -81,10 +81,13 @@ Shen = (function() {
       this.in = fn[0];
       this.out = fn[1];
       this.read_byte = function(vm) {return this.in.read_byte(vm);};
-      this.write_byte = function(vm) {this.in.write_byte(vm);};
-      this.close = function() {
+      this.write_byte = function(byte, vm) {
+        return this.out.write_byte(byte, vm);
+      };
+      this.close = function(vm) {
         this.in.close(vm);
         this.out.close(vm);
+        return [];
       };
     }
   };
@@ -141,7 +144,7 @@ Shen = (function() {
         }
       } catch (e) {
         if (this.is_true(this.glob["js.show-error"]))
-          this.io.puts("# err: " + e + "\n");
+          log("# err: " + e);
         if (e !== this.interrupt_obj) {
           if (this.error_handlers.length > 0)
             start = this.handle_exception(e);
@@ -164,7 +167,7 @@ Shen = (function() {
       this.start = pc;
     } catch (e) {
       if (this.is_true(this.glob["js.show-error"]))
-        this.io.puts("# err: " + e + "\n");
+        log("# err: " + e);
       if (e !== this.interrupt_obj) {
         if (this.error_handlers.length > 0)
           this.start = this.handle_exception(e);
@@ -286,9 +289,9 @@ Shen = (function() {
     };
     var replaced = function() {
       var args = Array.prototype.slice.call(arguments);
-      this.io.puts("(" + name + " " + args.map(tostr).join(" ") + ")\n");
+      log("(" + name + " " + args.map(tostr).join(" ") + ")");
       var ret = fn.apply(this, arguments);
-      this.io.puts("" + name + " => " + this.xstr(ret) + "\n");
+      log("" + name + " => " + this.xstr(ret));
       return ret;
     };
     replaced.old = fn;
@@ -574,17 +577,17 @@ Shen = (function() {
   };
 
   Shenvm.prototype._bs_var = function(name, obj) {
-    this.io.puts("Shen." + name + " = (function() {\n  return {\n");
+    print("Shen." + name + " = (function() {\n  return {");
     for (var key in obj) {
       var repr = this._bs_obj(obj[key]);
-      this.io.puts('    "' + this.esc(key) + '": ' + repr + ",\n");
+      print('    "' + this.esc(key) + '": ' + repr + ",");
     }
-    this.io.puts("  };\n})();\n");
+    print("  };\n})();");
   };
 
   Shenvm.prototype.bootstrap = function() {
-    this.io.puts(this._bs_var("glob", this.glob));
-    this.io.puts(this._bs_eval_buf);
+    print(this._bs_var("glob", this.glob));
+    print(this._bs_eval_buf);
   };
 
 // UTILS {
@@ -641,26 +644,26 @@ Shen = (function() {
     return ret;
   };
 
-  function dbg_printer(vm) {
-    try {return vm.puts;} catch (e) {}
-    try {return putstr;} catch (e) {}
-    try {return write;} catch (e) {}
-    return this.error("No printer");
+  function log(s) {
+    try {
+      console.log(s);
+    } catch (e) {
+      print(s);
+    }
   };
 
   Shenvm.prototype.dump_regs = function(start, n) {
-    var pr = dbg_printer(this);
-    var r = this.reg, io = this.io;
+    var r = this.reg;
     var n = n || 20;
     var start = (start === undefined) ? this.sp : start;
     for (var i = start, j = start; i < r.length; ++i) {
       if (r[i] !== undefined) {
         if (j + 1 == i - 1)
-          pr("    " + (i - 1) + ": nil\n");
+          log("    " + (i - 1) + ": nil");
         else if (j + 1 < i)
-          pr("    " + (j + 1) + ".." + (i - 1) + ": nil\n");
+          log("    " + (j + 1) + ".." + (i - 1) + ": nil");
         var x = this.dbg_str_prefixed(this.xstr(r[i], n), "      ");
-        pr("    " + i + ": " + x + "\n");
+        log("    " + i + ": " + x);
         j = i;
       }
     }
@@ -874,8 +877,7 @@ Shen = (function() {
 
     var out_buf = "";
 
-    io.gets = readline;
-    io.puts = function console_puts(x) {
+    function console_puts(x) {
       out_buf += x;
       var pos = out_buf.lastIndexOf("\n");
       if (pos >= 0) {
@@ -885,9 +887,9 @@ Shen = (function() {
     };
 
     var writer = new vm.Utf8_writer(function(char) {
-      io.puts(String.fromCharCode(char));
+      console_puts(String.fromCharCode(char));
     });
-    var stdout = new vm.Stream("w", function(vm, byte) {
+    var stdout = new vm.Stream("w", function(byte, vm) {
                                       writer.write_byte(byte);
                                     });
     var stdin = new vm.Stream("r", null, function(vm) {quit();});
@@ -896,7 +898,7 @@ Shen = (function() {
       var x = strbuf.read_byte();
       if (x >= 0)
         return x;
-      var str = this.io.gets();
+      var str = readline();
       if (str == null) {
         vm.quit();
         return -1;
@@ -920,7 +922,7 @@ Shen = (function() {
     this.io = opts.io(this);
     if (!this.io)
       return this.error("Shen: IO is not set");
-    var keys = ["gets", "puts", "open"];
+    var keys = ["open"];
     for (var i = 0; i < keys.length; ++i)
       if (!this.io[keys[i]])
         throw new Error("Shen: IO has no method " + keys[i]);
