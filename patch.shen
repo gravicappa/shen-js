@@ -20,7 +20,7 @@
 
   (defun macroexpand (X)
     (do (set *macros* (resolve-macro-functions (value *macros*) []))
-        (macroexpand' X))
+        (macroexpand' X)))
 
   (define add-macro
     F -> (let MacroReg (value *macroreg*)

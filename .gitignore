@@ -1,2 +1,3 @@
 *.kl
+primitives.js
 ./node_modules/*
