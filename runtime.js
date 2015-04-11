@@ -23,7 +23,7 @@ Shen = (function() {
   Shenvm.prototype.glob = {
     "*language*": "Javascript",
     "*implementation*": "cli",
-    "*port*": "17.2.1",
+    "*port*": "3.0.0",
     "*porters*": "Ramil Farkhshatov",
     "*home-directory*": "",
     "js.show-error": false,
@@ -97,7 +97,7 @@ Shen = (function() {
 
   Shenvm.prototype.clone = function() {
     var obj = new this.constructor(),
-        keys = ["io", "eval_str", "run"],
+        keys = ["io", "eval_str", "run", "fn_entry", "fn_return"],
         key;
     for (var i = 0; i < keys.length; ++i) {
       key = keys[i];
@@ -127,16 +127,12 @@ Shen = (function() {
     this.run();
   };
 
-  Shenvm.prototype.run = function() {
-    throw new Error("Call Shen.init first!");
-  };
-
   Shenvm.prototype.run_loop = function() {
-    var start = this.start;
+    var pc, start = this.start;
     while (start) {
+      pc = start;
+      start = null;
       try {
-        var pc = start;
-        start = null;
         while (pc) {
           if (this.dump_state_enabled)
             this.dump_state({pc: pc});
@@ -157,6 +153,8 @@ Shen = (function() {
       }
     }
   };
+
+  Shenvm.prototype.run = Shenvm.prototype.run_loop;
 
   Shenvm.prototype.run_step = function() {
     try {
@@ -214,7 +212,7 @@ Shen = (function() {
     if (name instanceof this.Sym)
       name = name.str;
     var ret = this.fns[name];
-    if (ret === undefined)
+    if (!ret)
       return this.error("No such function: " + name);
     return ret;
   };
@@ -453,10 +451,7 @@ Shen = (function() {
   };
 
   Shenvm.prototype.wipe_stack = function(start) {
-    var r = this.reg;
-    var n = this.sp_top;
-    for (var i = this.sp + start; i < n; ++i)
-      delete r[i];
+    this.reg.length = this.sp + start;
   };
 
   Shenvm.prototype.error = function(s) {
@@ -465,10 +460,11 @@ Shen = (function() {
   };
 
   Shenvm.prototype.error_to_string = function(s) {
-    var stack = s.stack;
-    var show = (stack !== undefined);
+    var stack = s.stack,
+        show = (stack !== undefined),
+        s = s.toString().replace(/^Error: /, "");
     show &= this.is_true(this.glob["js.show-error-stack"]);
-    return (show) ? ("" + s + " " + stack) : ("" + s);
+    return (show) ? (s + " " + stack) : s;
   };
 
   Shenvm.prototype.bootstrap_eval_str = function(s) {
@@ -476,9 +472,8 @@ Shen = (function() {
   };
 
   Shenvm.prototype.write_string = function(s, stream) {
-    var w = this.write_byte;
     for (var i = 0; i < s.length; ++i)
-      w(s.charCodeAt(i), stream);
+      stream.write_byte(s.charCodeAt(i), this);
     return s;
   };
 
@@ -678,27 +673,25 @@ Shen = (function() {
   };
 
   Shenvm.prototype.dump_state = function(extra) {
-    var pr = this.dbg_printer();
     var n = 20;
-    pr("# STEP ################\n");
+    log("# STEP ################");
     for (var x in extra)
-      pr("  " + x + ": " + this.xstr(extra[x]) + "\n");
-    pr("  next: " + this.xstr(this.next) + "\n");
-    pr("  ret: " + this.xstr(this.ret, n) + "\n");
-    pr("  nargs: " + this.nargs + "\n");
-    pr("  sp: " + this.sp + "\n");
-    pr("  regs:\n");
+      log("  " + x + ": " + this.xstr(extra[x]));
+    log("  next: " + this.xstr(this.next));
+    log("  ret: " + this.xstr(this.ret, n));
+    log("  nargs: " + this.nargs);
+    log("  sp: " + this.sp);
+    log("  regs:");
     this.dump_regs(this.sp, n);
-    pr("\n\n");
+    log("\n");
   };
 
   Shenvm.prototype.inspect_obj = function(obj) {
-    var pr = this.dbg_printer();
-    pr("INSPECT " + obj + "\n");
-    pr("  type: " + this.typeof(obj) + "\n");
+    log("INSPECT " + obj);
+    log("  type: " + this.typeof(obj));
     for (var key in obj)
-      pr("  ." + key + ": " + obj[key] + "\n");
-    pr("\n");
+      log("  ." + key + ": " + obj[key]);
+    log("\n");
   };
 
   Shenvm.prototype.typeof = function(obj) {
@@ -855,7 +848,7 @@ Shen = (function() {
       }
     }
 
-    io.open = function open(vm, name, dir) {
+    io.open = function open(name, dir, vm) {
       var filename = vm.glob["*home-directory*"] + name;
       if ($HOME)
         var filename = filename.replace(/^~/, $HOME);
@@ -875,32 +868,27 @@ Shen = (function() {
       return vm.error("Unsupported 'open' flags");
     };
 
-    var out_buf = "";
-
-    function console_puts(x) {
-      out_buf += x;
-      var pos = out_buf.lastIndexOf("\n");
-      if (pos >= 0) {
-        print(out_buf.substring(0, pos));
-        out_buf = out_buf.substring(pos + 1);
-      }
-    };
+    var putchars = null;
+    try {putchars = putstr;} catch(e) {}
+    try {putchars = write;} catch(e) {}
+    if (!putchars)
+      throw new Error("You JS implementation's IO is not supported");
 
     var writer = new vm.Utf8_writer(function(char) {
-      console_puts(String.fromCharCode(char));
+      putchars(String.fromCharCode(char));
     });
     var stdout = new vm.Stream("w", function(byte, vm) {
                                       writer.write_byte(byte);
                                     });
     var stdin = new vm.Stream("r", null, function(vm) {quit();});
-    strbuf = new vm.Utf8_reader();
+    var strbuf = new vm.Utf8_reader();
     stdin.read_byte = function (vm) {
       var x = strbuf.read_byte();
       if (x >= 0)
         return x;
       var str = readline();
       if (str == null) {
-        vm.quit();
+        quit();
         return -1;
       }
       strbuf = new vm.Utf8_reader(str + "\n");
@@ -914,7 +902,6 @@ Shen = (function() {
   // } IO
 
   Shenvm.prototype.nop = function(vm) {
-    vm.wipe_stack(0);
     return vm.next;
   };
 
@@ -931,7 +918,6 @@ Shen = (function() {
     }
     switch (opts.run_mode) {
     case "interval": this.run = this.run_interval; break;
-    default: this.run = this.run_loop;
     }
     if (opts.repl)
       this.call("shen.shen", []);
@@ -945,6 +931,7 @@ Shen = (function() {
 
   sh.eval_str = sh.eval;
   sh.defun_x("shen.process-datatype", 2, sh.nop);
+  sh.defun_x("shen.datatype-error", 1, sh.nop);
   sh.defun_x("compile", 3, sh.nop);
   sh.defun_x("declare", 2, sh.nop);
   sh.defun_x("adjoin", 2, sh.nop);
