@@ -100,23 +100,38 @@ Shen = (function() {
       return new Chan();
     this.buf = [];
     this.readers = [];
+    this.closed = false;
   };
 
   Shenvm.prototype.Chan.prototype.write = function(x) {
+    if (this.closed)
+      return false;
     var reader = this.readers.shift();
     if (reader)
       reader.resume(x);
     else
       this.buf.push(x);
+    return true;
   };
 
   Shenvm.prototype.Chan.prototype.read = function(vm) {
     if (this.buf.length)
       return this.buf.shift();
-    if (!vm.threads.length)
+    if (this.closed)
+      return vm.fail_obj;
+    if (!Object.keys(threads).length)
       vm.error("Possible deadlock");
     this.readers.push(vm);
     vm.interrupt();
+  };
+
+  Shenvm.prototype.Chan.prototype.close = function(vm) {
+    this.closed = true;
+    var r = this.readers;
+    for (var i = 0; i < r.length; ++i)
+      r[i].resume(vm.fail_obj);
+    this.readers.length = 0;
+    return true;
   };
 
   Shenvm.prototype.clone = function() {
@@ -149,6 +164,19 @@ Shen = (function() {
   Shenvm.prototype.resume = function(value) {
     this.ret = value || true;
     this.run();
+  };
+
+  Shenvm.prototype.sleep_ms = function(ms) {
+    if (this.thread) {
+      clearInterval(this.thread);
+      this.thread = null;
+      var vm = this;
+      setTimeout(function() {
+        vm.resume(true);
+        vm.step();
+      }, ms);
+      this.interrupt();
+    }
   };
 
   Shenvm.prototype.run = function() {
@@ -195,24 +223,11 @@ Shen = (function() {
           clearInterval(this.thread);
           delete threads[this];
           this.start = this.next;
-          break;
+          return;
         }
       }
     }
     this.start = ip;
-  };
-
-  Shenvm.prototype.sleep = function(ms) {
-    if (this.thread) {
-      clearInterval(this.thread);
-      this.thread = null;
-      var vm = this;
-      setTimeout(function() {
-        vm.resume(true);
-        vm.step();
-      }, ms);
-      this.interrupt();
-    }
   };
 
   Shenvm.prototype.run_interval = function() {
@@ -220,6 +235,7 @@ Shen = (function() {
       clearInterval(this.thread);
     this.thread = setInterval(this.step.bind(this),
                               this.run_span_interval_ms);
+    threads[this] = true;
   };
 
   Shenvm.prototype.call_function = function(proc, args) {
@@ -507,10 +523,6 @@ Shen = (function() {
     return (show) ? (s + " " + stack) : s;
   };
 
-  Shenvm.prototype.bootstrap_eval_str = function(s) {
-    this._bs_eval_buf += s + "\n";
-  };
-
   Shenvm.prototype.write_string = function(s, stream) {
     for (var i = 0; i < s.length; ++i)
       stream.write_byte(s.charCodeAt(i), this);
@@ -573,54 +585,6 @@ Shen = (function() {
     this.wipe_stack(0);
     eval(s);
     return toplevel_next;
-  };
-
-  Shenvm.prototype._bs_obj = function(x) {
-    switch (typeof(x)) {
-      case "string": return "\"" + this.esc(x) + "\"";
-      case "number":
-      case "boolean": return String(x);
-      case "function": return x.name;
-      case "object":
-        if (x === this.fail_obj)
-          return "this.fail_obj";
-        if (x instanceof Array) {
-          if (x.length <= 0)
-            return "[]"
-          var repr = this._bs_obj.bind(this);
-          return "[" + x.map(repr).join(", ") + "]";
-        }
-        var types = {
-          "Shen.Tag": this.Tag,
-          "Shen.Cons": this.Cons,
-          "Shen.Func": this.Func,
-          "Shen.Sym": this.Sym,
-          "Shen.Stream": this.Stream,
-        };
-        for (var t in types) {
-          if (x instanceof types[t]) {
-            var obj = {type: t};
-            for (var key in x)
-              obj[key] = this._bs_obj(x[key]);
-            return JSON.stringify(obj);
-          }
-        }
-        return "XXXX";
-    }
-  };
-
-  Shenvm.prototype._bs_var = function(name, obj) {
-    print("Shen." + name + " = (function() {\n  return {");
-    for (var key in obj) {
-      var repr = this._bs_obj(obj[key]);
-      print('    "' + this.esc(key) + '": ' + repr + ",");
-    }
-    print("  };\n})();");
-  };
-
-  Shenvm.prototype.bootstrap = function() {
-    print(this._bs_var("glob", this.glob));
-    print(this._bs_eval_buf);
   };
 
 // UTILS {
@@ -996,13 +960,17 @@ Shen = (function() {
     return chan.write(x, this);
   });
 
+  sh.defun("js.chan-close", function chan_write(chan) {
+    return chan.close(this);
+  });
+
   sh.defun("js.make-thread", function make_thread(fn) {
     var thread = this.make_thread(fn);
     return thread.id;
   });
 
-  sh.defun("js.sleep-ms", function sleep(ms) {
-    this.sleep(ms);
+  sh.defun("js.sleep-ms", function sleep_ms(ms) {
+    this.sleep_ms(ms);
     return true;
   });
 
