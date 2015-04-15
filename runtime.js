@@ -150,7 +150,7 @@ Shen = (function() {
     this.wipe_stack(0);
     this.sp = err_handler.sp;
     this.next = err_handler.next;
-    return this.call_function(err_handler.fn, [e]);
+    return this.prep_func_call(err_handler.fn, [e]);
   };
 
   Shenvm.prototype.push_error_handler = function(e) {
@@ -238,7 +238,7 @@ Shen = (function() {
     threads[this] = true;
   };
 
-  Shenvm.prototype.call_function = function(proc, args) {
+  Shenvm.prototype.prep_func_call = function(proc, args) {
     var n = args.length, closure_vars,
         reg = this.reg;
     n2 = 0;
@@ -275,7 +275,9 @@ Shen = (function() {
     return fn;
   };
 
-  Shenvm.prototype.call = function(proc, args) {
+  Shenvm.prototype.exec = function(proc, args) {
+    if (threads[this])
+      this.error("Recursive Shen.exec is not allowed");
     if (typeof(proc) === "string")
       proc = this.find_func(proc);
 
@@ -283,13 +285,13 @@ Shen = (function() {
     this.reg.length = 0;
 
     this.next = null;
-    this.start = this.call_function(proc, args);
+    this.start = this.prep_func_call(proc, args);
     this.run();
     if (this.run === Shenvm.prototype.run)
-      return this.call_result();
+      return this.exec_result();
   };
 
-  Shenvm.prototype.call_result = function() {
+  Shenvm.prototype.exec_result = function() {
     var r = this.ret;
     this.ret = null;
 
@@ -298,6 +300,11 @@ Shen = (function() {
       this.error("sp < 0");
 
     return r;
+  };
+
+  Shenvm.prototype.call = function(proc, args) {
+    var vm = this.clone();
+    return vm.exec(proc, args);
   };
 
   Shenvm.prototype.put_closure_args = function(closure) {
@@ -881,7 +888,7 @@ Shen = (function() {
         lst = this.list([1, 2, 3, this.Sym("four"), this.list(["five"])]),
         t_ms = Date.now();
     for (var i = 0; i < n; ++i)
-      this.call("=", [lst, lst]);
+      this.exec("=", [lst, lst]);
     t_ms = Date.now() - t_ms;
     this.run_span_len = Math.floor(n * this.run_span_interval_ms / t_ms);
   };
@@ -889,7 +896,7 @@ Shen = (function() {
   Shenvm.prototype.make_thread = function(fn) {
     var thread = this.clone();
     thread.run = Shenvm.prototype.run_interval;
-    thread.call(fn, []);
+    thread.exec(fn, []);
     return thread;
   };
 
@@ -909,7 +916,7 @@ Shen = (function() {
     default: this.run = Shenvm.prototype.run; break;
     }
     if (opts.repl)
-      this.call("shen.shen", []);
+      this.exec("shen.shen", []);
   };
 
   Shenvm.prototype.console_repl = function() {
@@ -918,6 +925,7 @@ Shen = (function() {
 
   var sh = new Shenvm();
 
+  // Placeholders for Shen initial boot
   sh.defun_x("shen.process-datatype", 2, sh.nop);
   sh.defun_x("shen.datatype-error", 1, sh.nop);
   sh.defun_x("compile", 3, sh.nop);
@@ -973,6 +981,17 @@ Shen = (function() {
     this.sleep_ms(ms);
     return true;
   });
+
+  sh.defun("js.list", function js_list(x) {
+    var ret = [];
+    while (x instanceof this.Cons) {
+      ret.push(x.head);
+      x = x.tail;
+    }
+    return ret;
+  });
+
+  sh.defun("js.shen_list", function js_shen_list(x) {return Shen.list(x);});
 
   return sh;
 })();
