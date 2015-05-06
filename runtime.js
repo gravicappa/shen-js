@@ -260,12 +260,14 @@ Shen = (function() {
     return fn;
   };
 
-  Shenvm.prototype.find_func = function(name) {
-    if (name instanceof this.Sym)
-      name = name.str;
-    var ret = this.fns[name];
+  Shenvm.prototype.find_func = function(fn) {
+    if (fn instanceof this.Func)
+      return fn;
+    if (fn instanceof this.Sym)
+      fn = fn.str;
+    var ret = this.fns[fn];
     if (!ret)
-      return this.error("No such function: " + name);
+      return this.error("No such function: " + fn);
     return ret;
   };
 
@@ -692,14 +694,6 @@ Shen = (function() {
     log("  sp: " + this.sp);
     log("  regs:");
     this.dump_regs(this.sp, n);
-    log("\n");
-  };
-
-  Shenvm.prototype.inspect_obj = function(obj) {
-    log("INSPECT " + obj);
-    log("  type: " + this.typeof(obj));
-    for (var key in obj)
-      log("  ." + key + ": " + obj[key]);
     log("\n");
   };
   // } UTILS
