@@ -4,6 +4,15 @@
   box-sizing: border-box;
 }
 
+.dark_primary_bg { background: #0288D1; }
+.default_primary_bg { background: #03A9F4; }
+.light_primary_bg { background: #B3E5FC; }
+.text_primary_color { color: #FFFFFF; }
+.accent_bg { background: #8BC34A; }
+.primary_text_color { color: #212121; }
+.secondary_text_color { color: #727272; }
+.divider_border { border-color: #B6B6B6; }
+
 .shen_edit {
   position: absolute;
   top: 0;
@@ -214,18 +223,27 @@ li.shenfs_entry {
 
 .shen_edit_hdr {
   background: #567;
+  width: 100%;
+  display: table-row;
 }
 
 .shen_edit_title {
   color: #fff;
-  display: inline-block;
+  display: table-cell;
   font-weight: bold;
+  width: 100%;
+  max-width: 0;
+  vertical-align: middle;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
 }
 
 .shen_edit_ctl {
-  width: auto;
-  display: inline-block;
-  float: right;
+  display: table-cell;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 /* } SHEN TEXT */
@@ -318,17 +336,67 @@ li.shenfs_entry {
   padding: 4px;
 }
 
-.shen_repl_in {
+.shen_repl_in_container {
   position: absolute;
-  overflow: hidden;
   width: 100%;
   left: 0;
   right: 0;
   bottom: 0;
-  resize: none;
-  padding: 8px 4px;
-  border: 1px solid #9ab;
+  padding: 0;
   margin: 0;
+  display: table;
+  border-collapse: collapse;
+}
+
+.shen_repl_in {
+  overflow: hidden;
+  resize: none;
+  background: #ffd;
+  padding: 8px 4px;
+  border: 0;
+  border-top: 1px solid #abc;
+  border-bottom: 2px solid #89a;
+  margin: 0;
+  display: table-cell;
+  width: 100%;
+  height: 100%;
+}
+
+.shen_repl_in:hover {
+  background: #ffb;
+  transition: background-color 0.2s;
+}
+
+.shen_repl_in:focus {
+  background: #fff;
+  transition: background-color 0.2s;
+}
+
+.shen_repl_in_btn {
+  background-color: #8BC34A;
+  border: 1px solid #dfd;
+  display: table-cell;
+  width: 0;
+  vertical-align: middle;
+  padding: 8px 4px;
+  transition: background-color 0.1s, color 0.1s;
+  cursor: default;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+}
+
+.shen_repl_in_btn:hover {
+  background-color: #89a;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.shen_repl_in_btn:active {
+  background-color: #123;
+  color: #ffe;
+  transition: background-color 0.1s, color 0.1s;
 }
 
 /* } SHEN REPL */

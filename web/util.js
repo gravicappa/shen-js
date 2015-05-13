@@ -1,35 +1,35 @@
-Shen_web = {
-  clean: function(obj) {
+(function() {
+  shen_web.clean = function(obj) {
     if (obj)
       while (obj.firstChild)
         obj.removeChild(obj.firstChild);
-  },
+  };
 
-  rm_class: function(cls, obj) {
+  shen_web.rm_class = function(cls, obj) {
     obj.className = ((" " + obj.className + " ").replace(" " + cls + " ", "")
                      .trim());
-  },
+  };
 
-  in_class: function(cls, obj) {
+  shen_web.in_class = function(cls, obj) {
     return (" " + obj.className + " ").indexOf(cls) > -1;
-  },
+  };
 
-  by_class: function(classname, obj) {
+  shen_web.by_class = function(classname, obj) {
     if (obj.getElementsByClassName)
       return obj.getElementsByClassName(classname);
     else
       return obj.querySelectorAll('.' + classname);
-  },
+  };
 
-  by_tag: function(tag, obj) {
+  shen_web.by_tag = function(tag, obj) {
     for (var i = 0; i < obj.childNodes.length; i++) {
       var x = obj.childNodes[i];
       if (x.tagName === tag)
         return x;
     }
-  },
+  };
 
-  img_btn: function(title, icon) {
+  shen_web.img_btn = function(title, icon) {
     var btn = document.createElement("button");
     btn.className = "shen_ctl_btn shen_ctl_icon_btn";
     btn.title = title;
@@ -37,22 +37,35 @@ Shen_web = {
     img.src = icon;
     btn.appendChild(img);
     return btn;
-  },
+  };
 
-  tool_sep: function() {
+  shen_web.tool_sep = function() {
     var sep = document.createElement("div");
     sep.style["display"] = "inline-block";
     sep.style["width"] = "20px";
     return sep;
-  },
+  };
 
-  clear_div: function() {
+  shen_web.toolbar = function(items) {
+    var i, n = items.length;
+    var tb = document.createElement("div");
+    tb.className = "shen_toolbar";
+    for (i = 0; i < n; ++i) {
+      var item = items[i];
+      var b = this.img_btn(item.title, item.icon);
+      b.onclick = item.onclick;
+      tb.appendChild(b);
+    }
+    return tb;
+  };
+
+  shen_web.clear_div = function() {
     var div = document.createElement("div");
     div.style["clear"] = "both";
     return div;
-  },
+  };
 
-  dialog: function(title, fn) {
+  shen_web.dialog = function(title, fn) {
     var over = document.createElement("div");
     over.className = "shen_dlg_overlay";
     over.onclick = function() {
@@ -89,9 +102,9 @@ Shen_web = {
     over.appendChild(dlg);
     document.body.appendChild(over);
     return over;
-  },
+  };
 
-  dlg_okcancel: function(show, fn) {
+  shen_web.dlg_okcancel = function(show, fn) {
     var div = document.createElement("div"), ok, cancel;
     div.className = "shen_dlg_btns";
 
@@ -120,9 +133,9 @@ Shen_web = {
       div.appendChild(cancel);
     }
     return div;
-  },
+  };
 
-  query: function(url, fn, errfn) {
+  shen_web.query = function(url, fn, errfn) {
     var req = new XMLHttpRequest();
     req.open('get', url, true);
     req.onreadystatechange = function() {
@@ -134,6 +147,10 @@ Shen_web = {
             errfn(req.statusText);
         }
     };
-    req.send();
+    try {
+      req.send();
+    } catch(e) {
+      errfn(e);
+    }
   }
-};
+})();

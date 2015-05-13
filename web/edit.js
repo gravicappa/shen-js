@@ -1,16 +1,17 @@
-Shen_web_edit = {
-  file: null,
-  path: null,
-  touched: false,
-  welcome: ".doc/welcome.html",
+(function() {
+  var edit = {};
+  edit.file = null;
+  edit.path = null;
+  edit.touched = false;
+  edit.welcome = ".doc/welcome.html";
 
-  set_title: function(title) {
+  edit.set_title = function(title) {
     var t = document.getElementById("shen_edit_title");
-    Shen_web.clean(t);
+    shen_web.clean(t);
     t.appendChild(document.createTextNode(title));
-  },
+  };
 
-  load: function(root, path) {
+  edit.load = function(root, path) {
     function load_html(html) {
       var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
       container.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
@@ -46,9 +47,9 @@ Shen_web_edit = {
       text.value = str;
       text.touched = false;
     }
-  },
+  };
 
-  unload: function() {
+  edit.unload = function() {
     var text = document.getElementById("shen_edit_entry"),
         container = document.getElementById("shen_edit_container"),
         ctl = document.getElementById("shen_edit_ctl");
@@ -56,31 +57,31 @@ Shen_web_edit = {
     this.file = null;
     this.path = null;
     ctl.style["visibility"] = "hidden";
-    Shen_web.clean(container);
-  },
+    shen_web.clean(container);
+  };
 
-  reload: function(force) {
+  edit.reload = function(force) {
     var s = "Do you want to restore file? All unsaved changes will be lost";
     if (!force && !(this.file && this.touched && confirm(s)))
       return;
     var text = document.getElementById("shen_edit_entry");
     text.value = this.file.str_data();
     text.touched = false;
-  },
+  };
 
-  save: function() {
+  edit.save = function() {
     var text = document.getElementById("shen_edit_entry");
     if (this.touched && this.path)
-      Shen_web_fs.root.put(this.path, text.value);
+      shen_web.fs.root.put(this.path, text.value);
     this.touched = false;
-  },
+  };
 
-  run: function(fn) {
+  edit.run = function(fn) {
     if (this.path)
       fn(this.path);
-  },
+  };
 
-  ensure_text_entry: function() {
+  edit.ensure_text_entry = function() {
     var text = document.getElementById("shen_edit_entry");
     text = text || document.createElement("textarea");
     text.id = "shen_edit_entry";
@@ -93,56 +94,56 @@ Shen_web_edit = {
     var fn = (function() {this.touched = true;}).bind(this);
     text.oninput = function() {fn();};
     return text;
-  },
+  };
 
-  mk: function(where, run) {
+  edit.mk = function(where, run) {
     var self = this;
 
     function mk_ctl() {
-      var ctl = document.createElement("div");
+      var ctl = shen_web.toolbar([
+        {
+          title: "Send to REPL",
+          icon: "web/run.png",
+          onclick: function() {self.run(run);}
+        },
+        {
+          title: "Save",
+          icon: "web/save.png",
+          onclick: function() {self.save();}
+        },
+        {
+          title: "Reload",
+          icon: "web/refresh.png",
+          onclick: function() {self.reload();}
+        },
+        {
+          title: "Download",
+          icon: "web/down.png",
+          onclick: function() {shen_web.fs.download(self.file, self.path);}
+        },
+        {
+          title: "Upload",
+          icon: "web/up.png",
+          onclick: function() {
+            if (self.file)
+              shen_web.fs.upload(self.path, false, function(files) {
+                if (files[0]) {
+                  shen_web.fs.read_fileio(self.path, files[0]);
+                  setTimeout(function() {
+                    self.load(shen_web.fs.root, self.path);
+                  }, 50);
+                }
+              });
+          }
+        }]);
       ctl.id = "shen_edit_ctl";
       ctl.className = "shen_ctl shen_edit_ctl";
       ctl.style["visibility"] = "hidden";
-
-      var btn_run = Shen_web.img_btn("Run", "web/run.png");
-      btn_run.className += " shen_edit_ctl_btn";
-      btn_run.onclick = function() {self.run(run);};
-      ctl.appendChild(btn_run);
-
-      ctl.appendChild(Shen_web.tool_sep());
-
-      var btn_save = Shen_web.img_btn("Save", "web/save.png");
-      btn_save.className += " shen_edit_ctl_btn";
-      btn_save.onclick = function() {self.save();};
-      ctl.appendChild(btn_save);
-
-      var btn_reload = Shen_web.img_btn("Reload", "web/refresh.png");
-      btn_reload.className += " shen_edit_ctl_btn";
-      btn_reload.onclick = function() {self.reload();};
-      ctl.appendChild(btn_reload);
-
-      var btn_down = Shen_web.img_btn("Download", "web/down.png");
-      btn_down.className += " shen_edit_ctl_btn";
-      btn_down.onclick = function() {Shen_web_fs.download(self.file, self.path);};
-      ctl.appendChild(btn_down);
-
-      var btn_up = Shen_web.img_btn("Upload", "web/up.png");
-      btn_up.className += " shen_edit_ctl_btn";
-      btn_up.onclick = function() {
-        if (self.file)
-          Shen_web_fs.upload(self.path, false, function(files) {
-            if (files[0]) {
-              Shen_web_fs.read_fileio(self.path, files[0]);
-              setTimeout(function() {self.load(Shen_web_fs.root, self.path);}, 50);
-            }
-          });
-      };
-      ctl.appendChild(btn_up);
       return ctl;
     }
 
     div = document.getElementById(where);
-    Shen_web.clean(div);
+    shen_web.clean(div);
     var hdr = document.createElement("div");
     hdr.className = "shen_edit_hdr";
 
@@ -157,14 +158,14 @@ Shen_web_edit = {
 
     hdr.appendChild(title);
     hdr.appendChild(mk_ctl());
-    hdr.appendChild(Shen_web.clear_div());
-
     div.appendChild(hdr);
     div.appendChild(container);
-  },
+  };
 
-  load_initial(root) {
+  edit.load_initial = function(root) {
     var start = location.hash.replace(/^#/, "");
     this.load(root, start || this.welcome);
-  }
-};
+  };
+
+  shen_web.edit = edit;
+})();

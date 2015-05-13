@@ -1,26 +1,52 @@
 <html>
-  <head>
-    <link rel="stylesheet" href="shen.css" type="text/css"/>
-    <script type='text/javascript' src='shen-repl-html.js'></script>
-  </head>
-  <body>
-    <noscript>No javascript, no shen-js</noscript>
-    <div id='shen'></div>
-    <div id='shen_fs' style='visibility:hidden'></div>
-    <script type='text/javascript'>
-    <!--
-    Shen_html_repl.init({
-      div: 'shen', 
-      src: ['shen.js', 'fileio-html5.js'],
-      onready: function() {
-        Shen_fs_html5.init({
-          div: 'shen_fs',
-          io: Shen_html_repl.io
-        })
-        Shen_html_repl.start()
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="Content-Type" content="text/html"; charset="UTF-8"/>
+  <link rel="stylesheet" href="web/shen.css" type="text/css"/>
+  <script type="text/javascript" src="web/boot.js"></script>
+  <title>Shen REPL</title>
+</head>
+<body>
+  <div id="shen"></div>
+  <script type="text/javascript">
+    function init_playground() {
+      function line_n(n) {
+        var s = "";
+        for (var i = 0; i < n; ++i)
+          s += String(i % 10);
+        return s;
       }
-    })
-    -->
-    </script>
-  </body>
+
+      function fake_fs(root) {
+        root.put(".repl", "# REPL");
+        root.put(".h.shen", Array(200).join(line_n(78) + "\n"));
+        root.put(".lessons/01/repl.shen", "\\* First let's learn how to use REPL *\\");
+        root.put(".lessons/01/basics.shen", "\\* Basics *\\");
+        root.put(".lessons/01/expr.shen", "\\* Expressions *\\");
+        root.put("one/two/three/six", "one thousand two hundreds and thirty six");
+        root.put("one/two/three/seven", "one thousand two hundreds and thirty seven");
+        root.mkdir("one/four/");
+        root.put("one/four/eight", "one hundred and forty eight");
+        root.put("one/four/file with very long name", "and short content");
+      }
+
+      function fill_repl_out() {
+        var out = document.getElementById("shen_repl_out");
+        var n = 1000;
+        var line = new Array(5).join("one two three five ").trim();
+        out.appendChild(document.createTextNode(line_n(78) + "\n"));
+        out.appendChild(document.createTextNode("START\n"));
+        for (var i = 0; i < n; ++i)
+          out.appendChild(document.createTextNode(line + "\n"));
+        out.appendChild(document.createTextNode(line_n(78) + "\n"));
+        out.appendChild(document.createTextNode("END\n"));
+      }
+      fake_fs(shen_web.fs.root);
+      fill_repl_out();
+      shen_web.edit.load_initial(shen_web.fs.root);
+    }
+
+    shen_web.boot({into: "shen", ondone: init_playground});
+  </script>
+</body>
 </html>
