@@ -336,19 +336,11 @@ function Jsfile(type, data, evhandlers) {
         shen_web.rm_class("shenfs_selection", fs.selected.entry);
       var file = fs.root.get(path);
       file_fn(file, path);
+      shen_web.rm_class("shen_ctl_removed", fs.file_ctl);
+      shen_web.rm_class("shen_ctl_removed", fs.dir_ctl);
       switch (file.type) {
-      case "f":
-        shen_web.rm_class("shen_ctl_removed", fs.file_ctl);
-        shen_web.rm_class("shen_ctl_removed", fs.dir_ctl);
-        fs.dir_ctl.className += " shen_ctl_removed";
-        fs.dir.style["top"] = fs.file_ctl.offsetHeight;
-        break;
-      case "d":
-        shen_web.rm_class("shen_ctl_removed", fs.file_ctl);
-        shen_web.rm_class("shen_ctl_removed", fs.dir_ctl);
-        fs.file_ctl.className += " shen_ctl_removed";
-        fs.dir.style["top"] = fs.dir_ctl.offsetHeight;
-        break;
+      case "f": fs.dir_ctl.className += " shen_ctl_removed"; break;
+      case "d": fs.file_ctl.className += " shen_ctl_removed"; break;
       }
       fs.selected.entry = entry;
       fs.selected.path = path;
@@ -423,30 +415,50 @@ function Jsfile(type, data, evhandlers) {
       };
     }
 
+    function handle() {
+      var handle = document.createElement("td");
+      handle.className = "shenfs_handle";
+      handle.rowSpan = 2;
+      handle.onclick = function() {
+        if (shen_web.in_class("shenfs_closed", div))
+          shen_web.rm_class("shenfs_closed", div);
+        else
+          div.className += " shenfs_closed";
+      };
+      return handle;
+    }
+
     div = document.getElementById(div);
     shen_web.clean(div);
-    div.className += " shenfs";
-    div.appendChild((fs.file_ctl = file_ctl()));
-    div.appendChild((fs.dir_ctl = dir_ctl()));
+    div.className += " shenfs shenfs_closed";
+
+    var frame = document.createElement("table");
+    var hdr = document.createElement("tr");
+    var ctl = document.createElement("td");
+    var fs_row = document.createElement("tr");
+    var fs_outer = document.createElement("td");
+    var fs_inner = document.createElement("div");
+
+    fs_outer.className = "shenfs_outer";
+    fs_inner.className = "shenfs_inner";
 
     fs.dir = document.createElement("div");
     fs.dir.className += " shenfs_tree";
+    fs.file_ctl = file_ctl();
+    fs.dir_ctl = dir_ctl();
 
-    fs.dir.style["top"] = fs.dir_ctl.offsetHeight;
-    fs.dir_ctl.className += " shen_ctl_removed";
     fs.file_ctl.className += " shen_ctl_removed";
 
-    var handle = document.createElement("div");
-    handle.className = "shenfs_handle";
-    handle.onclick = function() {
-      if (shen_web.in_class("shenfs_opened", div))
-        shen_web.rm_class("shenfs_opened", div);
-      else
-        div.className += " shenfs_opened";
-    };
-    div.appendChild(handle);
-
-    div.appendChild(fs.dir);
+    ctl.appendChild(fs.file_ctl);
+    ctl.appendChild(fs.dir_ctl);
+    hdr.appendChild(ctl);
+    hdr.appendChild(handle());
+    fs_row.appendChild(fs_outer);
+    frame.appendChild(hdr);
+    frame.appendChild(fs_row);
+    fs_inner.appendChild(fs.dir);
+    fs_outer.appendChild(fs_inner);
+    div.appendChild(frame);
     oncreate_dir(this.root, "", fs.dir);
   };
   shen_web.fs = fs;

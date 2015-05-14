@@ -65,45 +65,50 @@
   display: none !important;
 }
 
-.shen_ctl_hidden {
+.shen_hidden {
   visibility: none;
 }
 
+.shen_maximized {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+}
+
 
+
 /* SHEN FS { */
 .shenfs {
-  width: 18px;
   height: 100%;
   vertical-align: top;
   overflow: hidden;
   z-index: 500;
-  transition: 0.4s;
   background: #ccb;
   position: absolute;
 }
 
-.shenfs_opened {
-  width: 15em;
-  box-shadow: 1px 0 5px #000;
+.shenfs_closed { }
+
+.shenfs > table {
+  height: 100%;
 }
 
 .shenfs_handle {
   width: 18px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  background: url(folder.png) #ffe no-repeat center;
-  z-index: 500;
   cursor: pointer;
-  border-right: 2px solid #eed;
+  border: 0;
+  box-shadow: 2px 0 5px 0 #000;
+  background: url(left.png) #ffe no-repeat center;
 }
 
-.shenfs_opened .shenfs_handle {
+.shenfs_closed .shenfs_handle {
+  box-shadow: 1px 0 5px 0 #000;
   border-right: 1px solid #345;
   background: #ffe;
-  box-shadow: 1px 0 5px #000;
-  background: url(left.png) #ffe no-repeat center;
+  background: url(folder.png) #ffe no-repeat center;
 }
 
 .shenfs_file_ctl, .shenfs_dir_ctl {
@@ -111,14 +116,32 @@
   background: #ccb !important;
 }
 
-.shenfs_tree {
+.shenfs_closed .shenfs_outer {
+  display: none;
+}
+
+.shenfs_closed .shen_ctl {
+  display: none;
+}
+
+.shenfs_outer {
+  width: 18em;
+  height: 100%;
+}
+
+.shenfs_inner {
+  height: 100%;
+  position: relative;
   overflow: auto;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  top: 22px;
-  right: 18px;
   background: #ffe;
+}
+
+.shenfs_tree {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .shenfs_tree ul {
@@ -185,9 +208,10 @@ li.shenfs_entry {
   margin-bottom: 8px;
 }
 /* } SHEN FS */
-
-/* SHEN TEXT { */
 
+
+
+/* SHEN TEXT { */
 .shen_text {
   position: absolute;
   left: 18px;
@@ -197,6 +221,7 @@ li.shenfs_entry {
   border: 1px solid #573;
   padding: 0;
   margin: 0;
+  background: #ffe;
 }
 
 .shen_edit_container {
