@@ -114,6 +114,14 @@ shen_web = (function() {
     window.onload = function() {
       mk(opts.into);
       init(function() {
+        window.onhashchange = function() {
+          var path = location.hash.replace(/^#/, "");
+          console.log("onhashchange " + path);
+          if (path === "")
+            shen_web.edit.unload();
+          else
+            shen_web.edit.load(shen_web.fs.root, path);
+        };
         if (opts.ondone)
           opts.ondone();
         wait.parentNode.removeChild(wait);

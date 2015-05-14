@@ -94,6 +94,7 @@
 
 .shenfs > table {
   height: 100%;
+  border-collapse: collapse;
 }
 
 .shenfs_handle {
