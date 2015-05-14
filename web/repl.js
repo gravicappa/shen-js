@@ -79,7 +79,7 @@
 
     var t = document.createElement("textarea");
     t.id = "shen_repl_in";
-    t.className += " shen_repl_in shen_tt_font";
+    t.classList.add("shen_repl_in", "shen_tt_font", "entry_bg", "entry_fg");
     t.placeholder = "Type code here";
     t.cols = 72;
     t.rows = 1;
@@ -88,7 +88,7 @@
     t.addEventListener("keyup", mk_input_keypress(deferred_resize_textarea));
 
     var b = document.createElement("div");
-    b.className += " shen_repl_in_btn";
+    b.classList.add("shen_repl_in_btn", "accent_bg", "accent_fg");
     b.appendChild(document.createTextNode("Send"));
     b.onclick = function() {
       if (t.value !== "")

@@ -85,7 +85,7 @@
     var text = document.getElementById("shen_edit_entry");
     text = text || document.createElement("textarea");
     text.id = "shen_edit_entry";
-    text.className = "shen_edit_entry shen_tt_font";
+    text.className = "shen_edit_entry shen_tt_font entry_bg entry_fg";
     text.cols = 80;
     text.rows = 25;
     text.disabled = true;
@@ -98,6 +98,18 @@
 
   edit.mk = function(where, run) {
     var self = this;
+
+    function mk_fs() {
+      var fs = shen_web.toolbar([
+        {
+          title: "Show filesystem",
+          icon: "web/folder.png",
+          onclick: function() {},
+        }
+      ]);
+      fs.className = "shen_ctl accent_bg";
+      return fs;
+    }
 
     function mk_ctl() {
       var ctl = shen_web.toolbar([
@@ -137,15 +149,16 @@
           }
         }]);
       ctl.id = "shen_edit_ctl";
-      ctl.className = "shen_ctl shen_edit_ctl";
+      ctl.classList.add("shen_ctl",  "shen_edit_ctl");
       ctl.style["visibility"] = "hidden";
       return ctl;
     }
 
     div = document.getElementById(where);
     shen_web.clean(div);
+    div.classList.add("norm_bg");
     var hdr = document.createElement("div");
-    hdr.className = "shen_edit_hdr";
+    hdr.className = "shen_edit_hdr alt_bg alt_fg";
 
     var title = document.createElement("div");
     title.id = "shen_edit_title";
@@ -156,6 +169,7 @@
     container.id = "shen_edit_container";
     container.className = "shen_edit_container";
 
+    hdr.appendChild(mk_fs());
     hdr.appendChild(title);
     hdr.appendChild(mk_ctl());
     div.appendChild(hdr);

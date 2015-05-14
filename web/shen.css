@@ -4,15 +4,6 @@
   box-sizing: border-box;
 }
 
-.dark_primary_bg { background: #0288D1; }
-.default_primary_bg { background: #03A9F4; }
-.light_primary_bg { background: #B3E5FC; }
-.text_primary_color { color: #FFFFFF; }
-.accent_bg { background: #8BC34A; }
-.primary_text_color { color: #212121; }
-.secondary_text_color { color: #727272; }
-.divider_border { border-color: #B6B6B6; }
-
 .shen_edit {
   position: absolute;
   top: 0;
@@ -86,7 +77,6 @@
   vertical-align: top;
   overflow: hidden;
   z-index: 500;
-  background: #ccb;
   position: absolute;
 }
 
@@ -108,13 +98,11 @@
 .shenfs_closed .shenfs_handle {
   box-shadow: 1px 0 5px 0 #000;
   border-right: 1px solid #345;
-  background: #ffe;
   background: url(folder.png) #ffe no-repeat center;
 }
 
 .shenfs_file_ctl, .shenfs_dir_ctl {
   white-space: nowrap;
-  background: #ccb !important;
 }
 
 .shenfs_closed .shenfs_outer {
@@ -134,7 +122,6 @@
   height: 100%;
   position: relative;
   overflow: auto;
-  background: #ffe;
 }
 
 .shenfs_tree {
@@ -173,8 +160,6 @@
 
 .shenfs_selection > .shenfs_name {
   border: 1px solid #665;
-  color: #fff;
-  background: #776;
 }
 
 .shenfs_icon {
@@ -215,14 +200,14 @@ li.shenfs_entry {
 /* SHEN TEXT { */
 .shen_text {
   position: absolute;
-  left: 18px;
+  left: 0;
   top: 0;
   bottom: 0;
   right: 0;
-  border: 1px solid #573;
+  border-left: 1px solid;
+  border-right: 1px solid;
   padding: 0;
   margin: 0;
-  background: #ffe;
 }
 
 .shen_edit_container {
@@ -248,13 +233,11 @@ li.shenfs_entry {
 }
 
 .shen_edit_hdr {
-  background: #567;
   width: 100%;
   display: table-row;
 }
 
 .shen_edit_title {
-  color: #fff;
   display: table-cell;
   font-weight: bold;
   width: 100%;
@@ -389,17 +372,14 @@ li.shenfs_entry {
 }
 
 .shen_repl_in:hover {
-  background: #ffb;
   transition: background-color 0.2s;
 }
 
 .shen_repl_in:focus {
-  background: #fff;
   transition: background-color 0.2s;
 }
 
 .shen_repl_in_btn {
-  background-color: #8BC34A;
   border: 1px solid #dfd;
   display: table-cell;
   width: 0;
@@ -415,13 +395,10 @@ li.shenfs_entry {
 }
 
 .shen_repl_in_btn:hover {
-  background-color: #89a;
   transition: background-color 0.2s, color 0.2s;
 }
 
 .shen_repl_in_btn:active {
-  background-color: #123;
-  color: #ffe;
   transition: background-color 0.1s, color 0.1s;
 }
 
@@ -464,3 +441,23 @@ li.shenfs_entry {
 }
 
 /* } SHEN WAIT */
+
+
+.norm_fg { color: #212121; }
+.norm_bg { background-color: #ffffff; border-color: #7f7f7f; }
+
+.alt_fg { color: #212121;}
+.alt_bg { background-color: #03a9f4; border-color: #0070c0; }
+
+.accent_fg { color: #212121; }
+.accent_bg { background-color: #b3e5fc; border-color: #83b5cc; }
+
+.entry_fg { color: #212121; }
+.entry_bg { background-color: #ffffff; border-color: #7f7f7f; }
+
+/* 
+#0288D1
+#03A9F4
+#B3E5FC
+#8BC34A
+*/

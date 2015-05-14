@@ -5,15 +5,6 @@
         obj.removeChild(obj.firstChild);
   };
 
-  shen_web.rm_class = function(cls, obj) {
-    obj.className = ((" " + obj.className + " ").replace(" " + cls + " ", "")
-                     .trim());
-  };
-
-  shen_web.in_class = function(cls, obj) {
-    return (" " + obj.className + " ").indexOf(cls) > -1;
-  };
-
   shen_web.by_class = function(classname, obj) {
     if (obj.getElementsByClassName)
       return obj.getElementsByClassName(classname);
@@ -53,6 +44,8 @@
     for (i = 0; i < n; ++i) {
       var item = items[i];
       var b = this.img_btn(item.title, item.icon);
+      if (item.class)
+        b.className += " " + item.class;
       b.onclick = item.onclick;
       tb.appendChild(b);
     }
@@ -87,7 +80,7 @@
     t.className = "shen_dlg_title";
     t.appendChild(document.createTextNode(title));
     var x = this.img_btn("Close", "web/close.png");
-    x.className += " shen_dlg_close";
+    x.classList.add("shen_dlg_close");
     x.onclick = function() {
       over.parentNode.removeChild(over);
     };

@@ -237,7 +237,7 @@ function Jsfile(type, data, evhandlers) {
 
     function ctl_rm(path) {
       var btn = shen_web.img_btn("Delete", "web/rm.png");
-      btn.className += " shenfs_ctl_rm_btn";
+      btn.classList.add("shenfs_ctl_rm_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
         if (path && confirm("Do you want to delete '" + path + "'?"))
@@ -263,14 +263,14 @@ function Jsfile(type, data, evhandlers) {
       switch (type) {
       case "f":
         btn = shen_web.img_btn("Create file", "web/new.png");
-        btn.className += " shenfs_ctl_mk_btn";
+        btn.classList.add("shenfs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter file name", function(path) {
           fs.root.put(path, "");
         });
         break;
       case "d":
         btn = shen_web.img_btn("Create dir", "web/folder_new.png");
-        btn.className += " shenfs_ctl_mk_btn";
+        btn.classList.add("shenfs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter directory name", function(path) {
           fs.root.mkdir(path);
         });
@@ -281,7 +281,7 @@ function Jsfile(type, data, evhandlers) {
 
     function ctl_upload() {
       var btn = shen_web.img_btn("Upload file", "web/up.png");
-      btn.className += " shenfs_ctl_upload_btn";
+      btn.classList.add("shenfs_ctl_upload_btn");
       btn.onclick = function() {
         console.log("fs.selected.path", fs.selected.path);
         var path = fs.selected.path;
@@ -293,7 +293,7 @@ function Jsfile(type, data, evhandlers) {
 
     function ctl_download() {
       var btn = shen_web.img_btn("Download file", "web/down.png");
-      btn.className += " shenfs_ctl_download_btn";
+      btn.classList.add("shenfs_ctl_download_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
         if (path)
@@ -304,7 +304,7 @@ function Jsfile(type, data, evhandlers) {
 
     function file_ctl() {
       var ctl = document.createElement("div");
-      ctl.className = "shen_ctl shenfs_file_ctl";
+      ctl.className = "shen_ctl shenfs_file_ctl alt_bg alt_fg";
       ctl.appendChild(ctl_download());
       ctl.appendChild(ctl_rm());
       return ctl;
@@ -312,7 +312,7 @@ function Jsfile(type, data, evhandlers) {
 
     function dir_ctl() {
       var ctl = document.createElement("div");
-      ctl.className = "shen_ctl shenfs_dir_ctl";
+      ctl.classList.add("shen_ctl",  "shenfs_dir_ctl",  "alt_bg", "alt_fg");
       ctl.appendChild(ctl_new("f"));
       ctl.appendChild(ctl_new("d"));
       ctl.appendChild(ctl_upload());
@@ -321,30 +321,31 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function dir_onclick_icon(icon, contents) {
-      if (shen_web.in_class("shenfs_subdir_collapsed", contents)) {
+      if (contents.classList.contains("shenfs_subdir_collapsed")) {
         icon.src = "web/folder_open.png";
-        shen_web.rm_class("shenfs_subdir_collapsed", contents);
+        contents.classList.remove("shenfs_subdir_collapsed");
       } else {
         icon.src = "web/folder.png";
-        contents.className += " shenfs_subdir_collapsed";
+        contents.classList.add("shenfs_subdir_collapsed");
       }
       return true;
     }
 
     function item_onclick(entry, path) {
       if (fs.selected.entry)
-        shen_web.rm_class("shenfs_selection", fs.selected.entry);
+        fs.selected.entry.classList.remove("shenfs_selection", "accent_bg",
+                                           "accent_fg");
       var file = fs.root.get(path);
       file_fn(file, path);
-      shen_web.rm_class("shen_ctl_removed", fs.file_ctl);
-      shen_web.rm_class("shen_ctl_removed", fs.dir_ctl);
+      fs.file_ctl.classList.remove("shen_ctl_removed");
+      fs.dir_ctl.classList.remove("shen_ctl_removed");
       switch (file.type) {
-      case "f": fs.dir_ctl.className += " shen_ctl_removed"; break;
-      case "d": fs.file_ctl.className += " shen_ctl_removed"; break;
+      case "f": fs.dir_ctl.classList.add("shen_ctl_removed"); break;
+      case "d": fs.file_ctl.classList.add("shen_ctl_removed"); break;
       }
       fs.selected.entry = entry;
       fs.selected.path = path;
-      entry.className += " shenfs_selection";
+      entry.classList.add("shenfs_selection", "accent_bg", "accent_fg");
     }
 
     function basename(path) {
@@ -366,7 +367,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function oncreate_dir(file, path, entry) {
-      entry.className += " shenfs_entry shenfs_dir_entry";
+      entry.classList.add("shenfs_entry", "shenfs_dir_entry");
       var name = document.createElement("div");
       name.className = "shenfs_name";
       name.onclick = function() {item_onclick(entry, path);};
@@ -384,7 +385,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function oncreate_file(file, path, entry) {
-      entry.className += " shenfs_entry shenfs_file_entry";
+      entry.classList.add("shenfs_entry", "shenfs_file_entry");
       var name = document.createElement("div");
       name.className = "shenfs_name";
       name.onclick = function() {item_onclick(entry, path);};
@@ -417,20 +418,20 @@ function Jsfile(type, data, evhandlers) {
 
     function handle() {
       var handle = document.createElement("td");
-      handle.className = "shenfs_handle";
+      handle.classList.add("shenfs_handle");
       handle.rowSpan = 2;
       handle.onclick = function() {
-        if (shen_web.in_class("shenfs_closed", div))
-          shen_web.rm_class("shenfs_closed", div);
+        if (div.classList.contains("shenfs_closed"))
+          div.classList.remove("shenfs_closed");
         else
-          div.className += " shenfs_closed";
+          div.classList.add("shenfs_closed");
       };
       return handle;
     }
 
     div = document.getElementById(div);
     shen_web.clean(div);
-    div.className += " shenfs shenfs_closed";
+    div.classList.add("shenfs", "shenfs_closed");
 
     var frame = document.createElement("table");
     var hdr = document.createElement("tr");
@@ -439,15 +440,15 @@ function Jsfile(type, data, evhandlers) {
     var fs_outer = document.createElement("td");
     var fs_inner = document.createElement("div");
 
-    fs_outer.className = "shenfs_outer";
-    fs_inner.className = "shenfs_inner";
+    fs_outer.classList.add("shenfs_outer");
+    fs_inner.classList.add("shenfs_inner");
 
     fs.dir = document.createElement("div");
-    fs.dir.className += " shenfs_tree";
+    fs.dir.classList.add("shenfs_tree");
     fs.file_ctl = file_ctl();
     fs.dir_ctl = dir_ctl();
 
-    fs.file_ctl.className += " shen_ctl_removed";
+    fs.file_ctl.classList.add("shen_ctl_removed");
 
     ctl.appendChild(fs.file_ctl);
     ctl.appendChild(fs.dir_ctl);
