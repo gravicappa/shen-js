@@ -12,16 +12,17 @@
   };
 
   edit.load = function(root, path) {
-    function load_html(html) {
+    function load_html(html, where) {
       var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
-      container.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
-      var scr = container.getElementsByTagName("script");
+      where.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
+      var scr = where.getElementsByTagName("script");
       for (var i = 0; i < scr.length; ++i)
         eval(scr[i].innerHTML);
     }
 
     var file = root.get(path),
-        container = document.getElementById("shen_edit_container"),
+        text = document.getElementById("shen_edit_entry"),
+        view = document.getElementById("shen_edit_view"),
         ctl = document.getElementById("shen_edit_ctl"),
         in_html = false;
     this.unload();
@@ -37,12 +38,11 @@
       var str = "<div class='warning'>File is binary</div>";
     }
     if (in_html || path.match(/\.doc\/.*\.html/)) {
-      container.style["display"] = "block";
-      load_html(str);
+      view.classList.remove("undisplayed");
+      load_html(str, view);
     } else {
-      ctl.style["visibility"] = "visible";
-      var text = this.ensure_text_entry();
-      container.appendChild(text);
+      text.classList.remove("undisplayed");
+      ctl.classList.remove("hidden");
       text.disabled = false;
       text.value = str;
       text.touched = false;
@@ -51,13 +51,15 @@
 
   edit.unload = function() {
     var text = document.getElementById("shen_edit_entry"),
-        container = document.getElementById("shen_edit_container"),
+        view = document.getElementById("shen_edit_view"),
         ctl = document.getElementById("shen_edit_ctl");
     this.set_title("");
     this.file = null;
     this.path = null;
-    ctl.style["visibility"] = "hidden";
-    shen_web.clean(container);
+    ctl.classList.add("hidden");
+    view.classList.add("undisplayed");
+    text.classList.add("undisplayed");
+    shen_web.clean(view);
   };
 
   edit.reload = function(force) {
@@ -81,38 +83,19 @@
       fn(this.path);
   };
 
-  edit.ensure_text_entry = function() {
-    var text = document.getElementById("shen_edit_entry");
-    text = text || document.createElement("textarea");
-    text.id = "shen_edit_entry";
-    text.className = "shen_edit_entry shen_tt_font entry_bg entry_fg";
-    text.cols = 80;
-    text.rows = 25;
-    text.disabled = true;
-    text.wrap = "off";
-    text.spellcheck = false;
-    var fn = (function() {this.touched = true;}).bind(this);
-    text.oninput = function() {fn();};
-    return text;
-  };
-
-  edit.mk = function(where, run) {
+  edit.init = function(run) {
     var self = this;
 
-    function mk_fs() {
-      var fs = shen_web.toolbar([
-        {
-          title: "Show filesystem",
-          icon: "web/folder.png",
-          onclick: function() {},
-        }
-      ]);
-      fs.className = "shen_ctl accent_bg";
-      return fs;
+    function init_text_entry() {
+      var t = document.getElementById("editor_edit");
+      t.wrap = "off";
+      t.spellcheck = false;
+      t.oninput = function() {self.touched = true;};
     }
 
-    function mk_ctl() {
-      var ctl = shen_web.toolbar([
+    function init_toolbar() {
+      var ctl = document.getElementById("editor_toolbar");
+      shen_web.toolbar(ctl, [
         {
           title: "Send to REPL",
           icon: "web/run.png",
@@ -148,32 +131,11 @@
               });
           }
         }]);
-      ctl.id = "shen_edit_ctl";
-      ctl.classList.add("shen_ctl",  "shen_edit_ctl");
-      ctl.style["visibility"] = "hidden";
-      return ctl;
     }
 
-    div = document.getElementById(where);
-    shen_web.clean(div);
-    div.classList.add("norm_bg");
-    var hdr = document.createElement("div");
-    hdr.className = "shen_edit_hdr alt_bg alt_fg";
-
-    var title = document.createElement("div");
-    title.id = "shen_edit_title";
-    title.className = "shen_edit_title";
-    title.appendChild(document.createTextNode(""));
-
-    var container = document.createElement("div");
-    container.id = "shen_edit_container";
-    container.className = "shen_edit_container";
-
-    hdr.appendChild(mk_fs());
-    hdr.appendChild(title);
-    hdr.appendChild(mk_ctl());
-    div.appendChild(hdr);
-    div.appendChild(container);
+    init_text_entry();
+    init_toolbar();
+    shen_web.init_maximize(document.getElementById("editor"));
   };
 
   edit.load_initial = function(root) {

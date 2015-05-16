@@ -1,6 +1,6 @@
 shen_web = (function() {
   var self = {};
-  self.boot = function(opts) {
+  self.init = function(opts) {
     function init(fn) {
       function load_index(fn) {
         self.query("web/fs.json", function(data) {
@@ -41,17 +41,18 @@ shen_web = (function() {
       });
     }
 
-    function mk(where) {
-      function div(name) {
-        var div = document.createElement("div");
-        div.id = name;
-        div.className = name;
-        return div;
-      }
-
-      where = document.getElementById(where);
-      shen_web.clean(where);
-
+    function init_ui(where) {
+      shen_web.init_repl();
+      shen_web.edit.init(function(path) {
+        console.log("TODO: send (load path) to shen", path);
+      });
+      shen_web.fs.init(function(file, path) {
+        if (file.type === "f")
+          shen_web.edit.load(shen_web.fs.root, path);
+        else
+          shen_web.edit.unload();
+      });
+      /*
       var edit = div("shen_edit"),
           fs = div("shen_fs"),
           text = div("shen_text"),
@@ -71,6 +72,7 @@ shen_web = (function() {
         console.log("TODO: send (load path) to shen", path);
       });
       shen_web.mk_repl("shen_repl");
+      */
     }
 
     function script(file, fn) {
@@ -80,39 +82,22 @@ shen_web = (function() {
       s.async = true;
       document.head.appendChild(s);
     }
-
-    function wait_frame() {
-      var div = document.createElement("div");
-      div.className = "shen_wait_overlay";
-
-      var pane = document.createElement("div");
-      pane.className = "shen_wait_pane";
-
-      var text = document.createElement("div");
-      text.className = "shen_wait_text";
-      text.appendChild(document.createTextNode("Please, wait..."));
-
-      var anim = document.createElement("img");
-      anim.src = "web/wait.gif";
-
-      pane.appendChild(text);
-      pane.appendChild(anim);
-      div.appendChild(pane);
-      return div;
-    }
-
-    where = document.getElementById(opts.into);
-    while (where.firstChild)
-      where.removeChild(where.firstChild);
-    var wait = wait_frame();
-    document.body.appendChild(wait);
-
     var files = ["web/util.js", "web/fs.js", "web/edit.js", "web/repl.js", "web/ui.js",
                  "runtime.js"];
     files.forEach(script);
 
     window.onload = function() {
-      mk(opts.into);
+      window.onerror = function(msg) {
+        var p = document.getElementById("wait_pane"),
+            t = document.getElementById("wait_text"),
+            img = document.getElementById("wait_progress");
+        p.classList.add("wait_error");
+        while (t.firstChild)
+          t.removeChild(t.firstChild);
+        t.appendChild(document.createTextNode("Error occured: " + msg));
+        p.removeChild(img);
+      };
+      init_ui();
       init(function() {
         window.onhashchange = function() {
           var path = location.hash.replace(/^#/, "");
@@ -122,9 +107,11 @@ shen_web = (function() {
           else
             shen_web.edit.load(shen_web.fs.root, path);
         };
-        if (opts.ondone)
+        if (opts && opts.ondone)
           opts.ondone();
+        var wait = document.getElementById("wait_frame");
         wait.parentNode.removeChild(wait);
+        window.onerror = null;
       });
     };
   }

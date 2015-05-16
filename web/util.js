@@ -22,7 +22,7 @@
 
   shen_web.img_btn = function(title, icon) {
     var btn = document.createElement("button");
-    btn.className = "shen_ctl_btn shen_ctl_icon_btn";
+    btn.className = "icon_btn";
     btn.title = title;
     var img = document.createElement("img");
     img.src = icon;
@@ -37,25 +37,26 @@
     return sep;
   };
 
-  shen_web.toolbar = function(items) {
+  shen_web.toolbar = function(tb, items) {
     var i, n = items.length;
-    var tb = document.createElement("div");
-    tb.className = "shen_toolbar";
     for (i = 0; i < n; ++i) {
       var item = items[i];
       var b = this.img_btn(item.title, item.icon);
-      if (item.class)
-        b.className += " " + item.class;
+      b.classList.add("toolbar_btn");
+      if (item.classes && item.classes.length)
+        b.classList.add.apply(b.classList, item.classes);
       b.onclick = item.onclick;
       tb.appendChild(b);
     }
     return tb;
   };
 
-  shen_web.clear_div = function() {
-    var div = document.createElement("div");
-    div.style["clear"] = "both";
-    return div;
+  shen_web.init_maximize = function(div) {
+    var max = div.getElementsByClassName("maximize_btn");
+    if (max.length)
+      max[0].onclick = function() {
+        div.classList.toggle("maximized");
+      };
   };
 
   shen_web.dialog = function(title, fn) {

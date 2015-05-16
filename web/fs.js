@@ -232,7 +232,7 @@ function Jsfile(type, data, evhandlers) {
     });
   };
 
-  fs.mk = function(div, file_fn) {
+  fs.init = function(file_fn) {
     var fs = this;
 
     function ctl_rm(path) {
@@ -302,22 +302,18 @@ function Jsfile(type, data, evhandlers) {
       return btn;
     }
 
-    function file_ctl() {
-      var ctl = document.createElement("div");
-      ctl.className = "shen_ctl shenfs_file_ctl alt_bg alt_fg";
-      ctl.appendChild(ctl_download());
-      ctl.appendChild(ctl_rm());
-      return ctl;
+    function init_file_ctl(div) {
+      div.appendChild(ctl_download());
+      div.appendChild(ctl_rm());
+      return div;
     }
 
-    function dir_ctl() {
-      var ctl = document.createElement("div");
-      ctl.classList.add("shen_ctl",  "shenfs_dir_ctl",  "alt_bg", "alt_fg");
-      ctl.appendChild(ctl_new("f"));
-      ctl.appendChild(ctl_new("d"));
-      ctl.appendChild(ctl_upload());
-      ctl.appendChild(ctl_rm());
-      return ctl;
+    function init_dir_ctl(div) {
+      div.appendChild(ctl_new("f"));
+      div.appendChild(ctl_new("d"));
+      div.appendChild(ctl_upload());
+      div.appendChild(ctl_rm());
+      return div;
     }
 
     function dir_onclick_icon(icon, contents) {
@@ -331,21 +327,32 @@ function Jsfile(type, data, evhandlers) {
       return true;
     }
 
+    function toggle_item_select(entry, select) {
+      var fn = (select) ? "add" : "remove";
+      for (var c = entry.childNodes, i = 0; i < c.length; ++i) {
+        var sub = c[i];
+        if (sub.classList.contains("shenfs_name"))
+          sub.classList[fn]("accent_bg", "accent_fg");
+      }
+    }
+
     function item_onclick(entry, path) {
-      if (fs.selected.entry)
-        fs.selected.entry.classList.remove("shenfs_selection", "accent_bg",
-                                           "accent_fg");
+      if (fs.selected.entry) {
+        toggle_item_select(fs.selected.entry, false);
+        fs.selected.entry.classList.remove("shenfs_selection");
+      }
       var file = fs.root.get(path);
       file_fn(file, path);
-      fs.file_ctl.classList.remove("shen_ctl_removed");
-      fs.dir_ctl.classList.remove("shen_ctl_removed");
+      fs.file_ctl.classList.remove("undisplayed");
+      fs.dir_ctl.classList.remove("undisplayed");
       switch (file.type) {
-      case "f": fs.dir_ctl.classList.add("shen_ctl_removed"); break;
-      case "d": fs.file_ctl.classList.add("shen_ctl_removed"); break;
+      case "f": fs.dir_ctl.classList.add("undisplayed"); break;
+      case "d": fs.file_ctl.classList.add("undisplayed"); break;
       }
       fs.selected.entry = entry;
       fs.selected.path = path;
-      entry.classList.add("shenfs_selection", "accent_bg", "accent_fg");
+      entry.classList.add("shenfs_selection");
+      toggle_item_select(fs.selected.entry, true);
     }
 
     function basename(path) {
@@ -416,50 +423,21 @@ function Jsfile(type, data, evhandlers) {
       };
     }
 
-    function handle() {
-      var handle = document.createElement("td");
-      handle.classList.add("shenfs_handle");
-      handle.rowSpan = 2;
+    function init_handle() {
+      var handle = document.getElementById("fs_toggle");
       handle.onclick = function() {
-        if (div.classList.contains("shenfs_closed"))
-          div.classList.remove("shenfs_closed");
+        if (this.checked)
+          document.body.classList.add("fs_opened");
         else
-          div.classList.add("shenfs_closed");
-      };
-      return handle;
+          document.body.classList.remove("fs_opened");
+      }
     }
 
-    div = document.getElementById(div);
-    shen_web.clean(div);
-    div.classList.add("shenfs", "shenfs_closed");
+    init_handle();
 
-    var frame = document.createElement("table");
-    var hdr = document.createElement("tr");
-    var ctl = document.createElement("td");
-    var fs_row = document.createElement("tr");
-    var fs_outer = document.createElement("td");
-    var fs_inner = document.createElement("div");
-
-    fs_outer.classList.add("shenfs_outer");
-    fs_inner.classList.add("shenfs_inner");
-
-    fs.dir = document.createElement("div");
-    fs.dir.classList.add("shenfs_tree");
-    fs.file_ctl = file_ctl();
-    fs.dir_ctl = dir_ctl();
-
-    fs.file_ctl.classList.add("shen_ctl_removed");
-
-    ctl.appendChild(fs.file_ctl);
-    ctl.appendChild(fs.dir_ctl);
-    hdr.appendChild(ctl);
-    hdr.appendChild(handle());
-    fs_row.appendChild(fs_outer);
-    frame.appendChild(hdr);
-    frame.appendChild(fs_row);
-    fs_inner.appendChild(fs.dir);
-    fs_outer.appendChild(fs_inner);
-    div.appendChild(frame);
+    fs.dir = document.getElementById("fs_tree");
+    fs.file_ctl = init_file_ctl(document.getElementById("file_ctl"));
+    fs.dir_ctl = init_dir_ctl(document.getElementById("dir_ctl"));
     oncreate_dir(this.root, "", fs.dir);
   };
   shen_web.fs = fs;

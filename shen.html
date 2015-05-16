@@ -1,52 +1,149 @@
 <html>
-<head>
-  <meta charset="UTF-8"/>
-  <meta http-equiv="Content-Type" content="text/html"; charset="UTF-8"/>
-  <link rel="stylesheet" href="web/shen.css" type="text/css"/>
-  <script type="text/javascript" src="web/boot.js"></script>
-  <title>Shen REPL</title>
-</head>
-<body>
-  <div id="shen"></div>
-  <script type="text/javascript">
-    function init_playground() {
-      function line_n(n) {
-        var s = "";
-        for (var i = 0; i < n; ++i)
-          s += String(i % 10);
-        return s;
-      }
+  <head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Type" content="text/html"; charset="UTF-8"/>
+    <link rel="stylesheet" href="web/shen.css" type="text/css"/>
+    <script type="text/javascript" src="web/boot.js"></script>
+  </head>
 
-      function fake_fs(root) {
-        root.put(".repl", "# REPL");
-        root.put(".h.shen", Array(200).join(line_n(78) + "\n"));
-        root.put(".lessons/01/repl.shen", "\\* First let's learn how to use REPL *\\");
-        root.put(".lessons/01/basics.shen", "\\* Basics *\\");
-        root.put(".lessons/01/expr.shen", "\\* Expressions *\\");
-        root.put("one/two/three/six", "one thousand two hundreds and thirty six");
-        root.put("one/two/three/seven", "one thousand two hundreds and thirty seven");
-        root.mkdir("one/four/");
-        root.put("one/four/eight", "one hundred and forty eight");
-        root.put("one/four/file with very long name", "and short content");
-      }
+  <body class="expand fs_opened">
+    <div id="wait_frame" class="wait_overlay">
+      <div id="wait_pane" class="wait_pane accent_bg">
+        <div id="wait_text" class="wait_text">Please, wait…</div>
+        <img id="wait_progress" src="web/wait.gif"></img>
+      </div>
+    </div>
+    <div class="fs tbl">
+      <div class="hdr_container tbl_row">
+        <div id="file_ctl" class="hdr accent_bg tbl_cell undisplayed"></div>
+        <div id="dir_ctl" class="hdr accent_bg tbl_cell"></div>
+      </div>
+      <div class="tbl_row">
+        <div class="outer tbl_cell">
+          <div id="fs_tree_container" class="inner">
+            <div id="fs_tree" class="fs_tree expand"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <div id="editor" class="editor expand tbl">
+        <div class="hdr_container tbl_row">
+          <div class="hdr accent_bg tbl_cell">
+            <div class="tbl_row">
+              <div class="hdr_tool tbl_cell">
+                <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
+                <label for="fs_toggle">
+                  <button class="tool_btn btn_bg">
+                    <img src="web/folder.png"></img>
+                  </button>
+                </label>
+              </div>
+              <div class="hdr_title tbl_cell">HDR</div>
+              <div id="editor_toolbar" class="hdr_tool tbl_cell"></div>
+              <div class="hdr_tool tbl_cell">
+                <button class="maximize_btn tool_btn">
+                  <img src="web/maximize.png"></img>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="editor_view_container" class="tbl_row undisplayed">
+          <div class="outer tbl_cell">
+            <div class="inner">
+              <div id="editor_view" class="editor_view expand code"></div>
+            </div>
+          </div>
+        </div>
+        <div id="editor_edit_container" class="tbl_row">
+          <div class="outer tbl_cell">
+            <div class="inner">
+              <textarea id="editor_edit"
+                        class="editor_edit entry_bg code"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      function fill_repl_out() {
-        var out = document.getElementById("shen_repl_out");
-        var n = 1000;
-        var line = new Array(5).join("one two three five ").trim();
-        out.appendChild(document.createTextNode(line_n(78) + "\n"));
-        out.appendChild(document.createTextNode("START\n"));
-        for (var i = 0; i < n; ++i)
-          out.appendChild(document.createTextNode(line + "\n"));
-        out.appendChild(document.createTextNode(line_n(78) + "\n"));
-        out.appendChild(document.createTextNode("END\n"));
-      }
-      fake_fs(shen_web.fs.root);
-      fill_repl_out();
-      shen_web.edit.load_initial(shen_web.fs.root);
-    }
+      <div id="repl" class="repl expand tbl">
+        <div class="hdr_container tbl_row">
+          <div class="hdr accent_bg tbl_cell">
+            <div class="tbl_row">
+              <div class="hdr_title tbl_cell"></div>
+              <div class="hdr_tool tbl_cell">
+                <button class="maximize_btn tool_btn">
+                  <img src="web/maximize.png"></img>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="repl_out_container tbl_row">
+          <div class="tbl_cell">
+            <div class="inner">
+              <div id="repl_out" class="repl_out expand code"></div>
+            </div>
+          </div>
+        </div>
+        <div id="repl_in_container" class="repl_in_container tbl_row">
+          <div class="tbl_cell">
+            <div class="tbl">
+              <div class="tbl_row">
+                <div class="tbl_cell repl_in_inner">
+                  <textarea id="repl_in" class="repl_in entry_bg code"
+                            rows="1" cols="1"></textarea>
+                </div>
+                <div id="repl_in_send" class="tbl_cell repl_in_send">Send</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    shen_web.boot({into: "shen", ondone: init_playground});
-  </script>
-</body>
+    <script type="text/javascript">
+      (function() {
+        function str_iota(n) {
+          var s = "";
+          for (var i = 0; i < n; ++i)
+            s += String(i % 10);
+          return s;
+        }
+
+        function fill_pre(t) {
+          if (t) {
+            var n = 1000,
+                s = new Array(n).join(str_iota(80) + "\n").trim();
+            t.appendChild(document.createTextNode("BEGIN\n" + s + "\nEND\n"));
+          }
+        }
+
+        function init_playground() {
+          function fake_fs(root) {
+            root.put(".repl", "# REPL");
+            root.put(".h.shen", Array(200).join(str_iota(78) + "\n"));
+            root.put(".lessons/01/repl.shen", "\\* First let's learn how to use REPL *\\");
+            root.put(".lessons/01/basics.shen", "\\* Basics *\\");
+            root.put(".lessons/01/expr.shen", "\\* Expressions *\\");
+            root.put("one/two/three/six", "one thousand two hundreds and thirty six");
+            root.put("one/two/three/seven", "one thousand two hundreds and thirty seven");
+            root.mkdir("one/four/");
+            root.put("one/four/eight", "one hundred and forty eight");
+            root.put("one/four/file with very long name", "and short content");
+          }
+          fake_fs(shen_web.fs.root);
+        }
+
+        var edit = document.getElementById("editor_edit");
+        var view = document.getElementById("editor_view");
+        var repl = document.getElementById("repl_out");
+        fill_pre(edit);
+        fill_pre(view);
+        fill_pre(repl);
+
+        shen_web.init({ondone: init_playground});
+      })();
+    </script>
+  </body>
 </html>
