@@ -15,15 +15,16 @@
       </div>
     </div>
     
-    <div id="main" class="main expand fs_opened">
+    <div id="main" class="main expand">
       <div class="fs tbl noselect alt_bg">
-        <div class="hdr_container tbl_row alt_fg alt_bg">
-          <div id="file_ctl" class="hdr tbl_cell undisplayed"></div>
-          <div id="dir_ctl" class="hdr tbl_cell"></div>
+        <div class="hdr_container tbl_row alt_hdr_fg alt_hdr_bg">
+          <div id="file_ctl" class="hdr tbl_cell hdr_tool undisplayed"></div>
+          <div id="dir_ctl" class="hdr tbl_cell hdr_tool"></div>
+          <div class="hdr_title tbl_cell"></div>
         </div>
         <div class="tbl_row">
           <div class="outer tbl_cell">
-            <div id="fs_tree_container" class="inner alt_bg">
+            <div id="fs_tree_container" class="inner">
               <div id="fs_tree" class="fs_tree expand"></div>
             </div>
           </div>
@@ -37,16 +38,17 @@
             <div class="hdr tbl_cell">
               <div class="tbl_row">
                 <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
-                <label for="fs_toggle" class="tbl_cell alt_fg alt_bg">
+                <label for="fs_toggle"
+                       class="tbl_cell alt_hdr_fg alt_hdr_bg alt_hdr_hover alt_hdr_active icon_btn btn_bg">
                   <div class="tbl_row">
                     <img src="web/folder.png" class="tbl_cell"></img>
-                    <span class="tbl_cell fs_toggle_arrow"></span>
+                    <div class="tbl_cell fs_toggle_arrow"></div>
                   </div>
                 </label>
                 <div id="editor_title" class="hdr_title tbl_cell"></div>
                 <div id="editor_toolbar" class="hdr_tool tbl_cell"></div>
                 <div class="hdr_tool tbl_cell">
-                  <button class="maximize_btn tool_btn">
+                  <button class="maximize_btn icon_btn btn_bg btn_fg">
                     <img src="web/maximize.png"></img>
                   </button>
                 </div>
@@ -80,7 +82,7 @@
               <div class="tbl_row">
                 <div class="hdr_title tbl_cell">*output*</div>
                 <div class="hdr_tool tbl_cell">
-                  <button class="maximize_btn tool_btn">
+                  <button class="maximize_btn icon_btn btn_bg btn_fg">
                     <img src="web/maximize.png"></img>
                   </button>
                 </div>
@@ -105,7 +107,9 @@
                               class="repl_in entry_fg entry_bg code"
                               rows="1" cols="1"></textarea>
                   </div>
-                  <div id="repl_in_send" class="tbl_cell noselect repl_in_send">
+                  <div id="repl_in_send"
+                       class="tbl_cell noselect repl_in_send btn_fg btn_bg
+                              repl_btn_bg repl_btn_fg">
                     Send
                   </div>
                 </div>

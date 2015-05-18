@@ -22,7 +22,7 @@
 
   shen_web.img_btn = function(title, icon) {
     var btn = document.createElement("button");
-    btn.className = "icon_btn";
+    btn.className = "icon_btn btn_bg btn_fg";
     btn.title = title;
     var img = document.createElement("img");
     img.src = icon;

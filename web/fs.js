@@ -391,6 +391,7 @@ function Jsfile(type, data, evhandlers) {
       name_text.className = "fs_name_text";
       name_text.appendChild(document.createTextNode(basename(path) + "/"));
       var subdir = document.createElement("ul");
+      subdir.className = "fs_dir";
       var icon = file_icon(file, path);
       icon.onclick = function() {return dir_onclick_icon(icon, subdir);};
       name.appendChild(icon);
