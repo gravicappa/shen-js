@@ -79,8 +79,7 @@
   }
 
   shen_web.init_repl = function() {
-    var div = document.getElementById("repl");
-    shen_web.init_maximize(div);
+    shen_web.init_maximize(document.getElementById("repl"));
     init_input();
   }
 })();

@@ -61,14 +61,13 @@
 
   shen_web.dialog = function(title, fn) {
     var over = document.createElement("div");
-    over.className = "shen_dlg_overlay";
+    over.className = "overlay";
     over.onclick = function() {
       over.parentNode.removeChild(over);
     }
-    over.style["cursor"] = "pointer";
 
     var dlg = document.createElement("div");
-    dlg.className = "shen_dlg";
+    dlg.className = "dlg";
     dlg.onclick = function(ev) {
       if (ev.stopPropagation)
         ev.stopPropagation();
@@ -78,17 +77,17 @@
     };
 
     var t = document.createElement("div");
-    t.className = "shen_dlg_title";
+    t.className = "dlg_title";
     t.appendChild(document.createTextNode(title));
     var x = this.img_btn("Close", "web/close.png");
-    x.classList.add("shen_dlg_close");
+    x.classList.add("dlg_close");
     x.onclick = function() {
       over.parentNode.removeChild(over);
     };
     t.appendChild(x);
 
     var content = document.createElement("div");
-    content.className = "shen_dlg_content";
+    content.className = "dlg_content";
 
     fn(over, content);
     dlg.appendChild(t);
@@ -100,27 +99,27 @@
 
   shen_web.dlg_okcancel = function(show, fn) {
     var div = document.createElement("div"), ok, cancel;
-    div.className = "shen_dlg_btns";
+    div.className = "dlg_btns";
 
     if (!show || show.match(/[oy]/)) {
       ok = document.createElement("button");
-      ok.className = "shen_dlg_btn_ok";
+      ok.className = "dlg_btn_ok";
       ok.appendChild(document.createTextNode("OK"));
       ok.onclick = function() {fn(true);};
     } else {
       ok = document.createElement("div");
-      ok.className = "shen_dlg_btn_ok";
+      ok.className = "dlg_btn_ok";
       ok.appendChild(document.createTextNode(" "));
     }
     div.appendChild(ok);
 
     if (!show || show.match(/[cn]/)) {
       cancel = document.createElement("a");
-      cancel.className = "shen_dlg_btn_cancel";
+      cancel.className = "dlg_btn_cancel";
       cancel.onclick = function() {fn(false);};
 
       var ct = document.createElement("span");
-      ct.className = "shen_dlg_btn_cancel_text";
+      ct.className = "dlg_btn_cancel_text";
       ct.appendChild(document.createTextNode("Cancel"));
       cancel.appendChild(ct);
 

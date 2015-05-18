@@ -207,7 +207,7 @@ function Jsfile(type, data, evhandlers) {
     shen_web.dialog("Upload to file", function(dlg, content) {
       var text = document.createElement("div");
       text.appendChild(document.createTextNode("Choose a file to upload"));
-      text.className = "shenfs_dlg_msg";
+      text.className = "dlg_msg";
       var input = document.createElement("input");
       input.type = "file";
       if (multiple)
@@ -232,12 +232,24 @@ function Jsfile(type, data, evhandlers) {
     });
   };
 
+  function init_handle() {
+    var handle = document.getElementById("fs_toggle"),
+        main = document.getElementById("main");
+    handle.checked = main.classList.contains("fs_opened");
+    handle.onclick = function() {
+      if (this.checked)
+        main.classList.add("fs_opened");
+      else
+        main.classList.remove("fs_opened");
+    };
+  }
+
   fs.init = function(file_fn) {
     var fs = this;
 
     function ctl_rm(path) {
       var btn = shen_web.img_btn("Delete", "web/rm.png");
-      btn.classList.add("shenfs_ctl_rm_btn");
+      btn.classList.add("fs_ctl_rm_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
         if (path && confirm("Do you want to delete '" + path + "'?"))
@@ -263,14 +275,14 @@ function Jsfile(type, data, evhandlers) {
       switch (type) {
       case "f":
         btn = shen_web.img_btn("Create file", "web/new.png");
-        btn.classList.add("shenfs_ctl_mk_btn");
+        btn.classList.add("fs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter file name", function(path) {
           fs.root.put(path, "");
         });
         break;
       case "d":
         btn = shen_web.img_btn("Create dir", "web/folder_new.png");
-        btn.classList.add("shenfs_ctl_mk_btn");
+        btn.classList.add("fs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter directory name", function(path) {
           fs.root.mkdir(path);
         });
@@ -281,7 +293,7 @@ function Jsfile(type, data, evhandlers) {
 
     function ctl_upload() {
       var btn = shen_web.img_btn("Upload file", "web/up.png");
-      btn.classList.add("shenfs_ctl_upload_btn");
+      btn.classList.add("fs_ctl_upload_btn");
       btn.onclick = function() {
         console.log("fs.selected.path", fs.selected.path);
         var path = fs.selected.path;
@@ -293,7 +305,7 @@ function Jsfile(type, data, evhandlers) {
 
     function ctl_download() {
       var btn = shen_web.img_btn("Download file", "web/down.png");
-      btn.classList.add("shenfs_ctl_download_btn");
+      btn.classList.add("fs_ctl_download_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
         if (path)
@@ -317,13 +329,10 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function dir_onclick_icon(icon, contents) {
-      if (contents.classList.contains("shenfs_subdir_collapsed")) {
-        icon.src = "web/folder_open.png";
-        contents.classList.remove("shenfs_subdir_collapsed");
-      } else {
+      if (contents.classList.toggle("fs_subdir_collapsed"))
         icon.src = "web/folder.png";
-        contents.classList.add("shenfs_subdir_collapsed");
-      }
+      else
+        icon.src = "web/folder_open.png";
       return true;
     }
 
@@ -331,7 +340,7 @@ function Jsfile(type, data, evhandlers) {
       var fn = (select) ? "add" : "remove";
       for (var c = entry.childNodes, i = 0; i < c.length; ++i) {
         var sub = c[i];
-        if (sub.classList.contains("shenfs_name"))
+        if (sub.classList.contains("fs_name"))
           sub.classList[fn]("accent_bg", "accent_fg");
       }
     }
@@ -339,7 +348,7 @@ function Jsfile(type, data, evhandlers) {
     function item_onclick(entry, path) {
       if (fs.selected.entry) {
         toggle_item_select(fs.selected.entry, false);
-        fs.selected.entry.classList.remove("shenfs_selection");
+        fs.selected.entry.classList.remove("fs_selection");
       }
       var file = fs.root.get(path);
       file_fn(file, path);
@@ -351,7 +360,7 @@ function Jsfile(type, data, evhandlers) {
       }
       fs.selected.entry = entry;
       fs.selected.path = path;
-      entry.classList.add("shenfs_selection");
+      entry.classList.add("fs_selection");
       toggle_item_select(fs.selected.entry, true);
     }
 
@@ -361,7 +370,7 @@ function Jsfile(type, data, evhandlers) {
 
     function file_icon(file, path) {
       var icon = document.createElement("img");
-      icon.className = "shenfs_icon";
+      icon.className = "fs_icon";
       if (file.type === "d") {
         icon.src = "web/folder_open.png";
       } else if (path.match(/\.html$/))
@@ -374,12 +383,12 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function oncreate_dir(file, path, entry) {
-      entry.classList.add("shenfs_entry", "shenfs_dir_entry");
+      entry.classList.add("fs_entry", "fs_dir_entry");
       var name = document.createElement("div");
-      name.className = "shenfs_name";
+      name.className = "fs_name";
       name.onclick = function() {item_onclick(entry, path);};
       var name_text = document.createElement("span");
-      name_text.className = "shenfs_entry_name";
+      name_text.className = "fs_name_text";
       name_text.appendChild(document.createTextNode(basename(path) + "/"));
       var subdir = document.createElement("ul");
       var icon = file_icon(file, path);
@@ -392,12 +401,12 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function oncreate_file(file, path, entry) {
-      entry.classList.add("shenfs_entry", "shenfs_file_entry");
+      entry.classList.add("fs_entry", "fs_file_entry");
       var name = document.createElement("div");
-      name.className = "shenfs_name";
+      name.className = "fs_name";
       name.onclick = function() {item_onclick(entry, path);};
       var name_text = document.createElement("span");
-      name_text.className = "shenfs_entry_name";
+      name_text.className = "fs_name_text";
       name_text.appendChild(document.createTextNode(basename(path)));
       name.appendChild(file_icon(file, path));
       name.appendChild(name_text);
@@ -421,16 +430,6 @@ function Jsfile(type, data, evhandlers) {
       return function() {
         container.parentNode.removeChild(container);
       };
-    }
-
-    function init_handle() {
-      var handle = document.getElementById("fs_toggle");
-      handle.onclick = function() {
-        if (this.checked)
-          document.body.classList.add("fs_opened");
-        else
-          document.body.classList.remove("fs_opened");
-      }
     }
 
     init_handle();

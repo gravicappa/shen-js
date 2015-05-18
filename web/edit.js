@@ -6,7 +6,7 @@
   edit.welcome = ".doc/welcome.html";
 
   edit.set_title = function(title) {
-    var t = document.getElementById("shen_edit_title");
+    var t = document.getElementById("editor_title");
     shen_web.clean(t);
     t.appendChild(document.createTextNode(title));
   };
@@ -21,9 +21,11 @@
     }
 
     var file = root.get(path),
-        text = document.getElementById("shen_edit_entry"),
-        view = document.getElementById("shen_edit_view"),
-        ctl = document.getElementById("shen_edit_ctl"),
+        edit_cont = document.getElementById("editor_edit_container"),
+        edit = document.getElementById("editor_edit"),
+        view_cont = document.getElementById("editor_view_container"),
+        view = document.getElementById("editor_view"),
+        ctl = document.getElementById("editor_toolbar"),
         in_html = false;
     this.unload();
     if (!file)
@@ -37,28 +39,28 @@
       in_html = true;
       var str = "<div class='warning'>File is binary</div>";
     }
-    if (in_html || path.match(/\.doc\/.*\.html/)) {
-      view.classList.remove("undisplayed");
+    if (in_html || path.match(/\.doc\/.*\.html/))
       load_html(str, view);
-    } else {
-      text.classList.remove("undisplayed");
-      ctl.classList.remove("hidden");
-      text.disabled = false;
-      text.value = str;
-      text.touched = false;
+    else {
+      view_cont.classList.add("undisplayed");
+      edit_cont.classList.remove("undisplayed");
+      ctl.classList.remove("undisplayed");
+      edit.value = str;
+      edit.touched = false;
     }
   };
 
   edit.unload = function() {
-    var text = document.getElementById("shen_edit_entry"),
-        view = document.getElementById("shen_edit_view"),
-        ctl = document.getElementById("shen_edit_ctl");
+    var edit_cont = document.getElementById("editor_edit_container"),
+        view_cont = document.getElementById("editor_view_container"),
+        view = document.getElementById("editor_view"),
+        ctl = document.getElementById("editor_toolbar");
     this.set_title("");
     this.file = null;
     this.path = null;
-    ctl.classList.add("hidden");
-    view.classList.add("undisplayed");
-    text.classList.add("undisplayed");
+    ctl.classList.add("undisplayed");
+    view_cont.classList.remove("undisplayed");
+    edit_cont.classList.add("undisplayed");
     shen_web.clean(view);
   };
 
@@ -132,9 +134,9 @@
           }
         }]);
     }
-
     init_text_entry();
     init_toolbar();
+    this.unload();
     shen_web.init_maximize(document.getElementById("editor"));
   };
 

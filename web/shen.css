@@ -24,20 +24,37 @@
 .norm_fg {color: #212121;}
 .norm_bg {background-color: #ffffff; border-color: #7f7f7f;}
 
-.alt_fg {color: #212121;}
-.alt_bg {background-color: #03a9f4; border-color: #0070c0;}
-
 .accent_fg {color: #212121;}
-.accent_bg {background-color: #b3e5fc; border-color: #83b5cc;}
+.accent_bg {background-color: #03a9f4; border-color: #0070c0;}
+
+.alt_fg {color: #212121;}
+.alt_bg {background-color: #bde; border-color: #83b5cc;}
+.alt_hdr_fg {color: #222;}
+.alt_hdr_bg {background-color: #bef; border-color: #83b5cc;}
+
+.hdr_fg {color: #ffffff;}
+.hdr_bg {background-color: #667; border-color: #83b5cc;}
 
 .entry_fg {color: #212121;}
-.entry_bg {background-color: #ffffff; border-color: #7f7f7f;}
+.entry_bg {
+  background-color: #ffffff;
+  border-color: #7f7f7f;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
 
 .btn_font {font-family: monospace; font-weight: bold;}
 .btn_fg {color: #fff;}
 .btn_bg {background-color: #8bc34a; border-color: #7f7f7f;}
 .btn_bg:hover {background-color: #7bb33a; border-color: #7f7f7f;}
 .btn_bg:active {background-color: #000; border-color: #000;}
+
+.noselect {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+}
 /* } GENERAL */
 /* 
 #0288D1
@@ -83,7 +100,7 @@ body {
   margin: 0;
   border: 0;
   overflow: hidden;
-  transition: transform 0.5s;
+  position: fixed !important;
 }
 
 .fs_opened {
@@ -92,6 +109,10 @@ body {
 }
 
 .main {
+  transition: transform 0.5s;
+}
+
+.main_inner {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -105,6 +126,7 @@ body {
   transform: translateX(-100%);
   width: 18em;
   height: 100%;
+  box-shadow: 2px 0 2px -2px rgba(0, 0, 0, 0.9);
 }
 
 .editor {
@@ -113,7 +135,6 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  border: 1px dashed red;
 }
 
 .outer {
@@ -126,7 +147,10 @@ body {
   height: 100%;
   overflow: auto;
   position: relative;
-  border: 1px solid Black;
+  border-width: 0;
+  border-top-width: 1px;
+  border-style: solid;
+  border-bottom-width: 1px;
 }
 
 .editor_edit {
@@ -138,8 +162,14 @@ body {
   border: 0;
 }
 
+.editor_border {
+  border-left: 1px solid;
+  border-right: 1px solid;
+}
+
 .hdr {
   position: relative;
+  white-space: nowrap;
 }
 
 .hdr_title {
@@ -156,11 +186,11 @@ body {
   
   margin: 0;
   padding: 0;
-  border: 1px dashed Green;
+  xxborder: 1px dashed Green;
 }
 
 .repl_out_container {
-  border: 1px dotted Black;
+  xxborder: 1px dotted Black;
   width: 100%;
   height: 100%;
 }
@@ -189,14 +219,44 @@ body {
   white-space: nowrap;
 }
 
-.wait_overlay {
+input.fs_toggle {
+  display: none;
+}
+
+input.fs_toggle + label {
+  padding: 0 8px;
+  box-shadow: 2px 0 2px -2px rgba(0, 0, 0, 0.9);
+  border-right: 1px solid;
+}
+
+.fs_subdir_collapsed {
+  display: none;
+}
+
+.fs_name {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.fs_name_text, .fs_icon {
+  vertical-align: middle;
+}
+
+.overlay {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  background: #667;
   z-index: 1000;
+  background-color: rgba(20, 20, 30, 0.7);
+  cursor: pointer;
+}
+
+/* WAIT { */
+
+.wait {
+  background-color: #667;
 }
 
 .wait_pane {
@@ -220,14 +280,78 @@ body {
 .wait_error {
   background-color: Red;
 }
+/* WAIT } */
+
+/* DLG { */
 
-input.fs_toggle {
-  display: none;
+.dlg_title {
+  background: #456;
+  color: #fff;
+  font-weight: bold;
 }
 
-input.fs_toggle + label button {
-  padding: 0 4px;
-  border: 1px solid;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
+.dlg_close_btn {
+  float: right;
 }
+
+.dlg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #778;
+  box-shadow: 1px 1px 10px #000;
+  text-align: center;
+  cursor: default;
+}
+
+.dlg_content {
+  padding: 16px;
+}
+
+.dlg_close {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font-weight: bold;
+  float: right;
+  background: transparent;
+  color: #f67;
+}
+
+.dlg_msg {
+  margin: 8px;
+}
+
+.dlg_btns {
+  margin: 16px 16px 0 16px;
+}
+
+.dlg_btn_ok {
+  width: 50%;
+}
+
+.dlg_btn_cancel {
+  width: 50%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 16px;
+}
+
+.dlg_btn_cancel_text {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px dashed #557;
+}
+/* DLG } */
+
+.fs_toggle_arrow {
+  vertical-align: middle;
+  padding-left: 4px;
+}
+
+.fs_toggle_arrow::after {content: "»";}
+.fs_opened .fs_toggle_arrow::after {content: "«";}

@@ -52,27 +52,6 @@ shen_web = (function() {
         else
           shen_web.edit.unload();
       });
-      /*
-      var edit = div("shen_edit"),
-          fs = div("shen_fs"),
-          text = div("shen_text"),
-          repl = div("shen_repl");
-      edit.appendChild(fs);
-      edit.appendChild(text);
-      where.appendChild(edit);
-      where.appendChild(repl);
-
-      shen_web.fs.mk("shen_fs", function(file, path) {
-        if (file.type === "f")
-          shen_web.edit.load(shen_web.fs.root, path);
-        else
-          shen_web.edit.unload();
-      });
-      shen_web.edit.mk("shen_text", function(path) {
-        console.log("TODO: send (load path) to shen", path);
-      });
-      shen_web.mk_repl("shen_repl");
-      */
     }
 
     function script(file, fn) {
@@ -82,7 +61,7 @@ shen_web = (function() {
       s.async = true;
       document.head.appendChild(s);
     }
-    var files = ["web/util.js", "web/fs.js", "web/edit.js", "web/repl.js", "web/ui.js",
+    var files = ["web/util.js", "web/fs.js", "web/edit.js", "web/repl.js",
                  "runtime.js"];
     files.forEach(script);
 

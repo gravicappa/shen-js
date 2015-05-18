@@ -4,104 +4,118 @@
     <meta http-equiv="Content-Type" content="text/html"; charset="UTF-8"/>
     <link rel="stylesheet" href="web/shen.css" type="text/css"/>
     <script type="text/javascript" src="web/boot.js"></script>
+    <title>Shen REPL</title>
   </head>
 
-  <body class="expand fs_opened">
-    <div id="wait_frame" class="wait_overlay">
+  <body class="expand">
+    <div id="wait_frame" class="overlay wait">
       <div id="wait_pane" class="wait_pane accent_bg">
         <div id="wait_text" class="wait_text">Please, wait…</div>
         <img id="wait_progress" src="web/wait.gif"></img>
       </div>
     </div>
-    <div class="fs tbl">
-      <div class="hdr_container tbl_row">
-        <div id="file_ctl" class="hdr accent_bg tbl_cell undisplayed"></div>
-        <div id="dir_ctl" class="hdr accent_bg tbl_cell"></div>
-      </div>
-      <div class="tbl_row">
-        <div class="outer tbl_cell">
-          <div id="fs_tree_container" class="inner">
-            <div id="fs_tree" class="fs_tree expand"></div>
-          </div>
+    
+    <div id="main" class="main expand fs_opened">
+      <div class="fs tbl noselect alt_bg">
+        <div class="hdr_container tbl_row alt_fg alt_bg">
+          <div id="file_ctl" class="hdr tbl_cell undisplayed"></div>
+          <div id="dir_ctl" class="hdr tbl_cell"></div>
         </div>
-      </div>
-    </div>
-    <div class="main">
-      <div id="editor" class="editor expand tbl">
-        <div class="hdr_container tbl_row">
-          <div class="hdr accent_bg tbl_cell">
-            <div class="tbl_row">
-              <div class="hdr_tool tbl_cell">
-                <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
-                <label for="fs_toggle">
-                  <button class="tool_btn btn_bg">
-                    <img src="web/folder.png"></img>
-                  </button>
-                </label>
-              </div>
-              <div class="hdr_title tbl_cell">HDR</div>
-              <div id="editor_toolbar" class="hdr_tool tbl_cell"></div>
-              <div class="hdr_tool tbl_cell">
-                <button class="maximize_btn tool_btn">
-                  <img src="web/maximize.png"></img>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="editor_view_container" class="tbl_row undisplayed">
+        <div class="tbl_row">
           <div class="outer tbl_cell">
-            <div class="inner">
-              <div id="editor_view" class="editor_view expand code"></div>
-            </div>
-          </div>
-        </div>
-        <div id="editor_edit_container" class="tbl_row">
-          <div class="outer tbl_cell">
-            <div class="inner">
-              <textarea id="editor_edit"
-                        class="editor_edit entry_bg code"></textarea>
+            <div id="fs_tree_container" class="inner alt_bg">
+              <div id="fs_tree" class="fs_tree expand"></div>
             </div>
           </div>
         </div>
       </div>
+      
+      <div class="main_inner">
+        <div id="editor" class="editor expand tbl">
 
-      <div id="repl" class="repl expand tbl">
-        <div class="hdr_container tbl_row">
-          <div class="hdr accent_bg tbl_cell">
-            <div class="tbl_row">
-              <div class="hdr_title tbl_cell"></div>
-              <div class="hdr_tool tbl_cell">
-                <button class="maximize_btn tool_btn">
-                  <img src="web/maximize.png"></img>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="repl_out_container tbl_row">
-          <div class="tbl_cell">
-            <div class="inner">
-              <div id="repl_out" class="repl_out expand code"></div>
-            </div>
-          </div>
-        </div>
-        <div id="repl_in_container" class="repl_in_container tbl_row">
-          <div class="tbl_cell">
-            <div class="tbl">
+          <div class="hdr_container tbl_row hdr_fg hdr_bg">
+            <div class="hdr tbl_cell">
               <div class="tbl_row">
-                <div class="tbl_cell repl_in_inner">
-                  <textarea id="repl_in" class="repl_in entry_bg code"
-                            rows="1" cols="1"></textarea>
+                <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
+                <label for="fs_toggle" class="tbl_cell alt_fg alt_bg">
+                  <div class="tbl_row">
+                    <img src="web/folder.png" class="tbl_cell"></img>
+                    <span class="tbl_cell fs_toggle_arrow"></span>
+                  </div>
+                </label>
+                <div id="editor_title" class="hdr_title tbl_cell"></div>
+                <div id="editor_toolbar" class="hdr_tool tbl_cell"></div>
+                <div class="hdr_tool tbl_cell">
+                  <button class="maximize_btn tool_btn">
+                    <img src="web/maximize.png"></img>
+                  </button>
                 </div>
-                <div id="repl_in_send" class="tbl_cell repl_in_send">Send</div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="editor_view_container"
+               class="tbl_row editor_border undisplayed">
+            <div class="outer tbl_cell">
+              <div class="inner">
+                <div id="editor_view" class="editor_view expand code"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="editor_edit_container" class="tbl_row editor_border">
+            <div class="outer tbl_cell">
+              <div class="inner">
+                <textarea 
+                   id="editor_edit"
+                   class="editor_edit entry_fg entry_bg code"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="repl" class="repl expand tbl">
+          <div class="hdr_container tbl_row hdr_fg hdr_bg">
+            <div class="hdr tbl_cell">
+              <div class="tbl_row">
+                <div class="hdr_title tbl_cell">*output*</div>
+                <div class="hdr_tool tbl_cell">
+                  <button class="maximize_btn tool_btn">
+                    <img src="web/maximize.png"></img>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="repl_out_container tbl_row">
+            <div class="tbl_cell">
+              <div class="inner">
+                <div id="repl_out" class="repl_out expand code"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="repl_in_container" class="repl_in_container tbl_row">
+            <div class="tbl_cell">
+              <div class="tbl">
+                <div class="tbl_row">
+                  <div class="tbl_cell repl_in_inner">
+                    <textarea id="repl_in"
+                              class="repl_in entry_fg entry_bg code"
+                              rows="1" cols="1"></textarea>
+                  </div>
+                  <div id="repl_in_send" class="tbl_cell noselect repl_in_send">
+                    Send
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
+    
     <script type="text/javascript">
       (function() {
         function str_iota(n) {
