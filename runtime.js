@@ -13,6 +13,7 @@ shen = (function() {
     this.error_handlers = [];
     this.call_toplevel = null;
     this.io = null;
+    this.chan_in = null;
   }
 
   Shen.prototype.toString = function() {
@@ -284,7 +285,7 @@ shen = (function() {
       this.receive(this.ret);
   };
 
-  Shen.prototype.step = function() {
+  Shen.prototype.step = function step() {
     var ip = this.start, n = this.run_span_len;
     function run_n(ip, n, vm) {
       while (ip && n--)
@@ -997,16 +998,19 @@ shen = (function() {
     return new this.Stream("r", read_byte, function(vm) {});
   };
 
+  Shen.prototype.ensure_chan_input = function() {
+    if (!this.chan_in) {
+      this.chan_in = this.Chan();
+      this.glob["*stinput*"] = this.chan_in_stream(this.chan_in);
+    }
+  };
+
   Shen.prototype.send_str = function(s) {
+    this.ensure_chan_input();
     var i, n = s.length, chan = this.chan_in;
     for (i = 0; i < n; ++i)
       chan.write(s.charCodeAt(i));
     return s;
-  };
-
-  Shen.prototype.init_chan_input = function() {
-    this.chan_in = this.Chan();
-    this.glob["*stinput*"] = this.chan_in_stream(this.chan_in);
   };
 
   // } IO

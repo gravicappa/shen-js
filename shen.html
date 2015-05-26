@@ -2,8 +2,8 @@
   <head>
     <meta charset="UTF-8"/>
     <meta http-equiv="Content-Type" content="text/html"; charset="UTF-8"/>
-    <link rel="stylesheet" href="shen.css" type="text/css"/>
-    <script type="text/javascript" src="boot.js"></script>
+    <link rel="stylesheet" href="web/shen.css" type="text/css"/>
+    <script type="text/javascript" src="web/boot.js"></script>
     <title>Shen REPL</title>
   </head>
 
@@ -11,7 +11,7 @@
     <div id="wait_frame" class="overlay wait">
       <div id="wait_pane" class="wait_pane alt_bg">
         <div id="wait_text" class="wait_text">Please, wait…</div>
-        <img id="wait_progress" src="wait.gif"></img>
+        <img id="wait_progress" src="web/wait.gif"></img>
       </div>
     </div>
     
@@ -39,9 +39,10 @@
               <div class="tbl_row">
                 <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
                 <label for="fs_toggle"
-                       class="tbl_cell alt_hdr_fg alt_hdr_bg alt_hdr_hover alt_hdr_active icon_btn btn_bg">
+                       class="tbl_cell alt_hdr_fg alt_hdr_bg alt_hdr_hover
+                              alt_hdr_active icon_btn btn_bg">
                   <div class="tbl_row">
-                    <img src="folder.png" class="tbl_cell"></img>
+                    <img src="web/folder.png" class="tbl_cell"></img>
                     <div class="tbl_cell fs_toggle_arrow"></div>
                   </div>
                 </label>
@@ -49,7 +50,7 @@
                 <div id="editor_toolbar" class="hdr_tool tbl_cell"></div>
                 <div class="hdr_tool tbl_cell">
                   <button class="maximize_btn icon_btn btn_bg btn_fg">
-                    <img src="maximize.png"></img>
+                    <img src="web/maximize.png"></img>
                   </button>
                 </div>
               </div>
@@ -83,7 +84,7 @@
                 <div class="hdr_title tbl_cell">*output*</div>
                 <div class="hdr_tool tbl_cell">
                   <button class="maximize_btn icon_btn btn_bg btn_fg">
-                    <img src="maximize.png"></img>
+                    <img src="web/maximize.png"></img>
                   </button>
                 </div>
               </div>
@@ -137,6 +138,13 @@
           }
         }
 
+        function fill_repl() {
+          var n = 1000,
+              s = new Array(n).join(str_iota(80) + "\n").trim();
+          s = "BEGIN\n" + s + "\nEND\n";
+          shen_web.puts(s);
+        }
+
         function init_playground() {
           function fake_fs(root) {
             root.put(".repl", "# REPL");
@@ -151,15 +159,13 @@
             root.put("one/four/file with very long name", "and short content");
           }
           fake_fs(shen_web.fs.root);
+          var edit = document.getElementById("editor_edit");
+          var view = document.getElementById("editor_view");
+          var repl = document.getElementById("repl_out");
+          fill_pre(edit);
+          fill_pre(view);
+          //fill_repl();
         }
-
-        var edit = document.getElementById("editor_edit");
-        var view = document.getElementById("editor_view");
-        var repl = document.getElementById("repl_out");
-        fill_pre(edit);
-        fill_pre(view);
-        fill_pre(repl);
-
         shen_web.init({ondone: init_playground});
       })();
     </script>

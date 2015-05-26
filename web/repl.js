@@ -1,26 +1,33 @@
 (function() {
   var repl = {};
-  function puts(str) {
+  function puts(str, tag) {
     var out = document.getElementById("repl_out");
     if (out == null)
       return;
     var cont = out.parentNode;
     var sd = cont.scrollHeight - cont.scrollTop;
     var diff = Math.abs(sd - cont.clientHeight);
-    var s = str.split("\n"), n = s.length - 1;
-    for (var j = 0; j < n; ++j) {
-      out.appendChild(document.createTextNode(s[j]));
-      out.appendChild(document.createElement("br"));
-    }
-    out.appendChild(document.createTextNode(s[n]));
+    var t = document.createTextNode(str);
+    if (tag) {
+      var s = document.createElement("span");
+      s.className = "repl_tag_" + tag;
+      s.appendChild(t);
+      out.appendChild(s);
+    } else
+      out.appendChild(t);
     if (diff < 5)
       cont.scrollTop = cont.scrollHeight;
   }
 
   function send_input(t, extra) {
-    puts(t.value + (extra || ""));
+    send(t.value + (extra || ""));
     t.value = "";
     t.rows = 1;
+  }
+
+  function send(s) {
+    puts(s, "input");
+    shen.send_str(s);
   }
 
   function mk_input_keypress(fn) {
@@ -78,6 +85,7 @@
     }
   }
 
+  shen_web.send = send;
   shen_web.puts = puts;
   shen_web.init_repl = function() {
     shen_web.init_maximize(document.getElementById("repl"));

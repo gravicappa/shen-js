@@ -2,8 +2,8 @@
   function io() {
     var io = {};
     io.open = open;
-    shen.init_chan_input();
     shen.glob["*stoutput*"] = new shen.Stream("w", write_byte, function() {});
+    shen.ensure_chan_input();
     return io;
 
     function write_byte(byte, vm) {
@@ -56,11 +56,12 @@
   function recv_step(ev) {
     if (ev.source !== window)
       return;
-    var data = ev.data;
-    if (typeof(data) === "number") {
+    var data = ev.data, f = posts[data];
+    if (f) {
       ev.stopPropagation();
-      var f = posts[data];
       delete posts[data];
+      if (!Object.keys(posts).length)
+        posts_id = 0;
       f();
     }
   }
@@ -74,9 +75,10 @@
   shen_web.vfs_handlers = [];
   shen_web.file_out_stream = file_out_stream;
   window.addEventListener("message", recv_step, true);
+  shen_web.post = post;
   shen_web.embed_shen = function(ondone) {
-    //shen.post_async = post;
-    shen.init({io: io, async: true, ondone: ondone});
-    //shen.set_async(true);
+    shen.post_async = post;
+    //shen.post_async = function(fn) {setTimeout(fn, 100);};
+    shen.init({io: io, async: true, ondone: ondone, repl: true});
   };
 })();

@@ -100,27 +100,27 @@
       shen_web.toolbar(ctl, [
         {
           title: "Send to REPL",
-          icon: "run.png",
+          icon: "web/run.png",
           onclick: function() {self.run(run);}
         },
         {
           title: "Save",
-          icon: "save.png",
+          icon: "web/save.png",
           onclick: function() {self.save();}
         },
         {
           title: "Reload",
-          icon: "refresh.png",
+          icon: "web/refresh.png",
           onclick: function() {self.reload();}
         },
         {
           title: "Download",
-          icon: "down.png",
+          icon: "web/down.png",
           onclick: function() {shen_web.fs.download(self.file, self.path);}
         },
         {
           title: "Upload",
-          icon: "up.png",
+          icon: "web/up.png",
           onclick: function() {
             if (self.file)
               shen_web.fs.upload(self.path, false, function(files) {

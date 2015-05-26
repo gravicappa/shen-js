@@ -61,8 +61,8 @@ shen_web = (function() {
       s.async = true;
       document.head.appendChild(s);
     }
-    var files = ["util.js", "fs.js", "edit.js", "repl.js", "embed.js",
-                 "shen.js"];
+    var files = ["web/util.js", "web/fs.js", "web/edit.js", "web/repl.js",
+                 "web/embed.js", "shen.js"];
     files.forEach(script);
 
     function apply_hash() {

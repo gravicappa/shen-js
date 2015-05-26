@@ -259,7 +259,7 @@ function Jsfile(type, data, evhandlers) {
     var fs = this;
 
     function ctl_rm(path) {
-      var btn = shen_web.img_btn("Delete", "rm.png");
+      var btn = shen_web.img_btn("Delete", "web/rm.png");
       btn.classList.add("fs_ctl_rm_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
@@ -285,14 +285,14 @@ function Jsfile(type, data, evhandlers) {
       var btn;
       switch (type) {
       case "f":
-        btn = shen_web.img_btn("Create file", "new.png");
+        btn = shen_web.img_btn("Create file", "web/new.png");
         btn.classList.add("fs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter file name", function(path) {
           fs.root.put(path, "");
         });
         break;
       case "d":
-        btn = shen_web.img_btn("Create dir", "folder_new.png");
+        btn = shen_web.img_btn("Create dir", "web/folder_new.png");
         btn.classList.add("fs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter directory name", function(path) {
           fs.root.mkdir(path);
@@ -303,7 +303,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function ctl_upload() {
-      var btn = shen_web.img_btn("Upload file", "up.png");
+      var btn = shen_web.img_btn("Upload file", "web/up.png");
       btn.classList.add("fs_ctl_upload_btn");
       btn.onclick = function() {
         console.log("fs.selected.path", fs.selected.path);
@@ -315,7 +315,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function ctl_download() {
-      var btn = shen_web.img_btn("Download file", "down.png");
+      var btn = shen_web.img_btn("Download file", "web/down.png");
       btn.classList.add("fs_ctl_download_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
@@ -341,9 +341,9 @@ function Jsfile(type, data, evhandlers) {
 
     function dir_onclick_icon(icon, contents) {
       if (contents.classList.toggle("fs_subdir_collapsed"))
-        icon.src = "folder.png";
+        icon.src = "web/folder.png";
       else
-        icon.src = "folder_open.png";
+        icon.src = "web/folder_open.png";
       return true;
     }
 
@@ -383,13 +383,13 @@ function Jsfile(type, data, evhandlers) {
       var icon = document.createElement("img");
       icon.className = "fs_icon";
       if (file.type === "d") {
-        icon.src = "folder_open.png";
+        icon.src = "web/folder_open.png";
       } else if (path.match(/\.html$/))
-        icon.src = "html.png";
+        icon.src = "web/html.png";
       else if (path.match(/\.shen$/))
-        icon.src = "shen_source.png";
+        icon.src = "web/shen_source.png";
       else
-        icon.src = "document.png";
+        icon.src = "web/document.png";
       return icon;
     }
 
