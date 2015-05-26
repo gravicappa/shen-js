@@ -14,7 +14,7 @@
   edit.load = function(root, path) {
     function load_html(html, where) {
       var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
-      where.innerHTML = "<div class='shen_edit_html'>" + html + "</div>";
+      where.innerHTML = "<div>" + html + "</div>";
       var scr = where.getElementsByTagName("script");
       for (var i = 0; i < scr.length; ++i)
         eval(scr[i].innerHTML);
@@ -100,27 +100,27 @@
       shen_web.toolbar(ctl, [
         {
           title: "Send to REPL",
-          icon: "web/run.png",
+          icon: "run.png",
           onclick: function() {self.run(run);}
         },
         {
           title: "Save",
-          icon: "web/save.png",
+          icon: "save.png",
           onclick: function() {self.save();}
         },
         {
           title: "Reload",
-          icon: "web/refresh.png",
+          icon: "refresh.png",
           onclick: function() {self.reload();}
         },
         {
           title: "Download",
-          icon: "web/down.png",
+          icon: "down.png",
           onclick: function() {shen_web.fs.download(self.file, self.path);}
         },
         {
           title: "Upload",
-          icon: "web/up.png",
+          icon: "up.png",
           onclick: function() {
             if (self.file)
               shen_web.fs.upload(self.path, false, function(files) {

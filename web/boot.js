@@ -3,7 +3,7 @@ shen_web = (function() {
   self.init = function(opts) {
     function init(fn) {
       function load_index(fn) {
-        self.query("web/fs.json", function(data) {
+        self.query("fs.json", function(data) {
           var def = JSON.parse(data);
           var index = [];
           for (var i = 0; i < def.length; ++i) {
@@ -61,9 +61,18 @@ shen_web = (function() {
       s.async = true;
       document.head.appendChild(s);
     }
-    var files = ["web/util.js", "web/fs.js", "web/edit.js", "web/repl.js",
-                 "runtime.js"];
+    var files = ["util.js", "fs.js", "edit.js", "repl.js", "embed.js",
+                 "shen.js"];
     files.forEach(script);
+
+    function apply_hash() {
+      var path = location.hash.replace(/^#/, "");
+      console.log("apply_hash " + path);
+      if (path === "")
+        shen_web.edit.unload();
+      else
+        shen_web.edit.load(shen_web.fs.root, path);
+    }
 
     window.onload = function() {
       window.onerror = function(msg) {
@@ -77,20 +86,23 @@ shen_web = (function() {
         p.removeChild(img);
       };
       init_ui();
-      init(function() {
-        window.onhashchange = function() {
-          var path = location.hash.replace(/^#/, "");
-          console.log("onhashchange " + path);
-          if (path === "")
-            shen_web.edit.unload();
-          else
-            shen_web.edit.load(shen_web.fs.root, path);
-        };
-        if (opts && opts.ondone)
-          opts.ondone();
-        var wait = document.getElementById("wait_frame");
-        wait.parentNode.removeChild(wait);
-        window.onerror = null;
+      var beat_i = 0;
+      function beat() {
+        console.log("beat " + (beat_i++));
+      }
+      //var beat_id = setInterval(beat, 100);
+      shen_web.embed_shen(function() {
+        init(function() {
+          //clearInterval(beat_id);
+          window.onhashchange = apply_hash;
+          if (opts && opts.ondone)
+            opts.ondone();
+          apply_hash();
+          var wait = document.getElementById("wait_frame");
+          if (wait)
+            wait.parentNode.removeChild(wait);
+          window.onerror = null;
+        });
       });
     };
   }

@@ -1,3 +1,5 @@
 *.kl
 primitives.js
 ./node_modules/*
+shen_bare.js
+shen_boot_image.js

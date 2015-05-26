@@ -90,7 +90,8 @@ function Jsfile(type, data, evhandlers) {
     var file = dir.data[name];
     if (file) {
       if (file.type === "d")
-        throw new Error("Directory " + path.join("/") + " already exists");
+        throw new Error("Jsfile.put: Directory " + path.join("/")
+                        + " already exists");
       file.data = ensure_array(data);
     } else {
       file = new Jsfile("f", ensure_array(data), this.on);
@@ -101,9 +102,19 @@ function Jsfile(type, data, evhandlers) {
     return file;
   };
 
+  this.append = function(data) {
+    if (this.type !== "f")
+      throw new Error("Jsfile.append: not a file");
+    var d = ensure_array(data);
+    var n = new Uint8Array(this.data.byteLength + d.byteLength);
+    n.set(this.data, 0);
+    n.set(d, this.data.byteLength);
+    this.data = n;
+  };
+
   this.is_empty = function() {
     return !data.length;
-  }
+  };
 
   this.rm = function(path, recursive) {
     path = split_path(path);
@@ -248,7 +259,7 @@ function Jsfile(type, data, evhandlers) {
     var fs = this;
 
     function ctl_rm(path) {
-      var btn = shen_web.img_btn("Delete", "web/rm.png");
+      var btn = shen_web.img_btn("Delete", "rm.png");
       btn.classList.add("fs_ctl_rm_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
@@ -274,14 +285,14 @@ function Jsfile(type, data, evhandlers) {
       var btn;
       switch (type) {
       case "f":
-        btn = shen_web.img_btn("Create file", "web/new.png");
+        btn = shen_web.img_btn("Create file", "new.png");
         btn.classList.add("fs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter file name", function(path) {
           fs.root.put(path, "");
         });
         break;
       case "d":
-        btn = shen_web.img_btn("Create dir", "web/folder_new.png");
+        btn = shen_web.img_btn("Create dir", "folder_new.png");
         btn.classList.add("fs_ctl_mk_btn");
         btn.onclick = mkfile_dlg("Enter directory name", function(path) {
           fs.root.mkdir(path);
@@ -292,7 +303,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function ctl_upload() {
-      var btn = shen_web.img_btn("Upload file", "web/up.png");
+      var btn = shen_web.img_btn("Upload file", "up.png");
       btn.classList.add("fs_ctl_upload_btn");
       btn.onclick = function() {
         console.log("fs.selected.path", fs.selected.path);
@@ -304,7 +315,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function ctl_download() {
-      var btn = shen_web.img_btn("Download file", "web/down.png");
+      var btn = shen_web.img_btn("Download file", "down.png");
       btn.classList.add("fs_ctl_download_btn");
       btn.onclick = function() {
         var path = fs.selected.path;
@@ -330,9 +341,9 @@ function Jsfile(type, data, evhandlers) {
 
     function dir_onclick_icon(icon, contents) {
       if (contents.classList.toggle("fs_subdir_collapsed"))
-        icon.src = "web/folder.png";
+        icon.src = "folder.png";
       else
-        icon.src = "web/folder_open.png";
+        icon.src = "folder_open.png";
       return true;
     }
 
@@ -372,13 +383,13 @@ function Jsfile(type, data, evhandlers) {
       var icon = document.createElement("img");
       icon.className = "fs_icon";
       if (file.type === "d") {
-        icon.src = "web/folder_open.png";
+        icon.src = "folder_open.png";
       } else if (path.match(/\.html$/))
-        icon.src = "web/html.png";
+        icon.src = "html.png";
       else if (path.match(/\.shen$/))
-        icon.src = "web/shen_source.png";
+        icon.src = "shen_source.png";
       else
-        icon.src = "web/document.png";
+        icon.src = "document.png";
       return icon;
     }
 

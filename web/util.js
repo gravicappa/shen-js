@@ -79,7 +79,7 @@
     var t = document.createElement("div");
     t.className = "dlg_title";
     t.appendChild(document.createTextNode(title));
-    var x = this.img_btn("Close", "web/close.png");
+    var x = this.img_btn("Close", "close.png");
     x.classList.add("dlg_close");
     x.onclick = function() {
       over.parentNode.removeChild(over);

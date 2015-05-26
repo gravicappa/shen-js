@@ -1,15 +1,17 @@
 Test = {
+  async: false,
   cases: [],
 
   init_shen: function() {
     load("../runtime.js");
     load("../primitives.js");
-    Shen.init({io: Shen.console_io});
-    Shen.defun("vector->", function(v, i, x) {
+    load("interval.js");
+    shen.init({io: shen.console_io, async: this.async});
+    shen.defun("vector->", function(v, i, x) {
                              v[i] = x;
                              return v;
                            });
-    Shen.defun("<-vector", function(v, i) {return this.absvector_ref(v, i);});
+    shen.defun("<-vector", function(v, i) {return this.absvector_ref(v, i);});
     load("test1.js");
   },
 
@@ -22,16 +24,16 @@ Test = {
     this.add_eq_case(true, 1, false);
     this.add_eq_case(true, "true", false);
     this.add_eq_case(true, 0, false);
-    this.add_eq_case(true, new Shen.Sym("true"), true);
-    this.add_eq_case(false, new Shen.Sym("false"), true);
-    this.add_eq_case(new Shen.Sym("one"), new Shen.Sym("one"), true);
-    this.add_eq_case(new Shen.Sym("one"), new Shen.Sym("two"), false);
-    this.add_eq_case(new Shen.Sym("<-vector"), Shen.fns["<-vector"], true);
-    this.add_eq_case(new Shen.Sym("<-vector"), Shen.fns["vector->"], false);
+    this.add_eq_case(true, new shen.Sym("true"), true);
+    this.add_eq_case(false, new shen.Sym("false"), true);
+    this.add_eq_case(new shen.Sym("one"), new shen.Sym("one"), true);
+    this.add_eq_case(new shen.Sym("one"), new shen.Sym("two"), false);
+    this.add_eq_case(new shen.Sym("<-vector"), shen.fns["<-vector"], true);
+    this.add_eq_case(new shen.Sym("<-vector"), shen.fns["vector->"], false);
     this.add_eq_case([], [], true);
-    this.add_eq_case(Shen.fail_obj, Shen.fail_obj, true);
-    this.add_eq_case(Shen.list([1]), Shen.list([1]), true);
-    this.add_eq_case(Shen.list([1, new Shen.Sym("one")]), Shen.list([1, new Shen.Sym("one")]), true);
+    this.add_eq_case(shen.fail_obj, shen.fail_obj, true);
+    this.add_eq_case(shen.list([1]), shen.list([1]), true);
+    this.add_eq_case(shen.list([1, new shen.Sym("one")]), shen.list([1, new shen.Sym("one")]), true);
     this.add_cases(this.t1);
   },
 
@@ -43,11 +45,11 @@ Test = {
   add_case: function(cs) {
     var fn = cs[0][0];
     var args = cs[0].slice(1);
-    var msgfn = [fn].concat(args.map(function(x) {return Shen.xstr(x);}));
+    var msgfn = [fn].concat(args.map(function(x) {return shen.xstr(x);}));
     this.cases.push({
       str: ("(" + msgfn.join(" ") + ")"),
       fn: function() {
-        return Shen.call(Shen.fns[fn], args);
+        return shen.call(shen.fns[fn], args);
       },
       expected: cs[1]
     });
@@ -55,8 +57,8 @@ Test = {
 
   add_eq_case: function(x, y, expected) {
     this.cases.push({
-      str: ("(= " + Shen.xstr(x) + " " + Shen.xstr(y) + ")"),
-      fn: function() {return Shen.is_equal(x, y);},
+      str: ("(= " + shen.xstr(x) + " " + shen.xstr(y) + ")"),
+      fn: function() {return shen.is_equal(x, y);},
       expected: expected
     });
   },
@@ -68,13 +70,13 @@ Test = {
     }
     try {
       var ret = def.fn();
-      var eq = Shen.is_equal(def.expected, ret);
+      var eq = shen.is_equal(def.expected, ret);
       var result_str = "";
       if (eq) {
         this.nok++;
       } else {
         this.nerr++;
-        var result_str = "[ERROR: expected " + Shen.xstr(def.expected) + "]";
+        var result_str = "[ERROR: expected " + shen.xstr(def.expected) + "]";
       }
     } catch(e) {
       this.nerr++;
@@ -85,7 +87,7 @@ Test = {
     if (0 && typeof(ret) === "object")
       for (var key in ret)
         print("  ret." + key + ": " + ret[key]);
-    print("" + i + ": " + def.str + " => " + Shen.xstr(ret) + " "
+    print("" + i + ": " + def.str + " => " + shen.xstr(ret) + " "
           + result_str);
     return eq;
   },

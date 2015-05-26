@@ -78,8 +78,9 @@
     }
   }
 
+  shen_web.puts = puts;
   shen_web.init_repl = function() {
     shen_web.init_maximize(document.getElementById("repl"));
     init_input();
-  }
+  };
 })();

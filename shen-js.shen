@@ -6,5 +6,5 @@
               (lambda E (do (set js.evaluated? false)
                             (error (error-to-string E))))))
 
-(define eval-str
-  S -> (eval [do [] [] | (read-from-string S)]))
+(define js.eval-str
+  S -> (eval [package null [] | (read-from-string S)]))

@@ -58,7 +58,7 @@
 
 .icon_btn {
   margin: 0;
-  padding: 0;
+  padding: 2px;
   border: 0;
   transition: 0.4s;
 }
@@ -67,6 +67,7 @@
   font-family: monospace;
   font-size: 14px;
   padding: 4px;
+  outline: 0;
 }
 
 .expand {
@@ -87,7 +88,7 @@
   background: #fff;
   width: 100% !important;
   height: 100% !important;
-  transition: 0.1s;
+  transition: 0.4s;
 }
 
 .overlay {
@@ -210,7 +211,6 @@ body {
   resize: none;
   overflow: hidden;
   width: 100%;
-  height: 100%;
   border: 1px solid Black;
   margin: 0;
 }
@@ -305,6 +305,7 @@ ul.fs_dir {
 
 .wait {
   background-color: #667;
+  cursor: wait;
 }
 
 .wait_pane {
@@ -321,7 +322,7 @@ ul.fs_dir {
 }
 
 .wait_text {
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 18px;
 }
 
@@ -397,9 +398,30 @@ ul.fs_dir {
 /* DLG } */
 
 /* SHEN DOC { */
-.shen_edit_container h1 {font-size: 24px;}
-.shen_edit_container h2 {font-size: 20px;}
-.shen_edit_container h3 {font-size: 18px;}
-.shen_edit_container h4 {font-size: 14px;}
+.editor_view h1 {font-size: 24px; font-variant: small-caps;}
+.editor_view h2 {font-size: 20px;}
+.editor_view h3 {font-size: 18px;}
+.editor_view h4 {font-size: 14px;}
+
+.editor_view code {
+  background-color: #ffffef;
+  border: 1px dashed #cbf;
+  padding: 2px;
+}
+
+.editor_view pre > code {
+  margin: 4px 2em;
+  padding: 4px;
+  display: block;
+}
+
 /* } SHEN DOC */
 
+/* HACKS */
+button::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner {
+  padding: 0 !important;
+  border: 0 none !important;
+}
