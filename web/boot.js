@@ -1,56 +1,17 @@
 shen_web = (function() {
   var self = {};
   self.init = function(opts) {
-    function init(fn) {
-      function load_index(fn) {
-        self.query("fs.json", function(data) {
-          var def = JSON.parse(data);
-          var index = [];
-          for (var i = 0; i < def.length; ++i) {
-            var d = def[i];
-            for (var j = 0; j < d.files.length; ++j) {
-              var f = d.files[j];
-              index.push({src: d.from + "/" + f, dst: d.to + "/" + f});
-            }
-          }
-          fn(index);
-        }, function(err) {
-          fn([]);
-        });
-      }
-
-      function load_files(entries, i, fn) {
-        if (i < entries.length) {
-          shen_web.query(entries[i].src, function(data) {
-            var w = entries[i].dst;
-            shen_web.fs.root.put(w, data);
-            load_files(entries, i + 1, fn);
-          }, function(err) {
-            load_files(entries, i + 1, fn);
-          });
-        } else {
-          fn();
-        }
-      }
-
-      load_index(function(index) {
-        load_files(index, 0, function() {
-          if (fn)
-            fn();
-        });
-      });
-    }
-
     function init_ui(where) {
       shen_web.init_repl();
       shen_web.edit.init(function(path) {
-        console.log("TODO: send (load path) to shen", path);
+        var file = shen_web.fs.root.get(path);
+        shen_web.send_file(path, file);
       });
       shen_web.fs.init(function(file, path) {
         if (file.type === "f")
-          shen_web.edit.load(shen_web.fs.root, path);
+          window.location.hash = "#" + path;
         else
-          shen_web.edit.unload();
+          window.location.hash = "#";
       });
     }
 
@@ -86,24 +47,18 @@ shen_web = (function() {
         p.removeChild(img);
       };
       init_ui();
-      var beat_i = 0;
-      function beat() {
-        console.log("beat " + (beat_i++));
-      }
-      //var beat_id = setInterval(beat, 100);
-      shen_web.embed_shen(function() {
-        init(function() {
-          //clearInterval(beat_id);
-          window.onhashchange = apply_hash;
-          if (opts && opts.ondone)
-            opts.ondone();
-          apply_hash();
-          var wait = document.getElementById("wait_frame");
-          if (wait)
-            wait.parentNode.removeChild(wait);
-          window.onerror = null;
-        });
-      });
+      var ondone = opts ? opts.ondone : null;
+      opts.ondone = function() {
+        window.onhashchange = apply_hash;
+        if (ondone)
+          ondone();
+        apply_hash();
+        var wait = document.getElementById("wait_frame");
+        if (wait)
+          wait.parentNode.removeChild(wait);
+        window.onerror = null;
+      };
+      shen_web.embed_shen(opts);
     };
   }
   return self;

@@ -53,10 +53,12 @@
 
   shen_web.init_maximize = function(div) {
     var max = div.getElementsByClassName("maximize_btn");
-    if (max.length)
+    if (max.length) {
+      max[0].title = "Maximize pane";
       max[0].onclick = function() {
         div.classList.toggle("maximized");
       };
+    }
   };
 
   shen_web.dialog = function(title, fn) {
@@ -79,19 +81,25 @@
     var t = document.createElement("div");
     t.className = "dlg_title";
     t.appendChild(document.createTextNode(title));
-    var x = this.img_btn("Close", "web/close.png");
-    x.classList.add("dlg_close");
-    x.onclick = function() {
-      over.parentNode.removeChild(over);
-    };
-    t.appendChild(x);
 
     var content = document.createElement("div");
     content.className = "dlg_content";
 
-    fn(over, content);
+    var ctl = document.createElement("div");
+    var cancel = document.createElement("a");
+    cancel.href = "";
+    cancel.className = "dlg_cancel link_btn";
+    cancel.onclick = function() {
+      over.parentNode.removeChild(over);
+      return false;
+    };
+    cancel.appendChild(document.createTextNode("cancel"));
+
+    fn(over, content, ctl);
+    ctl.appendChild(cancel);
     dlg.appendChild(t);
     dlg.appendChild(content);
+    content.appendChild(ctl);
     over.appendChild(dlg);
     document.body.appendChild(over);
     return over;
@@ -131,6 +139,7 @@
   shen_web.query = function(url, fn, errfn) {
     var req = new XMLHttpRequest();
     req.open('get', url, true);
+    req.responseType = "text";
     req.onreadystatechange = function() {
       if (req.readyState === 4)
         switch (req.status) {
@@ -146,4 +155,18 @@
       errfn(e);
     }
   }
+
+  shen_web.recv_jsonp = function(resp) {
+    console.log("jsonp resp", resp.meta, resp.data);
+  };
+
+  shen_web.jsonp = function(url) {
+    var script = document.createElement("script");
+    script.src = url;
+    script.onload = function() {
+      console.log("jsonp script loaded");
+      script.parentNode.removeChild(script);
+    };
+    document.getElementsByTagName("head")[0].appendChild(script);
+  };
 })();

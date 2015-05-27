@@ -38,11 +38,13 @@
             <div class="hdr tbl_cell">
               <div class="tbl_row">
                 <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
-                <label for="fs_toggle"
+                <label id="fs_toggle_label" for="fs_toggle" 
                        class="tbl_cell alt_hdr_fg alt_hdr_bg alt_hdr_hover
                               alt_hdr_active icon_btn btn_bg">
                   <div class="tbl_row">
-                    <img src="web/folder.png" class="tbl_cell"></img>
+                    <div class="tbl_cell fs_toggle_icon">
+                      <img src="web/folder.png"></img>
+                    </div>
                     <div class="tbl_cell fs_toggle_arrow"></div>
                   </div>
                 </label>
@@ -102,7 +104,7 @@
           <div id="repl_in_container" class="repl_in_container tbl_row">
             <div class="tbl_cell">
               <div class="tbl">
-                <div class="tbl_row">
+                <div class="tbl_row repl_in_outer">
                   <div class="tbl_cell repl_in_inner">
                     <textarea id="repl_in"
                               class="repl_in entry_fg entry_bg code"
@@ -144,29 +146,7 @@
           s = "BEGIN\n" + s + "\nEND\n";
           shen_web.puts(s);
         }
-
-        function init_playground() {
-          function fake_fs(root) {
-            root.put(".repl", "# REPL");
-            root.put(".h.shen", Array(200).join(str_iota(78) + "\n"));
-            root.put(".lessons/01/repl.shen", "\\* First let's learn how to use REPL *\\");
-            root.put(".lessons/01/basics.shen", "\\* Basics *\\");
-            root.put(".lessons/01/expr.shen", "\\* Expressions *\\");
-            root.put("one/two/three/six", "one thousand two hundreds and thirty six");
-            root.put("one/two/three/seven", "one thousand two hundreds and thirty seven");
-            root.mkdir("one/four/");
-            root.put("one/four/eight", "one hundred and forty eight");
-            root.put("one/four/file with very long name", "and short content");
-          }
-          fake_fs(shen_web.fs.root);
-          var edit = document.getElementById("editor_edit");
-          var view = document.getElementById("editor_view");
-          var repl = document.getElementById("repl_out");
-          fill_pre(edit);
-          fill_pre(view);
-          //fill_repl();
-        }
-        shen_web.init({ondone: init_playground});
+        shen_web.init({fs_index: "fs.json"});
       })();
     </script>
   </body>

@@ -1,9 +1,9 @@
 (function() {
-  function io() {
+  function io(vm) {
     var io = {};
     io.open = open;
-    shen.glob["*stoutput*"] = new shen.Stream("w", write_byte, function() {});
-    shen.ensure_chan_input();
+    vm.glob["*stoutput*"] = vm.Stream("w", write_byte, function() {});
+    vm.ensure_chan_input();
     return io;
 
     function write_byte(byte, vm) {
@@ -13,9 +13,9 @@
 
   function open(name, dir, vm) {
     var filename = vm.glob["*home-directory*"] + name;
-    var handler = find_handler(name);
-    if (handler)
-      return handler(name, dir, vm);
+    var loader = shen_web.fs.find_loader(name);
+    if (loader)
+      return loader(name, dir, vm);
     switch (dir.str) {
     case "in":
       var file = shen_web.fs.root.get(filename);
@@ -41,14 +41,13 @@
     return vm.Stream("w", read_byte, function() {});
   }
 
-  function find_handler(name) {
-    var hs = shen_web.vfs_handlers, n = hs.length, i, f;
-    for (i = 0; i < n; ++i) {
-      f = hs[i](name);
-      if (f)
-        return f;
-    }
-    return null;
+  function send(s) {
+    shen_web.puts(s, "input");
+    shen.send_str(s);
+  }
+
+  function send_file(path, file) {
+    send("(load \"" + path + "\")\n");
   }
 
   var posts = {}, posts_id = 0;
@@ -66,19 +65,32 @@
     }
   }
 
-  function post(fn) {
-    var id = posts_id++;
-    posts[id] = fn;
-    window.postMessage(id, "*");
+  function post(fn, ms) {
+    if (!ms) {
+      var id = posts_id++;
+      posts[id] = fn;
+      window.postMessage(id, "*");
+    } else
+      setTimeout(fn, ms);
   }
 
-  shen_web.vfs_handlers = [];
+  function shen_web_root() {
+    var url = window.location.href.replace(/#.*$/, "");
+    path = url.replace(/\/\/*/g, "/").replace(/^\//, "").replace(/\/$/, "")
+              .split("/");
+    return path.slice(0, path.length - 1).join("/");
+  }
+
   shen_web.file_out_stream = file_out_stream;
   window.addEventListener("message", recv_step, true);
   shen_web.post = post;
-  shen_web.embed_shen = function(ondone) {
-    shen.post_async = post;
-    //shen.post_async = function(fn) {setTimeout(fn, 100);};
-    shen.init({io: io, async: true, ondone: ondone, repl: true});
+  shen_web.send = send;
+  shen_web.send_file = send_file;
+  shen_web.embed_shen = function(opts) {
+    var fsindex = shen_web_root() + "/" + (opts.fs_index || "fs.json");
+    shen_web.fs.deploy(fsindex, function() {
+      shen.post_async = post;
+      shen.init({io: io, async: true, ondone: opts.ondone, repl: true});
+    });
   };
 })();

@@ -20,14 +20,9 @@
   }
 
   function send_input(t, extra) {
-    send(t.value + (extra || ""));
+    shen_web.send(t.value + (extra || ""));
     t.value = "";
     t.rows = 1;
-  }
-
-  function send(s) {
-    puts(s, "input");
-    shen.send_str(s);
   }
 
   function mk_input_keypress(fn) {
@@ -85,7 +80,6 @@
     }
   }
 
-  shen_web.send = send;
   shen_web.puts = puts;
   shen_web.init_repl = function() {
     shen_web.init_maximize(document.getElementById("repl"));

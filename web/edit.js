@@ -12,12 +12,22 @@
   };
 
   edit.load = function(root, path) {
+    function process_links(where) {
+      var links = where.getElementsByTagName("a"), i, n = links.length;
+      for (i = 0; i < n; ++i) {
+        var a = links[i];
+        if (a.hostname !== window.location.hostname)
+          a.target = "_blank";
+      }
+    }
+
     function load_html(html, where) {
       var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
       where.innerHTML = "<div>" + html + "</div>";
       var scr = where.getElementsByTagName("script");
       for (var i = 0; i < scr.length; ++i)
         eval(scr[i].innerHTML);
+      process_links(where);
     }
 
     var file = root.get(path),
@@ -68,19 +78,20 @@
     var s = "Do you want to restore file? All unsaved changes will be lost";
     if (!force && !(this.file && this.touched && confirm(s)))
       return;
-    var text = document.getElementById("shen_edit_entry");
+    var text = document.getElementById("editor_edit");
     text.value = this.file.str_data();
     text.touched = false;
   };
 
   edit.save = function() {
-    var text = document.getElementById("shen_edit_entry");
+    var text = document.getElementById("editor_edit");
     if (this.touched && this.path)
       shen_web.fs.root.put(this.path, text.value);
     this.touched = false;
   };
 
   edit.run = function(fn) {
+    this.save();
     if (this.path)
       fn(this.path);
   };
@@ -99,7 +110,7 @@
       var ctl = document.getElementById("editor_toolbar");
       shen_web.toolbar(ctl, [
         {
-          title: "Send to REPL",
+          title: "Save and send to REPL",
           icon: "web/run.png",
           onclick: function() {self.run(run);}
         },
@@ -110,17 +121,17 @@
         },
         {
           title: "Reload",
-          icon: "web/refresh.png",
+          icon: "web/revert.png",
           onclick: function() {self.reload();}
         },
         {
           title: "Download",
-          icon: "web/down.png",
+          icon: "web/download.png",
           onclick: function() {shen_web.fs.download(self.file, self.path);}
         },
         {
           title: "Upload",
-          icon: "web/up.png",
+          icon: "web/upload.png",
           onclick: function() {
             if (self.file)
               shen_web.fs.upload(self.path, false, function(files) {
@@ -138,11 +149,6 @@
     init_toolbar();
     this.unload();
     shen_web.init_maximize(document.getElementById("editor"));
-  };
-
-  edit.load_initial = function(root) {
-    var start = location.hash.replace(/^#/, "");
-    this.load(root, start || this.welcome);
   };
 
   shen_web.edit = edit;

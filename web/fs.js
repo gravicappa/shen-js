@@ -255,6 +255,65 @@ function Jsfile(type, data, evhandlers) {
     };
   }
 
+  fs.loaders = [];
+
+  fs.find_loader = function(name) {
+    var hs = this.loaders, n = hs.length, i, f;
+    for (i = 0; i < n; ++i) {
+      f = hs[i](name);
+      if (f)
+        return f;
+    }
+    return null;
+  };
+
+  fs.mk_match_loader = function(re, fn) {
+    return function(name) {
+      return (name.match(re)) ? fn : null;
+    };
+  };
+
+  fs.deploy = function deploy_fs(url, fn) {
+    function load_index(fn) {
+      shen_web.query(url, function(data) {
+        var obj = [];
+        try {
+          obj = JSON.parse(data);
+        } catch(err) {
+          console.log("fs.deploy parse error:", err);
+        }
+        fn(obj);
+      }, function(err) {
+        console.log("fs.deploy error: ", err);
+        fn([]);
+      });
+    }
+
+    function load_files(entries, i, fn) {
+      if (i < entries.length) {
+        var entry = entries[i], from = entry.from, to = entry.to;
+        if (from && to) {
+          shen_web.query(from, function(data) {
+            shen_web.fs.root.put(to, data);
+            load_files(entries, i + 1, fn);
+          }, function(err) {
+            console.log("fs.deploy entry err", err);
+            load_files(entries, i + 1, fn);
+          });
+        } else
+          load_files(entries, i + 1, fn);
+      } else
+        fn();
+    }
+
+    load_index(function(index) {
+      load_files(index, 0, function() {
+        if (fn)
+          fn();
+      });
+    });
+  };
+
   fs.init = function(file_fn) {
     var fs = this;
 
@@ -303,7 +362,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function ctl_upload() {
-      var btn = shen_web.img_btn("Upload file", "web/up.png");
+      var btn = shen_web.img_btn("Upload file", "web/upload.png");
       btn.classList.add("fs_ctl_upload_btn");
       btn.onclick = function() {
         console.log("fs.selected.path", fs.selected.path);
@@ -315,7 +374,7 @@ function Jsfile(type, data, evhandlers) {
     }
 
     function ctl_download() {
-      var btn = shen_web.img_btn("Download file", "web/down.png");
+      var btn = shen_web.img_btn("Download file", "web/download.png");
       btn.classList.add("fs_ctl_download_btn");
       btn.onclick = function() {
         var path = fs.selected.path;

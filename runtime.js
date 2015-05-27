@@ -14,6 +14,7 @@ shen = (function() {
     this.call_toplevel = null;
     this.io = null;
     this.chan_in = null;
+    this.interrupted = false;
   }
 
   Shen.prototype.toString = function() {
@@ -29,7 +30,7 @@ shen = (function() {
   Shen.prototype.run_span_interval_ms = 20;
   Shen.prototype.glob = {
     "*language*": "Javascript",
-    "*implementation*": "cli",
+    "*implementation*": "generic",
     "*port*": "3.0.0",
     "*porters*": "Ramil Farkhshatov",
     "*home-directory*": "",
@@ -203,7 +204,7 @@ shen = (function() {
 
   Shen.prototype.clone = function() {
     var obj = new this.constructor(),
-        keys = ["io", "eval", "run", "fn_entry", "fn_return", "run_span_len"],
+        keys = ["io", "run", "fn_entry", "fn_return", "run_span_len"],
         key;
     for (var i = 0; i < keys.length; ++i) {
       key = keys[i];
@@ -237,15 +238,11 @@ shen = (function() {
   };
 
   Shen.prototype.sleep_ms = function(ms) {
-    if (this.thread) {
-      this.thread = null;
-      var vm = this;
-      setTimeout(function() {
-        vm.resume(true);
-        vm.step();
-      }, ms);
-      this.interrupt();
-    }
+    var vm = this;
+    this.post_async(function() {
+      vm.resume(true);
+    }, ms);
+    this.interrupt();
   };
 
   function run(ip, vm) {
@@ -311,7 +308,7 @@ shen = (function() {
 
   Shen.prototype.run_interval = function() {
     var vm = this;
-    this.thread = this.post_async(function() {vm.step();});
+    this.post_async(function() {vm.step();}, 0);
     threads[this] = true;
   };
 
@@ -354,8 +351,8 @@ shen = (function() {
     return fn;
   };
 
-  Shen.prototype.post_async = function(x) {
-    setTimeout(x, 0);
+  Shen.prototype.post_async = function(x, ms) {
+    setTimeout(x, ms);
   };
 
   Shen.prototype.is_async = function() {
@@ -525,7 +522,8 @@ shen = (function() {
   };
 
   Shen.prototype.is_vector = function(x) {
-    return (x instanceof Array) && x[0] > 0;
+    return (x instanceof Array) && (typeof(x[0]) === "number")
+           && x.length === (x[0] + 1);
   };
 
   Shen.prototype.is_absvector = function(x) {
@@ -533,12 +531,7 @@ shen = (function() {
   };
 
   Shen.prototype.absvector = function(n) {
-    var ret = new Array(n);
-    /*
-    for (var i = 0; i < n; ++i)
-      ret[i] = this.fail_obj;
-      */
-    return ret;
+    return new Array(n);
   };
 
   Shen.prototype.is_true = function(x) {
@@ -940,7 +933,7 @@ shen = (function() {
       }
     }
 
-    io.open = function open(name, dir, vm) {
+    function open(name, dir, vm) {
       var filename = vm.glob["*home-directory*"] + name;
       if (typeof($HOME) !== "undefined")
         var filename = filename.replace(/^~/, $HOME);
@@ -988,6 +981,7 @@ shen = (function() {
     var stdin = new vm.Stream("r", read_byte, function(vm) {quit();});
     vm.glob["*stinput*"] = stdin;
     vm.glob["*stoutput*"] = stdout;
+    io.open = open;
     return io;
   };
 
@@ -1011,6 +1005,12 @@ shen = (function() {
     for (i = 0; i < n; ++i)
       chan.write(s.charCodeAt(i));
     return s;
+  };
+
+  Shen.prototype.print = function(s) {
+    var i, n = s.length, out = this.glob["*stoutput*"];
+    for (i = 0; i < n; ++i)
+      out.write_byte(s.charCodeAt(i), this);
   };
 
   // } IO

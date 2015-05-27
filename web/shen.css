@@ -29,6 +29,7 @@
 .btn_bg {background-color: transparent;}
 .btn_bg:hover {background-color: #8bc34a; border-color: #7f7f7f;}
 .btn_bg:active {background-color: #000; border-color: #000;}
+.lit_btn_bg {background-color: rgba(255, 255, 255, 0.3);}
 
 .repl_btn_fg {color: #222;}
 .repl_btn_bg {background-color: #d9ffc3; border-color: #d0f0c0;}
@@ -48,7 +49,13 @@
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.repl_tag_input {color: #778;}
+.link_btn, .link_btn:hover, .link_btn:visited {
+  color: #e33;
+  text-decoration: none;
+  border-bottom: 1px dashed #e33;
+}
+
+.repl_tag_input {color: #567;}
 .repl_tag_err {color: #c43;}
 
 .noselect {
@@ -153,7 +160,6 @@ body {
   resize: none;
   width: 100%;
   height: 100%;
-  padding: 0;
   margin: 0;
   border: 0;
 }
@@ -224,8 +230,12 @@ body {
   resize: none;
   overflow: hidden;
   width: 100%;
-  border: 1px solid Black;
   margin: 0;
+  border: 0;
+}
+
+.repl_in_outer {
+  border: 1px solid Black;
 }
 
 .repl_in_inner {
@@ -235,8 +245,7 @@ body {
 .repl_in_send {
   padding: 0 4px;
   font-size: 14px;
-  border-width: 1px;
-  border-style: solid;
+  border: 0;
   vertical-align: middle;
   cursor: default;
   transition: 0.4s;
@@ -308,6 +317,10 @@ ul.fs_dir {
   padding-left: 4px;
 }
 
+.fs_toggle_icon {
+  vertical-align: middle;
+}
+
 .fs_toggle_arrow::after {content: "»";}
 .fs_opened .fs_toggle_arrow::after {content: "«";}
 
@@ -354,6 +367,11 @@ ul.fs_dir {
 
 .dlg_close_btn {
   float: right;
+}
+
+a.dlg_cancel {
+  float: right;
+  margin: 8px 4px;
 }
 
 .dlg {
@@ -411,14 +429,26 @@ ul.fs_dir {
 /* DLG } */
 
 /* SHEN DOC { */
+
+.editor_view {
+  font-family: serif;
+}
+
 .editor_view h1 {font-size: 24px; font-variant: small-caps;}
-.editor_view h2 {font-size: 20px;}
+
+.editor_view h2 {
+  color: #445;
+  font-size: 20px;
+  border-bottom: 1px solid #dde;
+  margin: 1em 0;
+}
+
 .editor_view h3 {font-size: 18px;}
 .editor_view h4 {font-size: 14px;}
 
 .editor_view code {
-  background-color: #ffffef;
-  border: 1px dashed #cbf;
+  background-color: #fffff7;
+  border: 1px solid #fdd;
   padding: 2px;
 }
 
