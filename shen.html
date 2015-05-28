@@ -1,0 +1,130 @@
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Type" content="text/html"; charset="UTF-8"/>
+    <link rel="stylesheet" href="web/shen.css" type="text/css"/>
+    <script type="text/javascript" src="web/boot.js"></script>
+    <title>Shen REPL</title>
+  </head>
+
+  <body class="expand">
+    <div id="wait_frame" class="overlay wait">
+      <div id="wait_pane" class="wait_pane alt_bg">
+        <div id="wait_text" class="wait_text">Please, wait…</div>
+        <img id="wait_progress" src="web/wait.gif"></img>
+      </div>
+    </div>
+    
+    <div id="main" class="main expand">
+      <div class="fs tbl noselect alt_bg">
+        <div class="hdr_container tbl_row alt_hdr_fg alt_hdr_bg">
+          <div id="file_ctl" class="hdr tbl_cell hdr_tool undisplayed"></div>
+          <div id="dir_ctl" class="hdr tbl_cell hdr_tool"></div>
+          <div class="hdr_title tbl_cell"></div>
+        </div>
+        <div class="tbl_row">
+          <div class="outer tbl_cell">
+            <div id="fs_tree_container" class="inner">
+              <div id="fs_tree" class="fs_tree expand"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="main_inner">
+        <div id="editor" class="editor expand tbl">
+
+          <div class="hdr_container tbl_row hdr_fg hdr_bg">
+            <div class="hdr tbl_cell">
+              <div class="tbl_row">
+                <input type="checkbox" id="fs_toggle" class="fs_toggle"/>
+                <label id="fs_toggle_label" for="fs_toggle" 
+                       class="tbl_cell alt_hdr_fg alt_hdr_bg alt_hdr_hover
+                              alt_hdr_active icon_btn btn_bg">
+                  <div class="tbl_row">
+                    <div class="tbl_cell fs_toggle_icon">
+                      <img src="web/folder.png"></img>
+                    </div>
+                    <div class="tbl_cell fs_toggle_arrow"></div>
+                  </div>
+                </label>
+                <div id="editor_title" class="hdr_title tbl_cell"></div>
+                <div id="editor_toolbar" class="hdr_tool tbl_cell"></div>
+                <div class="hdr_tool tbl_cell">
+                  <button class="maximize_btn icon_btn btn_bg btn_fg">
+                    <img src="web/maximize.png"></img>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="editor_view_container"
+               class="tbl_row editor_border undisplayed">
+            <div class="outer tbl_cell">
+              <div class="inner">
+                <div id="editor_view" class="editor_view expand code"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="editor_edit_container" class="tbl_row editor_border">
+            <div class="outer tbl_cell">
+              <div class="inner">
+                <textarea 
+                   id="editor_edit"
+                   class="editor_edit entry_fg entry_bg code"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="repl" class="repl expand tbl">
+          <div class="hdr_container tbl_row hdr_fg hdr_bg">
+            <div class="hdr tbl_cell">
+              <div class="tbl_row">
+                <div class="hdr_title tbl_cell">*output*</div>
+                <div class="hdr_tool tbl_cell">
+                  <button class="maximize_btn icon_btn btn_bg btn_fg">
+                    <img src="web/maximize.png"></img>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="repl_out_container tbl_row">
+            <div class="tbl_cell">
+              <div class="inner">
+                <div id="repl_out" class="repl_out expand code"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="repl_in_container" class="repl_in_container tbl_row">
+            <div class="tbl_cell">
+              <div class="tbl">
+                <div class="tbl_row repl_in_outer">
+                  <div class="tbl_cell repl_in_inner">
+                    <textarea id="repl_in"
+                              class="repl_in entry_fg entry_bg code"
+                              rows="1" cols="1"></textarea>
+                  </div>
+                  <div id="repl_in_send"
+                       class="tbl_cell noselect repl_in_send btn_fg btn_bg
+                              repl_btn_bg repl_btn_fg">
+                    Send
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="application/javascript">
+      shen_web.init({fs_index: "fs.json"});
+    </script>
+  </body>
+</html>

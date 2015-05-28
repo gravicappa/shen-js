@@ -1,0 +1,12 @@
+[
+  {"to": ".doc/development.html", "from": "web_doc/doc/development.html"},
+  {"to": ".doc/welcome.html", "from": "web_doc/doc/welcome.html"},
+  {"to": ".examples/threads.shen", "from": "web_doc/examples/threads.shen"},
+  {"to": ".examples/ffi.shen", "from": "web_doc/examples/ffi.shen"},
+  {"to": ".doc/vm.html", "from": "doc/vm.html"},
+  {"to": ".doc/threads.html", "from": "doc/threads.html"},
+  {"to": ".doc/ffi.html", "from": "doc/ffi.html"},
+  {"to": ".doc/web.html", "from": "doc/web.html"},
+  {"to": ".doc/node.html", "from": "doc/node.html"},
+  {"to": ".doc/extend.html", "from": "doc/extend.html"}
+]

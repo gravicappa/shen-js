@@ -1,0 +1,345 @@
+(function() {
+  var fs = {};
+  fs.root = new Jsfile("d");
+  fs.selected = {};
+
+  fs.download = function(file, path) {
+    if (!file)
+      return;
+    try {
+      var blob = new Blob([file.data], {type: "application/octet-stream"});
+    } catch (e) {
+      window.BlobBuilder = window.BlobBuilder
+                           || window.MozBlobBuilder
+                           || window.WebKitBlobBuilder
+                           || window.MSBlobBuilder;
+      var bb = new window.BlobBuilder();
+      bb.append(file.data.buffer);
+      var blob = bb.getBlob("application/octet-stream");
+    }
+    window.URL = window.URL || window.webkitURL;
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.style["display"] = "none";
+    a.target = "_blank";
+    a.href = url;
+    a.download = path.match(/[^/]*$/)[0];
+    if (document.createEvent) {
+      var ev = document.createEvent("MouseEvents");
+      ev.initMouseEvent("click", true, true, window, 1, 0, 0, 0, 0, false,
+                        false, false, false, 0, null);
+      a.dispatchEvent(ev);
+    } else if (a.click)
+      a.click();
+    setTimeout(function() {URL.revokeObjectURL(url)}, 100);
+  };
+
+  fs.read_fileio = function(path, file) {
+    console.log("read_fileio", path, file);
+    var fs = this;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      fs.root.put(path, e.target.result);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  fs.upload = function(path, multiple, fn) {
+    var fs = this;
+    shen_web.dialog("Upload to file", function(dlg, content) {
+      var text = document.createElement("div");
+      text.appendChild(document.createTextNode("Choose a file to upload"));
+      text.className = "dlg_msg";
+      var input = document.createElement("input");
+      input.type = "file";
+      if (multiple)
+        input.directory = input.webkitdirectory = input.multiple = true;
+      input.onchange = function(ev) {
+        var files = ev.target.files || ev.target.webkitEntries;
+        fn(files);
+        dlg.parentNode.removeChild(dlg);
+      };
+      content.appendChild(text);
+      content.appendChild(input);
+    });
+  };
+
+  fs.upload_to = function(path) {
+    var fs = this;
+    this.upload(path, true, function(files) {
+      for (var i = 0; i < files.length; ++i) {
+        var f = files[i];
+        fs.read_fileio(path + "/" + f.name, f);
+      }
+    });
+  };
+
+  function init_handle() {
+    var handle = document.getElementById("fs_toggle"),
+        main = document.getElementById("main");
+    handle.checked = main.classList.contains("fs_opened");
+    handle.onclick = function() {
+      if (this.checked)
+        main.classList.add("fs_opened");
+      else
+        main.classList.remove("fs_opened");
+    };
+  }
+
+  fs.loaders = [];
+
+  fs.find_loader = function(name) {
+    var hs = this.loaders, n = hs.length, i, f;
+    for (i = 0; i < n; ++i) {
+      f = hs[i](name);
+      if (f)
+        return f;
+    }
+    return null;
+  };
+
+  fs.mk_match_loader = function(re, fn) {
+    return function(name) {
+      return (name.match(re)) ? fn : null;
+    };
+  };
+
+  fs.deploy = function deploy_fs(url, fn) {
+    function load_index(fn) {
+      shen_web.query(url, function(data) {
+        var obj = [];
+        try {
+          obj = JSON.parse(data);
+        } catch(err) {
+          console.log("fs.deploy parse error:", err);
+        }
+        fn(obj);
+      }, function(err) {
+        console.log("fs.deploy error: ", err);
+        fn([]);
+      });
+    }
+
+    function load_files(entries, i, fn) {
+      if (i < entries.length) {
+        var entry = entries[i], from = entry.from, to = entry.to;
+        if (from && to) {
+          shen_web.query(from, function(data) {
+            shen_web.fs.root.put(to, data);
+            load_files(entries, i + 1, fn);
+          }, function(err) {
+            console.log("fs.deploy entry err", err);
+            load_files(entries, i + 1, fn);
+          });
+        } else
+          load_files(entries, i + 1, fn);
+      } else
+        fn();
+    }
+
+    load_index(function(index) {
+      load_files(index, 0, function() {
+        if (fn)
+          fn();
+      });
+    });
+  };
+
+  fs.init = function(file_fn) {
+    var fs = this;
+
+    function ctl_rm(path) {
+      var btn = shen_web.img_btn("Delete", "web/rm.png");
+      btn.classList.add("fs_ctl_rm_btn");
+      btn.onclick = function() {
+        var path = fs.selected.path;
+        if (path && confirm("Do you want to delete '" + path + "'?"))
+          fs.root.rm(path, true);
+      };
+      return btn;
+    }
+
+    function mkfile_dlg(text, fn) {
+      return function() {
+        if (!fs.selected.path)
+          return;
+        var name = prompt(text);
+        if (!name || name === "")
+          return;
+        if (!fs.root.get(fs.selected.path + "/" + name))
+          fn(fs.selected.path + "/" + name);
+      };
+    }
+
+    function ctl_new(type) {
+      var btn;
+      switch (type) {
+      case "f":
+        btn = shen_web.img_btn("Create file", "web/new.png");
+        btn.classList.add("fs_ctl_mk_btn");
+        btn.onclick = mkfile_dlg("Enter file name", function(path) {
+          fs.root.put(path, "");
+        });
+        break;
+      case "d":
+        btn = shen_web.img_btn("Create dir", "web/folder_new.png");
+        btn.classList.add("fs_ctl_mk_btn");
+        btn.onclick = mkfile_dlg("Enter directory name", function(path) {
+          fs.root.mkdir(path);
+        });
+        break;
+      }
+      return btn;
+    }
+
+    function ctl_upload() {
+      var btn = shen_web.img_btn("Upload file", "web/upload.png");
+      btn.classList.add("fs_ctl_upload_btn");
+      btn.onclick = function() {
+        console.log("fs.selected.path", fs.selected.path);
+        var path = fs.selected.path;
+        if (path || path === "")
+          fs.upload_to(path);
+      };
+      return btn;
+    }
+
+    function ctl_download() {
+      var btn = shen_web.img_btn("Download file", "web/download.png");
+      btn.classList.add("fs_ctl_download_btn");
+      btn.onclick = function() {
+        var path = fs.selected.path;
+        if (path)
+          fs.download(fs.root.get(path), path);
+      };
+      return btn;
+    }
+
+    function init_file_ctl(div) {
+      div.appendChild(ctl_download());
+      div.appendChild(ctl_rm());
+      return div;
+    }
+
+    function init_dir_ctl(div) {
+      div.appendChild(ctl_new("f"));
+      div.appendChild(ctl_new("d"));
+      div.appendChild(ctl_upload());
+      div.appendChild(ctl_rm());
+      return div;
+    }
+
+    function dir_onclick_icon(icon, contents) {
+      if (contents.classList.toggle("fs_subdir_collapsed"))
+        icon.src = "web/folder.png";
+      else
+        icon.src = "web/folder_open.png";
+      return true;
+    }
+
+    function toggle_item_select(entry, select) {
+      var fn = (select) ? "add" : "remove";
+      for (var c = entry.childNodes, i = 0; i < c.length; ++i) {
+        var sub = c[i];
+        if (sub.classList.contains("fs_name"))
+          sub.classList[fn]("accent_bg", "accent_fg");
+      }
+    }
+
+    function item_onclick(entry, path) {
+      if (fs.selected.entry) {
+        toggle_item_select(fs.selected.entry, false);
+        fs.selected.entry.classList.remove("fs_selection");
+      }
+      var file = fs.root.get(path);
+      file_fn(file, path);
+      fs.file_ctl.classList.remove("undisplayed");
+      fs.dir_ctl.classList.remove("undisplayed");
+      switch (file.type) {
+      case "f": fs.dir_ctl.classList.add("undisplayed"); break;
+      case "d": fs.file_ctl.classList.add("undisplayed"); break;
+      }
+      fs.selected.entry = entry;
+      fs.selected.path = path;
+      entry.classList.add("fs_selection");
+      toggle_item_select(fs.selected.entry, true);
+    }
+
+    function basename(path) {
+      return path.match(/[^/]*$/)[0];
+    }
+
+    function file_icon(file, path) {
+      var icon = document.createElement("img");
+      icon.className = "fs_icon";
+      if (file.type === "d") {
+        icon.src = "web/folder_open.png";
+      } else if (path.match(/\.html$/))
+        icon.src = "web/html.png";
+      else if (path.match(/\.shen$/))
+        icon.src = "web/shen_source.png";
+      else
+        icon.src = "web/document.png";
+      return icon;
+    }
+
+    function oncreate_dir(file, path, entry) {
+      entry.classList.add("fs_entry", "fs_dir_entry");
+      var name = document.createElement("div");
+      name.className = "fs_name";
+      name.onclick = function() {item_onclick(entry, path);};
+      var name_text = document.createElement("span");
+      name_text.className = "fs_name_text";
+      name_text.appendChild(document.createTextNode(basename(path) + "/"));
+      var subdir = document.createElement("ul");
+      subdir.className = "fs_dir";
+      var icon = file_icon(file, path);
+      icon.onclick = function() {return dir_onclick_icon(icon, subdir);};
+      name.appendChild(icon);
+      name.appendChild(name_text);
+      entry.appendChild(name);
+      entry.appendChild(subdir);
+      file.oncreate_child = mkoncreate_child(subdir);
+    }
+
+    function oncreate_file(file, path, entry) {
+      entry.classList.add("fs_entry", "fs_file_entry");
+      var name = document.createElement("div");
+      name.className = "fs_name";
+      name.onclick = function() {item_onclick(entry, path);};
+      var name_text = document.createElement("span");
+      name_text.className = "fs_name_text";
+      name_text.appendChild(document.createTextNode(basename(path)));
+      name.appendChild(file_icon(file, path));
+      name.appendChild(name_text);
+      entry.appendChild(name);
+    }
+
+    function mkoncreate_child(container) {
+      function fn(file, path) {
+        var entry = document.createElement("li");
+        container.appendChild(entry);
+        switch (file.type) {
+        case "d": oncreate_dir(file, path, entry); break;
+        case "f": oncreate_file(file, path, entry); break;
+        }
+        file.onrm = mkonrm(entry);
+      }
+      return fn;
+    }
+
+    function mkonrm(container) {
+      return function() {
+        container.parentNode.removeChild(container);
+      };
+    }
+
+    init_handle();
+
+    fs.dir = document.getElementById("fs_tree");
+    fs.file_ctl = init_file_ctl(document.getElementById("file_ctl"));
+    fs.dir_ctl = init_dir_ctl(document.getElementById("dir_ctl"));
+    oncreate_dir(this.root, "", fs.dir);
+  };
+  shen_web.fs = fs;
+})();
