@@ -1,0 +1,78 @@
+<h1>Welcome to Shen-js browser REPL</h1>
+
+<p><em>If you don&#39;t want to see this document again use this <a href="#">link</a> in the
+future.</em></p>
+
+<h2>New Shen-js features</h2>
+
+<ul>
+<li>Cleaner objects representation,</li>
+<li><a href="#.doc/threads.html">green threads</a>,</li>
+<li><a href="#.doc/ffi.html">better FFI</a>,</li>
+<li><a href="#.doc/vm.html">async-ready VM</a>,</li>
+<li>new shiny web UI.</li>
+</ul>
+
+<h2>Usage</h2>
+
+<p>The screen is divided into three parts:</p>
+
+<ul>
+<li>filesystem pane which now should be hidden,</li>
+<li>editor pane on the left,</li>
+<li>repl pane on the right.</li>
+</ul>
+
+<h3>Filesystem pane</h3>
+
+<p>Press a button <span id="fs_btn_sample"></span> on topleft page corner to show
+or hide filesystem view which represents virtual filesystem. <strong>Note that
+persistent storage is not implemented yet hence all changes will be lost when
+you close or reload Shen repl page.</strong></p>
+
+<p>Click on a file or directory to select it. If a file has <code>.html</code> extension
+then it will be displayed in the editor pane as a formatted document (just
+like this manual). Otherwise it will be opened for modifications.</p>
+
+<p>You also can upload or download files. Use corresponding buttons at the top of
+filesystem pane or in the title of currently opened document (if applicable).</p>
+
+<h3>Editor pane</h3>
+
+<p>Here you can view formatted documents or edit sources. When editable file is
+loaded additional buttons appear at the title which allow running file in
+Shen, downloading, updating, etc.</p>
+
+<h3>REPL pane</h3>
+
+<p>It consists of Shen output window and Shen input entry. Type code into it and
+press <code>Return</code> to execute. You can also press <code>Ctrl+Return</code> for multiline
+entry.</p>
+
+<h2>Development</h2>
+
+<p>The application is still buggy and incomplete. It lacks a lot of features,
+such as:</p>
+
+<ul>
+<li>extensive documentation,</li>
+<li>built-in Shen tutorials,</li>
+<li>loading files from services like github.com,</li>
+<li>persistent file storage,</li>
+<li>cleaner visual style (icons, colours and other such things),</li>
+<li>…</li>
+</ul>
+
+<p>Any form of <a href="#.doc/development.html">contribution</a> is welcome.</p>
+
+<script type="application/javascript">
+(function() {
+  var to = document.getElementById("fs_btn_sample"),
+      x = document.getElementById("fs_toggle_label").cloneNode(true);
+  to.style.border = "1px solid #ddd";
+  to.style.display = "inline-block";
+  //x.htmlFor = null;
+  x.style.display = "block";
+  to.appendChild(x);
+})();
+</script>

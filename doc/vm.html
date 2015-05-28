@@ -1,0 +1,25 @@
+<h1>Some Shen-js VM tricks</h1>
+
+<h2>Interrupting vm</h2>
+
+<p>Shen-js vm can be stopped at some point of time and resumed later. It can be
+useful when dealing with asynchronous Javascript tasks:</p>
+
+<pre><code>shen.defun(&quot;xml-http-req&quot;, function(arg) {
+  this.interrupt();
+  var vm = this;
+  xml_http_req(function ondone(result) {
+    vm.resume(result);
+  }, function onerr(err) {
+    vm.resume(vm.fail_obj);
+  });
+);
+</code></pre>
+
+<p>To be used like</p>
+
+<pre><code>(let Data (xml-http-req Url)
+  (if (= Data (fail))
+      (error &quot;Request failed&quot;)
+      (process-response Data)))
+</code></pre>

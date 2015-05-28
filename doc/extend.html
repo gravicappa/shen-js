@@ -1,0 +1,65 @@
+<h1>Extending Shen-js</h1>
+
+<h2>Implementing own I/O</h2>
+
+<p>It&#39;s easier to look into <code>web/embed.js</code> to see how to set up custom I/O. It
+consists of defining I/O initialisation function and passing it to <code>shen.init</code>
+by <code>io</code> key:</p>
+
+<pre><code>  function io(vm) {
+    var io_obj = {};
+    io_obj.open = function(name, direction, vm) {
+      …
+    };
+    vm.glob[&quot;*stoutput*&quot;] = vm.Stream(&quot;w&quot; out_write_byte, out_close);
+
+    /* you can either directly assign a stream as an input */
+    vm.glob[&quot;*stinput*&quot;] = vm.Stream(&quot;r&quot;, in_read_byte, in_close);
+    /*
+      or you can initialise input channel:
+
+        vm.ensure_chan_input();
+
+      and then use 
+
+        vm.send_str(some_string);
+
+      to pass data to it
+    */
+  }
+
+  shen.init({io: io, …});
+</code></pre>
+
+<h3>Stream class</h3>
+
+<p>Objects (stream in) or a (stream out) are represented in Shen-js as objects of
+Stream class. Output streams has &quot;w&quot; character in their <code>dir</code> member and input
+streams has &quot;r&quot; character.</p>
+
+<pre><code>/* defining output stream */
+var out = vm.Stream(&quot;w&quot;,
+                    function write_byte(byte, vm) {
+                      …
+                    },
+                    function close(vm) {
+                      …
+                    });
+
+/* defining input stream */
+var inp = vm.Stream(&quot;r&quot;,
+                    function read_byte(vm) {
+                      …
+                    },
+                    function close(vm) {
+                      …
+                    });
+</code></pre>
+
+<p>Notes:</p>
+
+<ul>
+<li><code>vm</code> parameter is a reference to shen-js thread that is calling
+corresponding methods.</li>
+<li><code>read_byte</code> should return -1 when end of file is reached.</li>
+</ul>

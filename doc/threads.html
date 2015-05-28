@@ -1,0 +1,51 @@
+<h1>Shen-js threads</h1>
+
+<p>Shen-js&#39;s threads are green threads.</p>
+
+<h2>Threads</h2>
+
+<p><code>js.make-thread</code> creates a thread and starts it. It receives a single argument
+which can be either zero-place function object or freeze object:</p>
+
+<pre><code>(js.make-thread (function some-code))
+(js.make-thread (freeze (some-code Arg1)))
+</code></pre>
+
+<p>It returns a thread id which is not used anywhere outside.</p>
+
+<h2>Channels</h2>
+
+<p>Channels are stream-like facilities suitable for inter-thread communication.
+If a thread tries to read from channel with empty buffer it becomes dormant
+until channel is written to. Reading from closed channel returns <code>fail</code>.</p>
+
+<p>Create a channel</p>
+
+<pre><code>(js.chan)
+</code></pre>
+
+<p>Read from a channel</p>
+
+<pre><code>(js.chan-read Ch)
+</code></pre>
+
+<p>Write to a channel</p>
+
+<pre><code>(js.chan-write Value Ch)
+</code></pre>
+
+<p>Close a channel</p>
+
+<pre><code>(js.chan-close Ch)
+</code></pre>
+
+<h2>Miscellaneous</h2>
+
+<p>To stop current thread for a time of given milliseconds</p>
+
+<pre><code>(js.sleep-ms Milliseconds)
+</code></pre>
+
+<h2>Example</h2>
+
+<p>Some simple <a href="#.examples/threads.shen">example</a>.</p>

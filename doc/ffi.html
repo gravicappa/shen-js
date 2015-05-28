@@ -1,0 +1,157 @@
+<h1>Shen-js FFI</h1>
+
+<h2>Javascript from Shen</h2>
+
+<h3>General Javascipt code</h3>
+
+<p><code>js.&#39;</code> injects raw Javascript code. Use it with caution. Trying to access
+internal interpreter variables (<code>vm</code>, <code>reg</code>, <code>sp</code>) may lead to unexpected
+results.</p>
+
+<pre><code>(let Add (js.&#39; &quot;function(x, y) {
+                  return x + y;
+                }&quot;)
+  (js.call Add 3 7))
+</code></pre>
+
+<h3>Referencing object properties or array items</h3>
+
+<p>Use <code>js.</code> to reference object&#39;s property:</p>
+
+<pre><code>(js. document body children 0)
+</code></pre>
+
+<p>that will be translated to</p>
+
+<pre><code>document.body.children[0]
+</code></pre>
+
+<p>Keep in mind that <code>js.</code> primitive will strip package names from symbols to
+simplify using it inside packages. But it also means that the code
+<code>(js. document.body children)</code> may not do that is expected to.</p>
+
+<h3>Calling native code</h3>
+
+<p><code>js.call</code> wraps it&#39;s arguments to a function call:</p>
+
+<pre><code>(js. console (js.call log &quot;Yellow pants! Double qu!&quot;))
+</code></pre>
+
+<p>is expanded to</p>
+
+<pre><code>console.log(&quot;Yellow pants! Double qu!&quot;)
+</code></pre>
+
+<h3>Setting values</h3>
+
+<pre><code>(js.set (js. document (js.call getElementById &quot;some_button&quot;))
+        (js.&#39; &quot;function() {
+                 console.log(&#39;click!&#39;);
+               }&quot;))
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>document.getElementById(&quot;some_button&quot;) = function() {
+  console.log(&#39;click!&#39;);
+};
+</code></pre>
+
+<h3>Creating objects</h3>
+
+<pre><code>(js.new (protect Array) 3 1 2 3)
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>new Array(3, 1, 2, 3)
+</code></pre>
+
+<h3>Creating literal objects</h3>
+
+<pre><code>(js.obj language &quot;Shen&quot; host_language &quot;Javascript&quot; ui &quot;Web&quot;)
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>{language: &quot;Shen&quot;, host_language: &quot;Javascript&quot;, ui: &quot;Web&quot;)
+</code></pre>
+
+<h3>Creating arrays</h3>
+
+<pre><code>(js.arr 1 &quot;two&quot; 3 &quot;four&quot; 5)
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>[1, &quot;two&quot;, 3, &quot;four&quot;, 5]
+</code></pre>
+
+<h3>Example</h3>
+
+<p>Some simple <a href="#.examples/ffi.shen">example</a>.</p>
+
+<h2>Shen from Javascript</h2>
+
+<p>It is more complicated so here is a short</p>
+
+<h3>Defining Shen function</h3>
+
+<p>Use <code>shen.defun</code> to define a Shen function. It has two modes. Called with a
+single function argument it takes passed function&#39;s name:</p>
+
+<pre><code>// defines `hello` function in Shen
+shen.defun(function hello(s) {
+  console.log(&quot;Hello, &quot; + s);
+});
+</code></pre>
+
+<p>But it is possible to manually specify a name:</p>
+
+<pre><code>// defines `hello-there` function in Shen
+shen.defun(&quot;hello-there&quot;, function hello(s) {
+  console.log(&quot;Hello there, &quot; + s);
+});
+</code></pre>
+
+<p>The function will be executed with <code>this</code> set to current interpreter vm.</p>
+
+<h3>Running Shen code</h3>
+
+<pre><code>shen.call(&quot;some-func&quot;, [arg1, arg2, ...]);
+</code></pre>
+
+<h3>Shen objects</h3>
+
+<h4>Cons</h4>
+
+<p>Creating</p>
+
+<pre><code>var a = shen.Cons(head, tail);
+var b = shen.list([a, b, c, ...]);
+</code></pre>
+
+<p>Accessing</p>
+
+<pre><code>console.log(a.head, a.tail);
+</code></pre>
+
+<h4>Vector</h4>
+
+<p>Creating</p>
+
+<pre><code>var v = shen.vector(n);
+</code></pre>
+
+<p>When accessing keep in mind that the first element <code>v[0]</code> contains the length
+of the vector.</p>
+
+<h4>Fail object</h4>
+
+<pre><code>shen.fail_obj
+</code></pre>
+
+<h4>Other</h4>
+
+<p>There are other objects which you can discover in the beginning of <code>shen.js</code>
+(or in <code>runtime.js</code>). I&#39;ll document them if there will be any need.</p>

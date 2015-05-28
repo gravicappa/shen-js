@@ -1,0 +1,26 @@
+<h1>Deploying Shen-js repl</h1>
+
+<p>To simply deploy Shen-js repl copy the following files/directories to some
+place in your webroot:</p>
+
+<ul>
+<li>shen.js</li>
+<li>shen.html</li>
+<li>web/</li>
+</ul>
+
+<p>It will have its filesystem empty though. If you want to fill it with some
+initial content then read the following section.</p>
+
+<h2>Deploying synthetic filesystem</h2>
+
+<p>Shen-js web UI tries to load (via xmlhttprequest/ajax) file <code>fs.json</code> located
+in the same directory with <code>shen.html</code> which defines which files to load and
+has simple structure:</p>
+
+<pre><code>[
+  {&quot;from&quot;: &quot;./relative/link&quot;, to: &quot;local/path&quot;},
+  {&quot;from&quot;: &quot;http://absolute/link/...&quot;, to: &quot;local/path&quot;},
+  ...
+]
+</code></pre>
