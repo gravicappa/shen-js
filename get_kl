@@ -1,0 +1,21 @@
+#!/bin/sh
+root=../official
+
+set -e
+
+latest() {
+  find "$root"/'Shen '[0-9]* -type d -maxdepth 0 | sort -V | tail -n 1
+}
+
+dir="$(latest)"
+
+kl_dir() {
+  kldir=""
+  for x in "K Lambda" "KLambda"; do
+    test -d "$dir/$x" && kldir="$dir/$x"
+  done
+  test -z "$kldir" && { echo "Unable to find KLambda files">&2; exit 1;}
+  echo "$kldir"
+}
+
+cp "$(kl_dir)"/*.kl "."

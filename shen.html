@@ -123,31 +123,8 @@
       </div>
     </div>
     
-    <script type="text/javascript">
-      (function() {
-        function str_iota(n) {
-          var s = "";
-          for (var i = 0; i < n; ++i)
-            s += String(i % 10);
-          return s;
-        }
-
-        function fill_pre(t) {
-          if (t) {
-            var n = 1000,
-                s = new Array(n).join(str_iota(80) + "\n").trim();
-            t.appendChild(document.createTextNode("BEGIN\n" + s + "\nEND\n"));
-          }
-        }
-
-        function fill_repl() {
-          var n = 1000,
-              s = new Array(n).join(str_iota(80) + "\n").trim();
-          s = "BEGIN\n" + s + "\nEND\n";
-          shen_web.puts(s);
-        }
-        shen_web.init({fs_index: "fs.json"});
-      })();
+    <script type="application/javascript">
+      shen_web.init({fs_index: "fs.json"});
     </script>
   </body>
 </html>

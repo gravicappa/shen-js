@@ -1,0 +1,89 @@
+#!/bin/sh
+#\
+exec jimsh "$0" "$@"
+
+set size 16x16
+set dirs {
+  /usr/share/icons/Tango
+  ~/.icons/Zen
+}
+
+array set icon_fallback {
+  places/folder-open.png {status/folder-open.png}
+}
+
+proc process_dirs {} {
+  global dirs env
+  set x {}
+  foreach d $dirs {
+    switch -glob -- $d {
+      #* {}
+      ~/* {lappend x [regsub {^~} $d $env(HOME)]}
+      default {lappend x $d}
+    }
+    lappend x $d
+  }
+  set dirs $x
+}
+
+process_dirs
+
+proc get_src {src} {
+  global icon_fallback dirs size
+  set src_list [list $src]
+  catch {lappend src_list {*}$icon_fallback($src)}
+  foreach src $src_list {
+    set dir [file dirname $src]
+    set name [regsub {\.[^.]*$} [file tail $src] {}]
+    lappend names $name
+    catch {lappend names {*}$icon_fallback($name)}
+    set sizes [list [regsub {x.*$} $size {}] $size scalable]
+    foreach d $dirs {
+      foreach n $names {
+        foreach s $sizes {
+          foreach e {png svg} {
+            set file $d/$dir/$s/$n.$e
+            if {[file exists $file]} {
+              return $file
+            }
+            set file $d/$s/$dir/$n.$e
+            if {[file exists $file]} {
+              return $file
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+proc from_svg {from to} {
+  global size
+  exec convert -background none $from -resize $size $to
+}
+
+proc get {from to} {
+  set src [get_src $from]
+  #puts "; $src -> $to"
+  switch -glob -- $src {
+    *.png {file copy -force $src $to}
+    *.svg {from_svg $src $to}
+    default {puts stderr "Cannot find $from"}
+  }
+}
+
+get actions/window-close.png web/close.png
+get mimetypes/document.png web/document.png
+get actions/down.png web/download.png
+get places/folder.png web/folder.png
+get actions/folder-new.png web/folder_new.png
+get places/folder-open.png web/folder_open.png
+get mimetypes/html.png web/html.png
+get actions/view-fullscreen.png web/maximize.png
+get actions/document-new.png web/new.png
+get actions/document-revert.png web/revert.png
+get actions/stock_delete.png web/rm.png
+get actions/system-run.png web/run.png
+get actions/document-save.png web/save.png
+get mimetypes/text-x-generic.png web/shen_source.png
+get actions/up.png web/upload.png

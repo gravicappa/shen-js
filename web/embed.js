@@ -74,20 +74,13 @@
       setTimeout(fn, ms);
   }
 
-  function shen_web_root() {
-    var url = window.location.href.replace(/#.*$/, "");
-    path = url.replace(/\/\/*/g, "/").replace(/^\//, "").replace(/\/$/, "")
-              .split("/");
-    return path.slice(0, path.length - 1).join("/");
-  }
-
   shen_web.file_out_stream = file_out_stream;
   window.addEventListener("message", recv_step, true);
   shen_web.post = post;
   shen_web.send = send;
   shen_web.send_file = send_file;
   shen_web.embed_shen = function(opts) {
-    var fsindex = shen_web_root() + "/" + (opts.fs_index || "fs.json");
+    var fsindex = opts.fs_index || "fs.json";
     shen_web.fs.deploy(fsindex, function() {
       shen.post_async = post;
       shen.init({io: io, async: true, ondone: opts.ondone, repl: true});

@@ -138,7 +138,7 @@
 
   shen_web.query = function(url, fn, errfn) {
     var req = new XMLHttpRequest();
-    req.open('get', url, true);
+    req.open('GET', url, true);
     req.responseType = "text";
     req.onreadystatechange = function() {
       if (req.readyState === 4)
