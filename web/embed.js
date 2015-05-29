@@ -41,11 +41,7 @@ shen_web.embed_shen = function(opts) {
   function file_out_stream(file, vm) {
     file.data = new Uint8Array(0);
     function write_byte(byte, vm) {
-      try {
-        file.data = buf_append(file.data, [byte]);
-      } catch (e) {
-        console.log(e);
-      }
+      file.data = buf_append(file.data, [byte]);
       return byte;
     }
     return vm.Stream("w", write_byte, function() {});
