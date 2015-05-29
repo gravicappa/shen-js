@@ -1,19 +1,7 @@
 shen_web = (function() {
   var self = {};
   self.init = function(opts) {
-    function init_ui(where) {
-      shen_web.init_repl();
-      shen_web.edit.init(function(path) {
-        var file = shen_web.fs.root.get(path);
-        shen_web.send_file(path, file);
-      });
-      shen_web.fs.init(function(file, path) {
-        if (file.type === "f")
-          window.location.hash = "#" + path;
-        else
-          window.location.hash = "#";
-      });
-    }
+    var ondone = opts ? opts.ondone : null;
 
     function script(file, fn) {
       var s = document.createElement("script")
@@ -35,29 +23,42 @@ shen_web = (function() {
         shen_web.edit.load(shen_web.fs.root, path);
     }
 
+    function onerror(msg) {
+      var p = document.getElementById("wait_pane"),
+          t = document.getElementById("wait_text"),
+          img = document.getElementById("wait_progress");
+      p.classList.add("wait_error");
+      while (t.firstChild)
+        t.removeChild(t.firstChild);
+      t.appendChild(document.createTextNode("Error occured: " + msg));
+      p.removeChild(img);
+    }
+
+    function done() {
+      window.onhashchange = apply_hash;
+      if (ondone)
+        ondone();
+      apply_hash();
+      var wait = document.getElementById("wait_frame");
+      if (wait)
+        wait.parentNode.removeChild(wait);
+      window.onerror = null;
+    }
+
     window.onload = function() {
-      window.onerror = function(msg) {
-        var p = document.getElementById("wait_pane"),
-            t = document.getElementById("wait_text"),
-            img = document.getElementById("wait_progress");
-        p.classList.add("wait_error");
-        while (t.firstChild)
-          t.removeChild(t.firstChild);
-        t.appendChild(document.createTextNode("Error occured: " + msg));
-        p.removeChild(img);
-      };
-      init_ui();
-      var ondone = opts ? opts.ondone : null;
-      opts.ondone = function() {
-        window.onhashchange = apply_hash;
-        if (ondone)
-          ondone();
-        apply_hash();
-        var wait = document.getElementById("wait_frame");
-        if (wait)
-          wait.parentNode.removeChild(wait);
-        window.onerror = null;
-      };
+      window.onerror = onerror;
+      shen_web.init_repl();
+      shen_web.init_edit(function(path) {
+        var file = shen_web.fs.root.get(path);
+        shen_web.send_file(path, file);
+      });
+      shen_web.init_fs(function(file, path) {
+        if (file.type === "f")
+          window.location.hash = "#" + path;
+        else
+          window.location.hash = "#";
+      });
+      opts.ondone = done;
       shen_web.embed_shen(opts);
     };
   }

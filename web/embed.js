@@ -1,4 +1,4 @@
-(function() {
+shen_web.embed_shen = function(opts) {
   function io(vm) {
     var io = {};
     io.open = open;
@@ -74,16 +74,14 @@
       setTimeout(fn, ms);
   }
 
-  shen_web.file_out_stream = file_out_stream;
+  this.file_out_stream = file_out_stream;
   window.addEventListener("message", recv_step, true);
-  shen_web.post = post;
-  shen_web.send = send;
-  shen_web.send_file = send_file;
-  shen_web.embed_shen = function(opts) {
-    var fsindex = opts.fs_index || "fs.json";
-    shen_web.fs.deploy(fsindex, function() {
-      shen.post_async = post;
-      shen.init({io: io, async: true, ondone: opts.ondone, repl: true});
-    });
-  };
-})();
+  this.post = post;
+  this.send = send;
+  this.send_file = send_file;
+  var fsindex = opts.fs_index || "fs.json";
+  this.fs.deploy(fsindex, function() {
+    shen.post_async = post;
+    shen.init({io: io, async: true, ondone: opts.ondone, repl: true});
+  });
+};

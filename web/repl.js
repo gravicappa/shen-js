@@ -1,4 +1,4 @@
-(function() {
+shen_web.init_repl = function() {
   var repl = {};
   function puts(str, tag) {
     var out = document.getElementById("repl_out");
@@ -81,8 +81,6 @@
   }
 
   shen_web.puts = puts;
-  shen_web.init_repl = function() {
-    shen_web.init_maximize(document.getElementById("repl"));
-    init_input();
-  };
-})();
+  shen_web.init_maximize(document.getElementById("repl"));
+  init_input();
+};
