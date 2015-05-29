@@ -1,0 +1,35 @@
+#!/bin/sh
+index() {
+  find "$1" -type f '(' -name '*.html' -or -name '*.shen' ')' \
+  | awk -v dst_prefix="$2" -v dir="$1" '
+  {
+    to = from = $0
+    sub("^" dir "/", dst_prefix, to);
+    printf("{\"to\": \"%s\", \"from\": \"%s\"}\n", to, from);
+  }'
+}
+
+{
+  index web_doc .
+  index doc .doc/
+} | awk '
+BEGIN {print("[")}
+NR != 1 {printf(",\n")}
+{printf("  %s", $0)}
+END {print("\n]")}
+'
+
+exit 0
+find "$dir" -type f '(' -name '*.html' -or -name '*.shen' ')' \
+| awk -v dst_prefix="$dst_prefix" -v dir="$dir" '
+
+BEGIN {print "[";}
+NR == 1 {printf "  "}
+NR != 1 {printf ",\n  "}
+{
+  to = from = $0
+  sub("^" dir "/", dst_prefix, to);
+  printf("{\"to\": \"%s\", \"from\": \"%s\"}", to, from);
+}
+END {print "\n]"}
+'

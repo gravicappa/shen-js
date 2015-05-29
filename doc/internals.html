@@ -1,4 +1,17 @@
-<h1>Some Shen-js VM tricks</h1>
+<h1>Shen-js internals</h1>
+
+<h2>Translating to Javascript</h2>
+
+<p>There are several function for translating from different kind of source data
+to Javascript code:</p>
+
+<pre><code>(js.from-file Filename)
+(js.from-files List-of-filenames)
+(js.from-string String)
+(js.from-shen List-of-Shen-code)
+(js.from-kl List-of-Kl-code)
+(js.save-from-files List-of-filenames Target-filename)
+</code></pre>
 
 <h2>Interrupting vm</h2>
 
