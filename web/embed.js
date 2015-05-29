@@ -26,19 +26,29 @@ shen_web.embed_shen = function(opts) {
       case "d": return vm.error("open: '" + filename + "' is directory");
       default: return vm.error("open: '" + filename + "' has unknown type");
       }
-    case "out": return file_out_stream(shen_web.fs.root.put(filename));
+    case "out": return file_out_stream(shen_web.fs.root.put(filename), vm);
     default: return vm.error("Unsupported 'open' flags");
     }
   }
 
+  function buf_append(a, b) {
+    var alen = a.length, blen = b.length, r = new Uint8Array(alen + blen);
+    r.set(a);
+    r.set(b, alen);
+    return r;
+  }
+
   function file_out_stream(file, vm) {
-    var pos = 0;
-    function read_byte(vm) {
-      if (pos < file.data.byteLength)
-        return file.data[pos++];
-      return -1;
+    file.data = new Uint8Array(0);
+    function write_byte(byte, vm) {
+      try {
+        file.data = buf_append(file.data, [byte]);
+      } catch (e) {
+        console.log(e);
+      }
+      return byte;
     }
-    return vm.Stream("w", read_byte, function() {});
+    return vm.Stream("w", write_byte, function() {});
   }
 
   function send(s) {

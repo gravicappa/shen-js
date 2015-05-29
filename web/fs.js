@@ -158,7 +158,7 @@ shen_web.init_fs = function(file_fn) {
 
   function mkfile_dlg(text, fn) {
     return function() {
-      if (!fs.selected.path)
+      if (!fs.selected.path && fs.selected.path !== "")
         return;
       var name = prompt(text);
       if (!name || name === "")
