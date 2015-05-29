@@ -30,6 +30,10 @@ Click on a file or directory to select it. If a file has `.html` extension
 then it will be displayed in the editor pane as a formatted document (just
 like this manual). Otherwise it will be opened for modifications.
 
+Actions of buttons on the top of the pane are performed to selected item. If
+you want to create a file then select destination directory and click on
+"create file" button.
+
 You also can upload or download files. Use corresponding buttons at the top of
 filesystem pane or in the title of currently opened document (if applicable).
 
