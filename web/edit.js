@@ -1,4 +1,4 @@
-(function() {
+shen_web.init_edit = function(run) {
   var edit = {};
   edit.file = null;
   edit.path = null;
@@ -96,60 +96,55 @@
       fn(this.path);
   };
 
-  edit.init = function(run) {
-    var self = this;
+  function init_text_entry() {
+    var t = document.getElementById("editor_edit");
+    t.wrap = "off";
+    t.spellcheck = false;
+    t.oninput = function() {edit.touched = true;};
+  }
 
-    function init_text_entry() {
-      var t = document.getElementById("editor_edit");
-      t.wrap = "off";
-      t.spellcheck = false;
-      t.oninput = function() {self.touched = true;};
-    }
-
-    function init_toolbar() {
-      var ctl = document.getElementById("editor_toolbar");
-      shen_web.toolbar(ctl, [
-        {
-          title: "Save and send to REPL",
-          icon: "web/run.png",
-          onclick: function() {self.run(run);}
-        },
-        {
-          title: "Save",
-          icon: "web/save.png",
-          onclick: function() {self.save();}
-        },
-        {
-          title: "Reload",
-          icon: "web/revert.png",
-          onclick: function() {self.reload();}
-        },
-        {
-          title: "Download",
-          icon: "web/download.png",
-          onclick: function() {shen_web.fs.download(self.file, self.path);}
-        },
-        {
-          title: "Upload",
-          icon: "web/upload.png",
-          onclick: function() {
-            if (self.file)
-              shen_web.fs.upload(self.path, false, function(files) {
-                if (files[0]) {
-                  shen_web.fs.read_fileio(self.path, files[0]);
-                  setTimeout(function() {
-                    self.load(shen_web.fs.root, self.path);
-                  }, 50);
-                }
-              });
-          }
-        }]);
-    }
-    init_text_entry();
-    init_toolbar();
-    this.unload();
-    shen_web.init_maximize(document.getElementById("editor"));
-  };
-
+  function init_toolbar() {
+    var ctl = document.getElementById("editor_toolbar");
+    shen_web.toolbar(ctl, [
+      {
+        title: "Save and send to REPL",
+        icon: "web/run.png",
+        onclick: function() {edit.run(run);}
+      },
+      {
+        title: "Save",
+        icon: "web/save.png",
+        onclick: function() {edit.save();}
+      },
+      {
+        title: "Reload",
+        icon: "web/revert.png",
+        onclick: function() {edit.reload();}
+      },
+      {
+        title: "Download",
+        icon: "web/download.png",
+        onclick: function() {shen_web.fs.download(edit.file, edit.path);}
+      },
+      {
+        title: "Upload",
+        icon: "web/upload.png",
+        onclick: function() {
+          if (edit.file)
+            shen_web.fs.upload(edit.path, false, function(files) {
+              if (files[0]) {
+                shen_web.fs.read_fileio(edit.path, files[0]);
+                setTimeout(function() {
+                  edit.load(shen_web.fs.root, edit.path);
+                }, 50);
+              }
+            });
+        }
+      }]);
+  }
+  init_text_entry();
+  init_toolbar();
+  edit.unload();
+  shen_web.init_maximize(document.getElementById("editor"));
   shen_web.edit = edit;
-})();
+};
