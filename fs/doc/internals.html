@@ -1,0 +1,141 @@
+<h1>Shen-js internals</h1>
+
+<h2>Translating to Javascript</h2>
+
+<p>There are several function for translating from different kind of source data
+to Javascript code:</p>
+
+<pre><code>(js.from-file Filename)
+(js.from-files List-of-filenames)
+(js.from-string String)
+(js.from-shen List-of-Shen-code)
+(js.from-kl List-of-Kl-code)
+(js.save-from-files List-of-filenames Target-filename)
+</code></pre>
+
+<h2>Interrupting vm</h2>
+
+<p>Shen-js vm can be stopped at some point of time and resumed later. It can be
+useful when dealing with asynchronous Javascript tasks:</p>
+
+<pre><code>shen.defun(&quot;xml-http-req&quot;, function(arg) {
+  this.interrupt();
+  var vm = this;
+  xml_http_req(function ondone(result) {
+    vm.resume(result);
+  }, function onerr(err) {
+    vm.resume(vm.fail_obj);
+  });
+);
+</code></pre>
+
+<p>To be used like</p>
+
+<pre><code>(let Data (xml-http-req Url)
+  (if (= Data (fail))
+      (error &quot;Request failed&quot;)
+      (process-response Data)))
+</code></pre>
+
+<h2>Defining Shen function</h2>
+
+<p>Use <code>shen.defun</code> to define a Shen function. It has two modes. Called with a
+single function argument it takes passed function&#39;s name:</p>
+
+<pre><code>// defines `hello` function in Shen
+shen.defun(function hello(s) {
+  console.log(&quot;Hello, &quot; + s);
+});
+</code></pre>
+
+<p>But it is possible to manually specify a name:</p>
+
+<pre><code>// defines `hello-there` function in Shen
+shen.defun(&quot;hello-there&quot;, function hello(s) {
+  console.log(&quot;Hello there, &quot; + s);
+});
+</code></pre>
+
+<p>The function will be executed with <code>this</code> set to current interpreter vm.</p>
+
+<h2>Running Shen code</h2>
+
+<pre><code>shen.call(&quot;some-func&quot;, [arg1, arg2, ...]);
+</code></pre>
+
+<h2>Shen objects</h2>
+
+<h3>Sym</h3>
+
+<p>Represents a symbol.</p>
+
+<p>Creating</p>
+
+<pre><code>var s = shen.Sym(&quot;symbol-name&quot;);
+</code></pre>
+
+<p>Accessing</p>
+
+<pre><code>console.log(s.str);
+</code></pre>
+
+<h3>Cons</h3>
+
+<p>Represents a cons cell.</p>
+
+<p>Creating</p>
+
+<pre><code>var a = shen.Cons(head, tail);
+var b = shen.list([a, b, c, ...]);
+</code></pre>
+
+<p>Accessing</p>
+
+<pre><code>console.log(a.head, a.tail);
+</code></pre>
+
+<h3>Vector</h3>
+
+<p>Creating</p>
+
+<pre><code>var v = shen.vector(n);
+</code></pre>
+
+<p>When accessing keep in mind that the first element <code>v[0]</code> contains the length
+of the vector.</p>
+
+<h3>Fail object</h3>
+
+<pre><code>shen.fail_obj
+</code></pre>
+
+<h3>Func</h3>
+
+<p>A function object.</p>
+
+<p>Creating</p>
+
+<pre><code>var f = shen.Func(name, arity, func, closure_vars);
+</code></pre>
+
+<p><strong>Note:</strong> using <code>shen.defun</code> is recommended instead. Bare <code>Func</code> objects do
+not handle partial application.</p>
+
+<h3>Stream</h3>
+
+<p>Creating</p>
+
+<pre><code>var stream = shen.Stream(read_byte, write_byte, close);
+</code></pre>
+
+<ul>
+<li><code>read_byte(vm)</code>: returns next byte from a stream. Returns -1 if stream is
+exhausted.</li>
+<li><code>write_byte(byte, vm)</code>: writes a byte to a stream. Returns the byte written.</li>
+<li><code>close</code>: a function which is called when a stream is closed.</li>
+</ul>
+
+<h3>Other</h3>
+
+<p>There are other objects which you can discover in the beginning of <code>shen.js</code>
+(or in <code>runtime.js</code>).</p>

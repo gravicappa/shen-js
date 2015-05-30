@@ -1,0 +1,90 @@
+<h1>Shen-js FFI</h1>
+
+<h2>General Javascipt code</h2>
+
+<p><code>js.&#39;</code> injects raw Javascript code. Use it with caution. Trying to access
+internal interpreter variables (<code>vm</code>, <code>reg</code>, <code>sp</code>) may lead to unexpected
+results.</p>
+
+<pre><code>(let Add (js.&#39; &quot;function(x, y) {
+                  return x + y;
+                }&quot;)
+  (js.call Add 3 7))
+</code></pre>
+
+<h2>Referencing object properties or array items</h2>
+
+<p>Use <code>js.</code> to reference object&#39;s property:</p>
+
+<pre><code>(js. document body children 0)
+</code></pre>
+
+<p>that will be translated to</p>
+
+<pre><code>document.body.children[0]
+</code></pre>
+
+<p>Keep in mind that <code>js.</code> primitive will strip package names from symbols to
+simplify using it inside packages. But it also means that the code
+<code>(js. document.body children)</code> may not do that is expected to.</p>
+
+<h3>Calling native code</h3>
+
+<p><code>js.call</code> wraps it&#39;s arguments to a function call:</p>
+
+<pre><code>(js. console (js.call log &quot;Yellow pants! Double qu!&quot;))
+</code></pre>
+
+<p>is expanded to</p>
+
+<pre><code>console.log(&quot;Yellow pants! Double qu!&quot;)
+</code></pre>
+
+<h2>Setting values</h2>
+
+<pre><code>(js.set (js. document (js.call getElementById &quot;some_button&quot;))
+        (js.&#39; &quot;function() {
+                 console.log(&#39;click!&#39;);
+               }&quot;))
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>document.getElementById(&quot;some_button&quot;) = function() {
+  console.log(&#39;click!&#39;);
+};
+</code></pre>
+
+<h2>Creating objects</h2>
+
+<pre><code>(js.new (protect Array) 3 1 2 3)
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>new Array(3, 1, 2, 3)
+</code></pre>
+
+<h2>Creating literal objects</h2>
+
+<pre><code>(js.obj language &quot;Shen&quot; host_language &quot;Javascript&quot; ui &quot;Web&quot;)
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>{language: &quot;Shen&quot;, host_language: &quot;Javascript&quot;, ui: &quot;Web&quot;)
+</code></pre>
+
+<h2>Creating arrays</h2>
+
+<pre><code>(js.arr 1 &quot;two&quot; 3 &quot;four&quot; 5)
+</code></pre>
+
+<p>=&gt;</p>
+
+<pre><code>[1, &quot;two&quot;, 3, &quot;four&quot;, 5]
+</code></pre>
+
+<h2>Example</h2>
+
+<p>See <a href="#.examples/ffi.shen">example</a>.</p>

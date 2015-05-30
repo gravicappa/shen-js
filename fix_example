@@ -1,0 +1,26 @@
+#!/bin/sh
+
+filter() {
+  awk --posix '
+    /^#.*Example/ {example = 1;}
+    example && /^See/ {
+      match($0, /^See ([^ ]*)\.$/);
+      x = substr($0, RSTART, RLENGTH);
+      sub(/^See /, "", x);
+      sub(/\.$/, "", x);
+      sub(/^See ([^ ]*)\.$/, "See [example](#." x ").");
+    }
+    {print}' 
+}
+
+t="$(mktemp)"
+
+cleanup() {
+  rm -f "$t"
+}
+
+trap cleanup EXIT
+
+for f in "$@"; do
+  filter <"$f" >"$t" && mv "$t" "$f"
+done

@@ -10,26 +10,10 @@ index() {
 }
 
 {
-  index web_doc .
-  index doc .doc/
+  index fs .
 } | awk '
 BEGIN {print("[")}
 NR != 1 {printf(",\n")}
 {printf("  %s", $0)}
 END {print("\n]")}
-'
-
-exit 0
-find "$dir" -type f '(' -name '*.html' -or -name '*.shen' ')' \
-| awk -v dst_prefix="$dst_prefix" -v dir="$dir" '
-
-BEGIN {print "[";}
-NR == 1 {printf "  "}
-NR != 1 {printf ",\n  "}
-{
-  to = from = $0
-  sub("^" dir "/", dst_prefix, to);
-  printf("{\"to\": \"%s\", \"from\": \"%s\"}", to, from);
-}
-END {print "\n]"}
 '

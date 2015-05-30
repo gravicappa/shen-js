@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+remote=origin
+branch=master
+assets='shen.js shen.html doc web examples'
+
+git_sync() {
+  git pull "$remote"
+  git checkout gh-pages
+  git checkout "$remote/$branch" -- $assets
+  git rm --cached -r .
+}
+
+local_sync() {
+  (cd ../shen-js && tar c $assets) | tar x
+}
+
+if test -d "../shen-js" ; then
+  local_sync
+else
+  git_sync
+fi
+
+mk
+
+rm -rf fs
+mkdir -p fs/doc fs/examples
+rm doc/*.md
+mv examples fs
+cp doc/*.html fs/doc
+cp web_doc/*.html fs/doc
