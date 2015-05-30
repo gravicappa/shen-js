@@ -99,7 +99,20 @@ The function will be executed with `this` set to current interpreter vm.
     shen.call("some-func", [arg1, arg2, ...]);
 
 ### Shen objects
+#### Sym
+Represents a symbol.
+
+Creating
+
+    var s = shen.Sym("symbol-name");
+
+Accessing
+
+    console.log(s.str);
+
 #### Cons
+Represents a cons cell.
+
 Creating
 
     var a = shen.Cons(head, tail);
@@ -121,7 +134,27 @@ of the vector.
 
     shen.fail_obj
 
+#### Func
+A function object.
+
+Creating
+
+    var f = shen.Func(name, arity, func, closure_vars);
+
+**Note:** using `shen.defun` is recommended instead. Bare `Func` objects do
+not handle partial application.
+
+#### Stream
+Creating
+
+    var stream = shen.Stream(read_byte, write_byte, close);
+
+* `read_byte(vm)`: returns next byte from a stream. Returns -1 if stream is
+  exhausted.
+* `write_byte(byte, vm)`: writes a byte to a stream. Returns the byte written.
+* `close`: a function which is called when a stream is closed.
+
 #### Other
 
 There are other objects which you can discover in the beginning of `shen.js`
-(or in `runtime.js`). I'll document them if there will be any need.
+(or in `runtime.js`).

@@ -2,7 +2,7 @@ shen_web.embed_shen = function(opts) {
   function io(vm) {
     var io = {};
     io.open = open;
-    vm.glob["*stoutput*"] = vm.Stream("w", write_byte, function() {});
+    vm.glob["*stoutput*"] = vm.Stream(null, write_byte);
     vm.ensure_chan_input();
     return io;
 
@@ -44,7 +44,7 @@ shen_web.embed_shen = function(opts) {
       file.data = buf_append(file.data, [byte]);
       return byte;
     }
-    return vm.Stream("w", write_byte, function() {});
+    return vm.Stream(null, write_byte);
   }
 
   function send(s) {

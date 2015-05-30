@@ -6,8 +6,8 @@ Javascript port of the [Shen](http://shenlanguage.org) language.
 
 Type in your terminal (choose a line depending on your js interpreter):
 
-    d8 -e 'load("shen.js"); Shen.console_repl()'
-    js -e 'load("shen.js"); Shen.console_repl()'
+    d8 -e 'load("shen.js"); shen.console_repl()'
+    js -e 'load("shen.js"); shen.console_repl()'
 
 ## Running in Node.js
 ** Node.js is outdated. But I am not familiar with it. **

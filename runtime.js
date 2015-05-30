@@ -96,34 +96,17 @@ shen = (function() {
     return r;
   };
 
-  Shen.prototype.Stream = function Stream(dir, fn, close) {
+  Shen.prototype.Stream = function Stream(read_byte, write_byte, close) {
     if (!(this instanceof Stream))
-      return new Stream(dir, fn, close);
-    this.dir = dir || "";
-    this.close = close || (function(vm) {return [];});
-    this.read_byte = function(vm) {
+      return new Stream(read_byte, write_byte, close);
+    this.dir = "" + (read_byte ? "r" : "") + (write_byte ? "w" : "");
+    this.read_byte = read_byte || function(vm) {
       return vm.error("read-byte: Wrong stream type.");
     };
-    this.write_byte = function(byte, vm) {
+    this.write_byte = write_byte || function(byte, vm) {
       vm.error("write-byte: Wrong stream type.");
     };
-    switch (dir) {
-    case "r": this.read_byte = fn; break;
-    case "w": this.write_byte = fn; break;
-    case "rw":
-    case "wr":
-      this.in = fn[0];
-      this.out = fn[1];
-      this.read_byte = function(vm) {return this.in.read_byte(vm);};
-      this.write_byte = function(byte, vm) {
-        return this.out.write_byte(byte, vm);
-      };
-      this.close = function(vm) {
-        this.in.close(vm);
-        this.out.close(vm);
-        return [];
-      };
-    }
+    this.close = close || (function(vm) {return [];});
   };
 
   Shen.prototype.Chan = function Chan() {
@@ -453,11 +436,6 @@ shen = (function() {
       if (!this.is_equal(x[i], y[i]))
         return false;
     return true;
-  }
-
-  Shen.prototype.is_stream_equal = function(x, y) {
-    return x.dir === y.dir && x.read_byte === y.read_byte
-           && x.write_byte === y.write_byte && x.close === y.close;
   };
 
   Shen.prototype.trace = function(name) {
@@ -500,8 +478,6 @@ shen = (function() {
              && this.is_array_equal(x.vars, y.vars);
     if (this.equal_function(x, y) || this.equal_function(y, x))
       return true;
-    if ((x instanceof this.Stream) && (y instanceof this.Stream))
-      return this.is_stream_equal(x, y);
     if ((x instanceof this.Func) && (y instanceof this.Sym) && !x.vars.length
         && x.name === y.str)
       return true;
@@ -915,7 +891,7 @@ shen = (function() {
         return -1;
       return buf[this.pos++];
     }
-    var stream = new this.Stream('r', r, function() {});
+    var stream = this.Stream(r, null, function() {});
     stream.pos = 0;
     stream.buf = arr;
     return stream;
@@ -943,9 +919,7 @@ shen = (function() {
           return vm.buf_stream(buf);
         else if (typeof(buf) === "string") {
           var strbuf = new vm.Utf8_reader(buf);
-          return new vm.Stream("r",
-                               function(vm) {return strbuf.read_byte();},
-                               function(vm){});
+          return vm.Stream(function(vm) {return strbuf.read_byte();});
         } else
           return vm.error("Unsupported file read result");
       } else if (dir.str === "out")
@@ -962,11 +936,12 @@ shen = (function() {
     var writer = new vm.Utf8_writer(function(char) {
       putchars(String.fromCharCode(char));
     });
-    var stdout = new vm.Stream("w", function(byte, vm) {
-                                      writer.write_byte(byte);
-                                    });
+    var stdout = vm.Stream(null, function(byte, vm) {
+                                   writer.write_byte(byte);
+                                 });
     var strbuf = new vm.Utf8_reader();
-    function read_byte(vm) {
+
+    var stdin = vm.Stream(function(vm) {
       var x = strbuf.read_byte();
       if (x >= 0)
         return x;
@@ -977,8 +952,7 @@ shen = (function() {
       }
       strbuf = new vm.Utf8_reader(str + "\n");
       return this.read_byte(vm);
-    }
-    var stdin = new vm.Stream("r", read_byte, function(vm) {quit();});
+    });
     vm.glob["*stinput*"] = stdin;
     vm.glob["*stoutput*"] = stdout;
     io.open = open;
@@ -986,10 +960,9 @@ shen = (function() {
   };
 
   Shen.prototype.chan_in_stream = function(chan) {
-    function read_byte(vm) {
+    return this.Stream(function(vm) {
       return chan.read(vm);
-    }
-    return new this.Stream("r", read_byte, function(vm) {});
+    });
   };
 
   Shen.prototype.ensure_chan_input = function() {
@@ -1027,14 +1000,10 @@ shen = (function() {
       fn = "reverse";
       args = [lst];
     }
-    log("calibrate fn: " + fn);
     for (var i = 0; i < n; ++i)
       this.exec(fn, args);
     t_ms = Date.now() - t_ms;
-    log("calibrate n: " + n + " dt: " + t_ms + "ms");
     this.run_span_len = Math.floor(n * this.run_span_interval_ms / t_ms);
-    log("calibrate run_span_len: " + this.run_span_len
-        + " run_span_interval: " + this.run_span_interval_ms + "ms");
   };
 
   Shen.prototype.make_thread = function(fn) {
