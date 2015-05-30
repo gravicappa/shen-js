@@ -16,11 +16,13 @@ shen_web = (function() {
 
     function apply_hash() {
       var path = location.hash.replace(/^#/, "");
-      console.log("apply_hash " + path);
-      if (path === "")
+      if (path === "") {
         shen_web.edit.unload();
-      else
+        shen_web.fs.select(null);
+      } else {
         shen_web.edit.load(shen_web.fs.root, path);
+        shen_web.fs.select(path);
+      }
     }
 
     function onerror(msg) {

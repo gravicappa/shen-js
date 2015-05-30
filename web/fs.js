@@ -2,6 +2,7 @@ shen_web.init_fs = function(file_fn) {
   var fs = {};
   fs.root = new Jsfile("d");
   fs.selected = {};
+  fs.items = {};
 
   fs.download = function(file, path) {
     if (!file)
@@ -35,7 +36,6 @@ shen_web.init_fs = function(file_fn) {
   };
 
   fs.read_fileio = function(path, file) {
-    console.log("read_fileio", path, file);
     var fs = this;
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -193,7 +193,6 @@ shen_web.init_fs = function(file_fn) {
     var btn = shen_web.img_btn("Upload file", "web/upload.png");
     btn.classList.add("fs_ctl_upload_btn");
     btn.onclick = function() {
-      console.log("fs.selected.path", fs.selected.path);
       var path = fs.selected.path;
       if (path || path === "")
         fs.upload_to(path);
@@ -243,11 +242,14 @@ shen_web.init_fs = function(file_fn) {
     }
   }
 
-  function item_onclick(entry, path) {
+  fs.select = function(path, entry) {
     if (fs.selected.entry) {
       toggle_item_select(fs.selected.entry, false);
       fs.selected.entry.classList.remove("fs_selection");
     }
+    entry = entry || fs.items[path];
+    if (!entry)
+      return;
     var file = fs.root.get(path);
     file_fn(file, path);
     fs.file_ctl.classList.remove("undisplayed");
@@ -284,7 +286,7 @@ shen_web.init_fs = function(file_fn) {
     entry.classList.add("fs_entry", "fs_dir_entry");
     var name = document.createElement("div");
     name.className = "fs_name";
-    name.onclick = function() {item_onclick(entry, path);};
+    name.onclick = function() {fs.select(path, entry);};
     var name_text = document.createElement("span");
     name_text.className = "fs_name_text";
     name_text.appendChild(document.createTextNode(basename(path) + "/"));
@@ -303,7 +305,7 @@ shen_web.init_fs = function(file_fn) {
     entry.classList.add("fs_entry", "fs_file_entry");
     var name = document.createElement("div");
     name.className = "fs_name";
-    name.onclick = function() {item_onclick(entry, path);};
+    name.onclick = function() {fs.select(path, entry);};
     var name_text = document.createElement("span");
     name_text.className = "fs_name_text";
     name_text.appendChild(document.createTextNode(basename(path)));
@@ -320,13 +322,15 @@ shen_web.init_fs = function(file_fn) {
       case "d": oncreate_dir(file, path, entry); break;
       case "f": oncreate_file(file, path, entry); break;
       }
-      file.onrm = mkonrm(entry);
+      file.onrm = mkonrm(entry, path);
+      fs.items[path] = entry;
     }
     return fn;
   }
 
-  function mkonrm(container) {
+  function mkonrm(container, path) {
     return function() {
+      delete fs.items[path];
       container.parentNode.removeChild(container);
     };
   }
