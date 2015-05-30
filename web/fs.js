@@ -340,6 +340,7 @@ shen_web.init_fs = function(file_fn) {
   fs.dir = document.getElementById("fs_tree");
   fs.file_ctl = init_file_ctl(document.getElementById("file_ctl"));
   fs.dir_ctl = init_dir_ctl(document.getElementById("dir_ctl"));
+  fs.items[""] = fs.dir;
   oncreate_dir(fs.root, "", fs.dir);
   this.fs = fs;
 };

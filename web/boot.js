@@ -18,7 +18,7 @@ shen_web = (function() {
       var path = location.hash.replace(/^#/, "");
       if (path === "") {
         shen_web.edit.unload();
-        shen_web.fs.select(null);
+        shen_web.fs.select("");
       } else {
         shen_web.edit.load(shen_web.fs.root, path);
         shen_web.fs.select(path);
@@ -55,10 +55,7 @@ shen_web = (function() {
         shen_web.send_file(path, file);
       });
       shen_web.init_fs(function(file, path) {
-        if (file.type === "f")
-          window.location.hash = "#" + path;
-        else
-          window.location.hash = "#";
+        window.location.hash = "#" + path;
       });
       opts.ondone = done;
       shen_web.embed_shen(opts);

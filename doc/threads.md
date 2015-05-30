@@ -37,4 +37,4 @@ To stop current thread for a time of given milliseconds
     (js.sleep-ms Milliseconds)
 
 ## Example
-Some simple [example](#.examples/threads.shen).
+See examples/threads.shen.
