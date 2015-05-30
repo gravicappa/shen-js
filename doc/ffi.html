@@ -123,7 +123,23 @@ shen.defun(&quot;hello-there&quot;, function hello(s) {
 
 <h3>Shen objects</h3>
 
+<h4>Sym</h4>
+
+<p>Represents a symbol.</p>
+
+<p>Creating</p>
+
+<pre><code>var s = shen.Sym(&quot;symbol-name&quot;);
+</code></pre>
+
+<p>Accessing</p>
+
+<pre><code>console.log(s.str);
+</code></pre>
+
 <h4>Cons</h4>
+
+<p>Represents a cons cell.</p>
 
 <p>Creating</p>
 
@@ -151,7 +167,33 @@ of the vector.</p>
 <pre><code>shen.fail_obj
 </code></pre>
 
+<h4>Func</h4>
+
+<p>A function object.</p>
+
+<p>Creating</p>
+
+<pre><code>var f = shen.Func(name, arity, func, closure_vars);
+</code></pre>
+
+<p><strong>Note:</strong> using <code>shen.defun</code> is recommended instead. Bare <code>Func</code> objects do
+not handle partial application.</p>
+
+<h4>Stream</h4>
+
+<p>Creating</p>
+
+<pre><code>var stream = shen.Stream(read_byte, write_byte, close);
+</code></pre>
+
+<ul>
+<li><code>read_byte(vm)</code>: returns next byte from a stream. Returns -1 if stream is
+exhausted.</li>
+<li><code>write_byte(byte, vm)</code>: writes a byte to a stream. Returns the byte written.</li>
+<li><code>close</code>: a function which is called when a stream is closed.</li>
+</ul>
+
 <h4>Other</h4>
 
 <p>There are other objects which you can discover in the beginning of <code>shen.js</code>
-(or in <code>runtime.js</code>). I&#39;ll document them if there will be any need.</p>
+(or in <code>runtime.js</code>).</p>
