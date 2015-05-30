@@ -11,10 +11,10 @@ by <code>io</code> key:</p>
     io_obj.open = function(name, direction, vm) {
       …
     };
-    vm.glob[&quot;*stoutput*&quot;] = vm.Stream(&quot;w&quot; out_write_byte, out_close);
+    vm.glob[&quot;*stoutput*&quot;] = vm.Stream(null, out_write_byte, out_close);
 
     /* you can either directly assign a stream as an input */
-    vm.glob[&quot;*stinput*&quot;] = vm.Stream(&quot;r&quot;, in_read_byte, in_close);
+    vm.glob[&quot;*stinput*&quot;] = vm.Stream(in_read_byte, null, in_close);
     /*
       or you can initialise input channel:
 
@@ -38,7 +38,7 @@ Stream class. Output streams has &quot;w&quot; character in their <code>dir</cod
 streams has &quot;r&quot; character.</p>
 
 <pre><code>/* defining output stream */
-var out = vm.Stream(&quot;w&quot;,
+var out = vm.Stream(null,
                     function write_byte(byte, vm) {
                       …
                     },
@@ -47,10 +47,10 @@ var out = vm.Stream(&quot;w&quot;,
                     });
 
 /* defining input stream */
-var inp = vm.Stream(&quot;r&quot;,
-                    function read_byte(vm) {
+var inp = vm.Stream(function read_byte(vm) {
                       …
                     },
+                    null,
                     function close(vm) {
                       …
                     });

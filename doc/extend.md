@@ -10,10 +10,10 @@ by `io` key:
         io_obj.open = function(name, direction, vm) {
           …
         };
-        vm.glob["*stoutput*"] = vm.Stream("w" out_write_byte, out_close);
+        vm.glob["*stoutput*"] = vm.Stream(null, out_write_byte, out_close);
 
         /* you can either directly assign a stream as an input */
-        vm.glob["*stinput*"] = vm.Stream("r", in_read_byte, in_close);
+        vm.glob["*stinput*"] = vm.Stream(in_read_byte, null, in_close);
         /*
           or you can initialise input channel:
 
@@ -35,7 +35,7 @@ Stream class. Output streams has "w" character in their `dir` member and input
 streams has "r" character.
 
     /* defining output stream */
-    var out = vm.Stream("w",
+    var out = vm.Stream(null,
                         function write_byte(byte, vm) {
                           …
                         },
@@ -44,10 +44,10 @@ streams has "r" character.
                         });
 
     /* defining input stream */
-    var inp = vm.Stream("r",
-                        function read_byte(vm) {
+    var inp = vm.Stream(function read_byte(vm) {
                           …
                         },
+                        null,
                         function close(vm) {
                           …
                         });
