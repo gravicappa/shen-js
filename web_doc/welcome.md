@@ -10,7 +10,7 @@ future.*
 * [better FFI](#.doc/ffi.html),
 * [async-compatible VM](#.doc/internals.html),
 * new shiny web UI,
-* persistent file storage in web UI.
+* persistent file storage in web UI (via IndexedDB).
 
 ## Usage
 

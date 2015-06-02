@@ -27,5 +27,5 @@ rm -rf fs
 mkdir -p fs/doc fs/examples
 rm doc/*.md
 mv examples fs
-cp doc/*.html fs/doc
-cp web_doc/*.html fs/doc
+mv doc/*.html fs/doc
+mv web_doc/*.html fs/doc
