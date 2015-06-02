@@ -1,5 +1,10 @@
 shen_web = (function() {
-  var self = {};
+  var self = {}, init_status;
+  self.set_init_status = function(s) {
+    init_status.innerHTML = "";
+    init_status.appendChild(document.createTextNode(s));
+  };
+
   self.init = function(opts) {
     var ondone = opts ? opts.ondone : null;
 
@@ -11,18 +16,16 @@ shen_web = (function() {
       document.head.appendChild(s);
     }
     var files = ["web/util.js", "web/jsfile.js", "web/fs.js", "web/edit.js",
-                 "web/repl.js", "web/embed.js", "shen.js"];
+                 "web/repl.js", "web/embed.js", "web/store.js", "shen.js"];
     files.forEach(script);
 
     function apply_hash() {
       var path = location.hash.replace(/^#/, "");
-      if (path === "") {
+      if (path === "")
         shen_web.edit.unload();
-        shen_web.fs.select("");
-      } else {
+      else
         shen_web.edit.load(shen_web.fs.root, path);
-        shen_web.fs.select(path);
-      }
+      shen_web.fs.select(path);
     }
 
     function onerror(msg) {
@@ -49,11 +52,15 @@ shen_web = (function() {
 
     window.onload = function() {
       window.onerror = onerror;
+      init_status = document.getElementById("wait_status");
+      shen_web.set_init_status("Initializing repl");
       shen_web.init_repl();
+      shen_web.set_init_status("Initializing editor");
       shen_web.init_edit(function(path) {
         var file = shen_web.fs.root.get(path);
         shen_web.send_file(path, file);
       });
+      shen_web.set_init_status("Initializing filesystem");
       shen_web.init_fs(function(file, path) {
         window.location.hash = "#" + path;
       });

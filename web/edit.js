@@ -1,7 +1,6 @@
 shen_web.init_edit = function(run) {
   var edit = {};
   edit.file = null;
-  edit.path = null;
   edit.touched = false;
   edit.welcome = ".doc/welcome.html";
 
@@ -11,7 +10,7 @@ shen_web.init_edit = function(run) {
     t.appendChild(document.createTextNode(title));
   };
 
-  edit.load = function(root, path) {
+  edit.load = function(root, file) {
     function process_links(where) {
       var links = where.getElementsByTagName("a"), i, n = links.length;
       for (i = 0; i < n; ++i) {
@@ -30,26 +29,26 @@ shen_web.init_edit = function(run) {
       process_links(where);
     }
 
-    var file = root.get(path),
+    var file = (typeof(file) === "string") ? root.get(file) : file,
         edit_cont = document.getElementById("editor_edit_container"),
         edit = document.getElementById("editor_edit"),
         view_cont = document.getElementById("editor_view_container"),
         view = document.getElementById("editor_view"),
         ctl = document.getElementById("editor_toolbar"),
-        in_html = false;
+        in_html = false,
+        str;
     this.unload();
-    if (!file)
+    if (!file || file.type === "d")
       return;
-    this.path = path;
-    this.set_title(path);
+    this.set_title(file.path());
     this.file = file;
     try {
-      var str = this.file.str_data();
+      str = this.file.str();
     } catch(e) {
       in_html = true;
-      var str = "<div class='warning'>File is binary</div>";
+      str = "<div class='warning'>Cannot show. File is probably binary</div>";
     }
-    if (in_html || path.match(/\.doc\/.*\.html/))
+    if (in_html || file.path().match(/\.html$/))
       load_html(str, view);
     else {
       view_cont.classList.add("undisplayed");
@@ -67,7 +66,6 @@ shen_web.init_edit = function(run) {
         ctl = document.getElementById("editor_toolbar");
     this.set_title("");
     this.file = null;
-    this.path = null;
     ctl.classList.add("undisplayed");
     view_cont.classList.remove("undisplayed");
     edit_cont.classList.add("undisplayed");
@@ -85,15 +83,15 @@ shen_web.init_edit = function(run) {
 
   edit.save = function() {
     var text = document.getElementById("editor_edit");
-    if (this.touched && this.path)
-      shen_web.fs.root.put(this.path, text.value);
+    if (this.touched && this.file)
+      this.file.put(text.value);
     this.touched = false;
   };
 
   edit.run = function(fn) {
     this.save();
-    if (this.path)
-      fn(this.path);
+    if (this.file)
+      fn(this.file.path());
   };
 
   function init_text_entry() {
@@ -131,11 +129,11 @@ shen_web.init_edit = function(run) {
         icon: "web/upload.png",
         onclick: function() {
           if (edit.file)
-            shen_web.fs.upload(edit.path, false, function(files) {
+            shen_web.fs.upload(edit.file.path(), false, function(files) {
               if (files[0]) {
-                shen_web.fs.read_fileio(edit.path, files[0]);
+                shen_web.fs.read_fileio(edit.file.path(), files[0]);
                 setTimeout(function() {
-                  edit.load(shen_web.fs.root, edit.path);
+                  edit.load(shen_web.fs.root, edit.file.path());
                 }, 50);
               }
             });

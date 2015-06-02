@@ -13,6 +13,7 @@
   };
 
   shen_web.by_tag = function(tag, obj) {
+    tag = tag.toUpperCase();
     for (var i = 0; i < obj.childNodes.length; i++) {
       var x = obj.childNodes[i];
       if (x.tagName === tag)
@@ -136,17 +137,20 @@
     return div;
   };
 
-  shen_web.query = function(url, fn, errfn) {
+  shen_web.xhr = function(opts, fn, errfn) {
+    if (typeof(opts) === "string")
+      opts = {url: opts};
+    opts.method = opts.method || "GET";
+    opts.resp_type = opts.resp_type || "text";
+    errfn = errfn || function() {};
     var req = new XMLHttpRequest();
-    req.open('GET', url, true);
-    req.responseType = "text";
+    req.open(opts.method, opts.url, true);
+    req.responseType = opts.resp_type;
     req.onreadystatechange = function() {
       if (req.readyState === 4)
         switch (req.status) {
-        case 200: fn(req.responseText); break;
-        default:
-          if (errfn)
-            errfn(req.statusText);
+        case 200: fn(req.response); break;
+        default: errfn(req.statusText);
         }
     };
     try {
@@ -154,7 +158,7 @@
     } catch(e) {
       errfn(e);
     }
-  }
+  };
 
   shen_web.recv_jsonp = function(resp) {
     console.log("jsonp resp", resp.meta, resp.data);

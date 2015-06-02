@@ -9,7 +9,8 @@ future.*
 * [green threads](#.doc/threads.html),
 * [better FFI](#.doc/ffi.html),
 * [async-compatible VM](#.doc/internals.html),
-* new shiny web UI.
+* new shiny web UI,
+* persistent file storage in web UI.
 
 ## Usage
 
@@ -57,7 +58,6 @@ such as:
 * extensive documentation,
 * built-in Shen tutorials,
 * loading files from services like github.com,
-* persistent file storage,
 * cleaner visual style (icons, colours and other such things),
 * …
 
