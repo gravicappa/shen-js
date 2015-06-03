@@ -48,9 +48,7 @@ Shen, downloading, updating, etc.
 
 ### REPL pane
 
-It consists of Shen output window and Shen input entry. Type code into it and
-press `Return` to execute. You can also press `Ctrl+Return` for multiline
-entry.
+Nothing unexpected here.
 
 ## Development
 
