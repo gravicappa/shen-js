@@ -1,6 +1,6 @@
 Shen-js
 =======
-Javascript port of the [Shen](http://shenlanguage.org) language.
+Javascript port of [Shen](http://shenlanguage.org) language.
 
 ## Running console REPL
 
@@ -12,7 +12,7 @@ Type in your terminal (choose a line depending on your js interpreter):
 If you want to carry console Shen-js around, you need only `shen.js` file.
 
 ## Running in Node.js
-** Node.js is outdated. But I am not familiar with it. **
+**Node.js is outdated. But I am not familiar with it.**
 See `doc/node.md`.
 
 ## Running in a browser
@@ -40,4 +40,4 @@ First ensure that you have latest
     ./make.shen new_shen.js && ./boot
     
 to have shen-js built into new_shen.js file. The `boot` step is unneccessary
-and it makes file twice as big, but it significantly increases start time.
+and it makes file twice as big, but it significantly decreases start time.
