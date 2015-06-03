@@ -30,4 +30,24 @@ shen_web.init_github_loader = function() {
     }
   }
   shen_web.fs.loaders.push(shen_web.fs.mk_match_loader(match_re, load));
+
+  shen_web.test_github_load = function(path) {
+    var out = document.getElementById("out");
+    out.innerHTML = "";
+    shen_web.xhr({
+                   url: api_url(path),
+                   responseType: "arraybuffer",
+                   req_headers: {"Accept": "application/vnd.github.3.raw"}
+                 }, function(data) {
+      var s = shen.str_from_utf8(new Uint8Array(data));
+      console.log("loaded", data, s);
+      out.appendChild(document.createTextNode(s));
+    }, function(err) {
+      console.log("github err", err);
+      var e = document.createElement("div");
+      e.className = "wait_error";
+      e.appendChild(document.createTextNode(err));
+      out.appendChild(e);
+    });
+  };
 };

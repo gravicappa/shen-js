@@ -12,6 +12,7 @@ future.*
 * New shiny web UI which has
   - Persistent file storage in web UI (via IndexedDB).
   - Ability to load files from github.com (see [Github loader](#.doc/web.html)).
+  - Initialization file `.init.shen` loading on startup.
 
 ## Usage
 
