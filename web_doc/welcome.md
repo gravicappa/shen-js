@@ -5,12 +5,13 @@ future.*
 
 ## New Shen-js features
 
-* Cleaner objects representation,
-* [green threads](#.doc/threads.html),
-* [better FFI](#.doc/ffi.html),
-* [async-compatible VM](#.doc/internals.html),
-* new shiny web UI,
-* persistent file storage in web UI (via IndexedDB).
+* Cleaner objects representation.
+* [Green threads](#.doc/threads.html).
+* [Better FFI](#.doc/ffi.html).
+* [Async-compatible VM](#.doc/internals.html).
+* New shiny web UI which has
+  - Persistent file storage in web UI (via IndexedDB).
+  - Ability to load files from github.com (see [Github loader](#.doc/web.html)).
 
 ## Usage
 

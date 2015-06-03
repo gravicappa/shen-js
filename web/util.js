@@ -141,11 +141,24 @@
     if (typeof(opts) === "string")
       opts = {url: opts};
     opts.method = opts.method || "GET";
-    opts.resp_type = opts.resp_type || "text";
-    errfn = errfn || function() {};
-    var req = new XMLHttpRequest();
+    opts.req_headers = opts.req_headers || {};
+
+    var keys = Object.keys(opts), i, key, hdrs = opts.req_headers,
+        hkeys = Object.keys(hdrs), req = new XMLHttpRequest();
+
     req.open(opts.method, opts.url, true);
-    req.responseType = opts.resp_type;
+    for (i = 0; i < keys.length; ++i) {
+      key = keys[i];
+      switch (key) {
+      case "method": case "url": case "req_headers": break;
+      default: req[key] = opts[key];
+      }
+    }
+    for (i = 0; i < hkeys.length; ++i) {
+      key = hkeys[i];
+      req.setRequestHeader(key, opts.req_headers[key]);
+    }
+    errfn = errfn || function() {};
     req.onreadystatechange = function() {
       if (req.readyState === 4)
         switch (req.status) {
@@ -158,19 +171,5 @@
     } catch(e) {
       errfn(e);
     }
-  };
-
-  shen_web.recv_jsonp = function(resp) {
-    console.log("jsonp resp", resp.meta, resp.data);
-  };
-
-  shen_web.jsonp = function(url) {
-    var script = document.createElement("script");
-    script.src = url;
-    script.onload = function() {
-      console.log("jsonp script loaded");
-      script.parentNode.removeChild(script);
-    };
-    document.getElementsByTagName("head")[0].appendChild(script);
   };
 })();

@@ -13,16 +13,16 @@ shen_web.embed_shen = function(opts) {
 
   function open(name, dir, vm) {
     var filename = vm.glob["*home-directory*"] + name;
-    var loader = shen_web.fs.find_loader(name);
+    var loader = shen_web.fs.find_loader(filename);
     if (loader)
-      return loader(name, dir, vm);
+      return loader(filename, dir, vm);
     switch (dir.str) {
     case "in":
       var file = shen_web.fs.root.get(filename);
       if (!file)
         return vm.error("open: '" + filename + "' does not exist");
       switch (file.type) {
-      case "f": return vm.buf_stream(file.data);
+      case "f": return vm.buf_stream(file.contents);
       case "d": return vm.error("open: '" + filename + "' is directory");
       default: return vm.error("open: '" + filename + "' has unknown type");
       }
@@ -84,16 +84,24 @@ shen_web.embed_shen = function(opts) {
       setTimeout(fn, ms);
   }
 
+  shen.defun("js.redeploy-fs", function() {
+    var vm = this;
+    shen_web.fs.deploy(shen_web.fs_index, function() {
+      vm.resume(true);
+    });
+    vm.interrupt();
+  });
+
   this.file_out_stream = file_out_stream;
   window.addEventListener("message", recv_step, true);
   this.post = post;
   this.send = send;
   this.send_file = send_file;
-  var fsindex = opts.fs_index || "fs.json";
+  shen_web.fs_index = opts.fs_index || "fs.json";
   shen_web.set_init_status("Deploying stored filesystem");
   shen_web.init_store(function() {
     shen_web.set_init_status("Deploying remote filesystem");
-    shen_web.fs.deploy(fsindex, function() {
+    shen_web.fs.deploy(shen_web.fs_index, function() {
       shen_web.set_init_status("Initializing Shen runtime");
       shen.post_async = post;
       shen.init({io: io, async: true, ondone: opts.ondone, repl: true});

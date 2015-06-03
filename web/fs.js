@@ -107,7 +107,7 @@ shen_web.init_fs = function(file_fn) {
 
   fs.deploy = function deploy_fs(url, fn) {
     function load_index(fn) {
-      shen_web.xhr({url: url, resp_type: "text"}, function(data) {
+      shen_web.xhr({url: url, responseType: "text"}, function(data) {
         var obj = [];
         try {
           obj = JSON.parse(data);
@@ -125,7 +125,8 @@ shen_web.init_fs = function(file_fn) {
       if (i < entries.length) {
         var entry = entries[i], from = entry.from, to = entry.to;
         if (from && to) {
-          shen_web.xhr({url: from, resp_type: "arraybuffer"}, function(data) {
+          shen_web.xhr({url: from, responseType: "arraybuffer"},
+                       function(data) {
             shen_web.fs.root.put(data, to);
             load_files(entries, i + 1, fn);
           }, function(err) {
@@ -304,7 +305,6 @@ shen_web.init_fs = function(file_fn) {
   }
 
   function oncreate() {
-    //console.log("fs..oncreate", this.path());
     var entry = document.createElement("li");
     this.container = entry;
     switch (this.type) {
@@ -324,13 +324,12 @@ shen_web.init_fs = function(file_fn) {
   }
 
   function onrm() {
-    //console.log("fs..onrm", this.path());
-    this.container.parentNode.removeChild(this.container);
+    if (this.parent)
+      this.container.parentNode.removeChild(this.container);
     shen_web.store.rm(this.path());
   }
 
   function onwrite() {
-    //console.log("fs..onwrite", this.path());
     shen_web.store.put(this.path(), this.type, this.contents);
   }
 

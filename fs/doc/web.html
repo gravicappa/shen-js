@@ -1,4 +1,25 @@
-<h1>Deploying Shen-js repl</h1>
+<h1>Shen-js web</h1>
+
+<h2>Github loader</h2>
+
+<p>If you want to load file &#39;dir/file.shen&#39; from github repo
+&#39;https://github.com/user/repo&#39; just type</p>
+
+<pre><code>(load &quot;https://github.com/user/repo/dir/file.shen&quot;)
+</code></pre>
+
+<p>Also you can add use <a href="https://github.com/vasil-sd/shen-libs">shen-libs</a> by
+just adding it to modulesys search path:</p>
+
+<pre><code>(module.add-path &quot;https://github.com/vasil-sd/shen-libs&quot;)
+</code></pre>
+
+<p>Then you can simply use libraries from the repo:</p>
+
+<pre><code>(module.use [maths defstruct])
+</code></pre>
+
+<h2>Deploying Shen-js repl</h2>
 
 <p>To simply deploy Shen-js repl copy the following files/directories to some
 place in your webroot:</p>
@@ -12,7 +33,7 @@ place in your webroot:</p>
 <p>It will have its filesystem empty though. If you want to fill it with some
 initial content then read the following section.</p>
 
-<h2>Deploying synthetic filesystem</h2>
+<h3>Deploying synthetic filesystem</h3>
 
 <p>Shen-js web UI tries to load (via xmlhttprequest/ajax) file <code>fs.json</code> located
 in the same directory with <code>shen.html</code> which defines which files to load and

@@ -16,7 +16,8 @@ shen_web = (function() {
       document.head.appendChild(s);
     }
     var files = ["web/util.js", "web/jsfile.js", "web/fs.js", "web/edit.js",
-                 "web/repl.js", "web/embed.js", "web/store.js", "shen.js"];
+                 "web/repl.js", "web/embed.js", "web/store.js", "shen.js",
+                 "web/loader_github.js"];
     files.forEach(script);
 
     function apply_hash() {
@@ -64,6 +65,7 @@ shen_web = (function() {
       shen_web.init_fs(function(file, path) {
         window.location.hash = "#" + path;
       });
+      shen_web.init_github_loader();
       opts.ondone = done;
       shen_web.embed_shen(opts);
     };
