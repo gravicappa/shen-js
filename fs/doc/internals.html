@@ -19,13 +19,13 @@ to Javascript code:</p>
 useful when dealing with asynchronous Javascript tasks:</p>
 
 <pre><code>shen.defun(&quot;xml-http-req&quot;, function(arg) {
-  this.interrupt();
   var vm = this;
   xml_http_req(function ondone(result) {
     vm.resume(result);
   }, function onerr(err) {
     vm.resume(vm.fail_obj);
   });
+  this.interrupt(); // Note that it should be the last expression
 );
 </code></pre>
 
