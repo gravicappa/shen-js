@@ -9,6 +9,8 @@ Type in your terminal (choose a line depending on your js interpreter):
     d8 -e 'load("shen.js"); shen.console_repl()'
     js -e 'load("shen.js"); shen.console_repl()'
 
+If you want to carry console Shen-js around, you need only `shen.js` file.
+
 ## Running in Node.js
 ** Node.js is outdated. But I am not familiar with it. **
 See `doc/node.md`.

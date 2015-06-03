@@ -13,16 +13,16 @@ shen_web.embed_shen = function(opts) {
 
   function open(name, dir, vm) {
     var filename = vm.glob["*home-directory*"] + name;
-    var loader = shen_web.fs.find_loader(name);
+    var loader = shen_web.fs.find_loader(filename);
     if (loader)
-      return loader(name, dir, vm);
+      return loader(filename, dir, vm);
     switch (dir.str) {
     case "in":
       var file = shen_web.fs.root.get(filename);
       if (!file)
         return vm.error("open: '" + filename + "' does not exist");
       switch (file.type) {
-      case "f": return vm.buf_stream(file.data);
+      case "f": return vm.buf_stream(file.contents);
       case "d": return vm.error("open: '" + filename + "' is directory");
       default: return vm.error("open: '" + filename + "' has unknown type");
       }

@@ -215,7 +215,11 @@ shen = (function() {
   Shen.prototype.resume = function(value) {
     if (this.interrupted) {
       this.interrupted = false;
-      this.ret = value || true;
+      if (value instanceof Error) {
+        this.start = trap(value, this);
+      } else {
+        this.ret = value || true;
+      }
       this.run();
     }
   };
@@ -921,10 +925,10 @@ shen = (function() {
           var strbuf = new vm.Utf8_reader(buf);
           return vm.Stream(function(vm) {return strbuf.read_byte();});
         } else
-          return vm.error("Unsupported file read result");
+          return vm.error("open: unsupported file read result");
       } else if (dir.str === "out")
-        return vm.error("Writing files is not supported in cli interpreter");
-      return vm.error("Unsupported 'open' flags");
+        return vm.error("open: writing files is not supported in cli");
+      return vm.error("open: unsupported flags");
     };
 
     var putchars = null;
