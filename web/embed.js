@@ -84,16 +84,24 @@ shen_web.embed_shen = function(opts) {
       setTimeout(fn, ms);
   }
 
+  shen.defun("js.redeploy-fs", function() {
+    var vm = this;
+    shen_web.fs.deploy(shen_web.fs_index, function() {
+      vm.resume(true);
+    });
+    vm.interrupt();
+  });
+
   this.file_out_stream = file_out_stream;
   window.addEventListener("message", recv_step, true);
   this.post = post;
   this.send = send;
   this.send_file = send_file;
-  var fsindex = opts.fs_index || "fs.json";
+  shen_web.fs_index = opts.fs_index || "fs.json";
   shen_web.set_init_status("Deploying stored filesystem");
   shen_web.init_store(function() {
     shen_web.set_init_status("Deploying remote filesystem");
-    shen_web.fs.deploy(fsindex, function() {
+    shen_web.fs.deploy(shen_web.fs_index, function() {
       shen_web.set_init_status("Initializing Shen runtime");
       shen.post_async = post;
       shen.init({io: io, async: true, ondone: opts.ondone, repl: true});
