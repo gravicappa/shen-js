@@ -57,10 +57,7 @@ shen_web = (function() {
       shen_web.set_init_status("Initializing repl");
       shen_web.init_repl();
       shen_web.set_init_status("Initializing editor");
-      shen_web.init_edit(function(path) {
-        var file = shen_web.fs.root.get(path);
-        shen_web.send_file(path, file);
-      });
+      shen_web.init_edit(function(path) {shen_web.send_file(path);});
       shen_web.set_init_status("Initializing filesystem");
       shen_web.init_fs(function(file, path) {
         window.location.hash = "#" + path;

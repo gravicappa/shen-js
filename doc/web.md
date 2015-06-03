@@ -14,6 +14,10 @@ Then you can simply use libraries from the repo:
 
     (module.use [maths defstruct])
 
+## Initialization file
+You can create `.init.shen` file which is loaded on startup. `module.add-path`
+can be added there.
+
 ## Deploying Shen-js repl
 To simply deploy Shen-js repl copy the following files/directories to some
 place in your webroot:

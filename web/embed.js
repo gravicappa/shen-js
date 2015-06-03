@@ -56,8 +56,15 @@ shen_web.embed_shen = function(opts) {
     shen.send_str(s);
   }
 
-  function send_file(path, file) {
+  function send_file(path) {
     send("(load \"" + path + "\")\n");
+  }
+
+  function load_init() {
+    var name = ".init.shen",
+        f = shen_web.fs.root.get(name);
+    if (f)
+      send_file(name);
   }
 
   var posts = {}, posts_id = 0;
@@ -105,6 +112,7 @@ shen_web.embed_shen = function(opts) {
       shen_web.set_init_status("Initializing Shen runtime");
       shen.post_async = post;
       shen.init({io: io, async: true, ondone: opts.ondone, repl: true});
+      load_init();
     });
   });
 };
