@@ -1,10 +1,7 @@
 shen_web.init_repl = function() {
   var repl = {};
   function puts(str, tag) {
-    var out = document.getElementById("repl_out");
-    if (out == null)
-      return;
-    var cont = out.parentNode;
+    var cont = repl.out.parentNode;
     var sd = cont.scrollHeight - cont.scrollTop;
     var diff = Math.abs(sd - cont.clientHeight);
     var t = document.createTextNode(str);
@@ -12,50 +9,9 @@ shen_web.init_repl = function() {
       var s = document.createElement("span");
       s.className = "repl_tag_" + tag;
       s.appendChild(t);
-      out.appendChild(s);
+      repl.out.insertBefore(s, repl.inp);
     } else
-      out.appendChild(t);
-    if (diff < 5)
-      cont.scrollTop = cont.scrollHeight;
-  }
-
-  function send_input(t, extra) {
-    shen_web.send(t.value + (extra || ""));
-    t.value = "";
-    t.rows = 1;
-  }
-
-  function mk_input_keypress(fn) {
-    function onkeypress(e) {
-      fn();
-      var key = e.keyCode || e.which;
-      if (key != 0xd)
-        return true;
-      if (e.ctrlKey) {
-        this.value += "\n";
-        return true;
-      }
-      send_input(this);
-      return false;
-    }
-    return onkeypress;
-  }
-
-  function resize_input(t, out) {
-    var cont = out.parentNode;
-    var st = (window.getComputedStyle === undefined)
-             ? t.currentStyle : getComputedStyle(t);
-    var bt = parseInt(st.borderTopWidth, 10);
-    var bb = parseInt(st.borderBottomWidth, 10);
-    var mt = parseInt(st.marginTop, 10);
-    var mb = parseInt(st.marginBottom, 10);
-
-    var sd = cont.scrollHeight - cont.scrollTop;
-    var diff = Math.abs(sd - cont.clientHeight);
-
-    t.style.height = 0;
-    t.style.height = t.scrollHeight + bt + bb + mt + mb + "px";
-
+      repl.out.insertBefore(t, repl.inp);
     if (diff < 5)
       cont.scrollTop = cont.scrollHeight;
   }
@@ -65,22 +21,30 @@ shen_web.init_repl = function() {
         b = document.getElementById("repl_in_send"),
         out = document.getElementById("repl_out");
 
-    t.addEventListener("change", deferred_resize_textarea);
-    t.addEventListener("keyup", mk_input_keypress(deferred_resize_textarea));
+    repl.inp = t;
+    repl.out = out;
 
-    b.onclick = function() {
-      if (t.value !== "") {
-        send_input(t, "\n");
-        resize_input(t, out);
-      }
+    repl.inp.contentEditable = true;
+    repl.inp.spellcheck = false;
+    repl.out.onclick = function() {
+      repl.inp.focus();
     };
 
-    function deferred_resize_textarea() {
-      setTimeout(function() {resize_input(t, out);}, 1);
-    }
+    repl.inp.onkeyup = function(e) {
+      var key = e.keyCode || e.which;
+      if (key == 0xd && !e.ctrlKey) {
+        var line = repl.inp.textContent || repl.inp.innerText;
+        line = line.trimRight("\n") + "\n";
+        shen_web.send(line);
+        shen_web.clean(repl.inp);
+        return true;
+      }
+      return false;
+    };
   }
 
   shen_web.puts = puts;
   shen_web.init_maximize(document.getElementById("repl"));
+  shen_web.repl = repl;
   init_input();
 };

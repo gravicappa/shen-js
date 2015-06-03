@@ -218,37 +218,32 @@ body {
 
 .repl_out > span {
   margin: 0;
-  padding: 0;
+  padding: 0 1px;
   border: 0;
 }
 
 .repl_out > span.repl_tag_input {
-  color: #;
+  color: #555;
 }
 
 .repl_in {
-  resize: none;
-  overflow: hidden;
-  width: 100%;
-  margin: 0;
+  height: 10px;
+  min-width: 100px;
+  padding-left: 1px !important;
+}
+
+.repl_in::after {
+  content:" ";
+  border-left: 2px solid Black;
+}
+
+.repl_in:focus::after {
   border: 0;
 }
 
-.repl_in_outer {
-  border: 1px solid Black;
-}
-
-.repl_in_inner {
-  width: 100%;
-}
-
-.repl_in_send {
-  padding: 0 4px;
-  font-size: 14px;
-  border: 0;
-  vertical-align: middle;
-  cursor: default;
-  transition: 0.4s;
+.repl_in:focus:empty::after {
+  content:" ";
+  border-left: 1px solid Black;
 }
 
 .hdr_tool {
