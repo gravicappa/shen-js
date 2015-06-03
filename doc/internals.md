@@ -15,13 +15,13 @@ Shen-js vm can be stopped at some point of time and resumed later. It can be
 useful when dealing with asynchronous Javascript tasks:
 
     shen.defun("xml-http-req", function(arg) {
-      this.interrupt();
       var vm = this;
       xml_http_req(function ondone(result) {
         vm.resume(result);
       }, function onerr(err) {
         vm.resume(vm.fail_obj);
       });
+      this.interrupt(); // Note that it should be the last expression
     );
 
 To be used like
