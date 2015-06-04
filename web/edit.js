@@ -3,6 +3,12 @@ shen_web.init_edit = function(run) {
   edit.file = null;
   edit.touched = false;
   edit.welcome = ".doc/welcome.html";
+  edit.runner = shen_web.img_btn("Run", "web/run.png");
+  edit.runner.classList.add("popup");
+  edit.runner.onclick = function() {
+    var t = this.x_shen_text;
+    shen_web.send(t);
+  };
 
   edit.set_title = function(title) {
     var t = document.getElementById("editor_title");
@@ -20,6 +26,21 @@ shen_web.init_edit = function(run) {
       }
     }
 
+    function process_code(where) {
+      var items = where.querySelectorAll(".editor_view pre > code"), i;
+      for (i = 0; i < items.length; ++i) {
+        items[i].onmouseenter = function() {
+          this.appendChild(edit.runner);
+          edit.runner.x_shen_text = (this.textContent || this.innerText);
+        };
+        items[i].onmouseleave = function() {
+          edit.runner.x_shen_text = null;
+          if (edit.runner.parentNode)
+            edit.runner.parentNode.removeChild(edit.runner);
+        };
+      }
+    }
+
     function load_html(html, where) {
       var html = str.replace(/(^.*<body[^>]*>)|(<\/body>.*$)/g, "");
       where.innerHTML = "<div>" + html + "</div>";
@@ -27,11 +48,12 @@ shen_web.init_edit = function(run) {
       for (var i = 0; i < scr.length; ++i)
         eval(scr[i].innerHTML);
       process_links(where);
+      process_code(where);
     }
 
     var file = (typeof(file) === "string") ? root.get(file) : file,
-        edit_cont = document.getElementById("editor_edit_container"),
-        edit = document.getElementById("editor_edit"),
+        ed_cont = document.getElementById("editor_edit_container"),
+        ed = document.getElementById("editor_edit"),
         view_cont = document.getElementById("editor_view_container"),
         view = document.getElementById("editor_view"),
         ctl = document.getElementById("editor_toolbar"),
@@ -52,9 +74,9 @@ shen_web.init_edit = function(run) {
       load_html(str, view);
     else {
       view_cont.classList.add("undisplayed");
-      edit_cont.classList.remove("undisplayed");
+      ed_cont.classList.remove("undisplayed");
       ctl.classList.remove("undisplayed");
-      edit.value = str;
+      ed.value = str;
       edit.touched = false;
     }
   };
