@@ -470,6 +470,13 @@ a.dlg_cancel {
   margin: 4px 2em;
   padding: 4px;
   display: block;
+  position: relative;
+}
+
+.editor_view .popup {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 
 /* } SHEN DOC */
