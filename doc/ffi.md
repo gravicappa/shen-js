@@ -47,7 +47,7 @@ is expanded to
 
 ## Creating objects
 
-    (js.new (protect Array) 3 1 2 3)
+    (js.new Array 3 1 2 3)
 
 =>
     
