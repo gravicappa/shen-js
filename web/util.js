@@ -53,10 +53,12 @@
   };
 
   shen_web.init_maximize = function(div) {
-    var max = div.getElementsByClassName("maximize_btn");
-    if (max.length) {
-      max[0].title = "Maximize pane";
-      max[0].onclick = function() {
+    var btns = div.getElementsByClassName("maximize_btn");
+    for (var i = 0; i < btns.length; ++i) {
+      var b = btns[i];
+      b.classList.add("alt_hdr_bg");
+      b.title = "Maximize pane";
+      b.onclick = function() {
         div.classList.toggle("maximized");
       };
     }

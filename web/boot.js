@@ -1,12 +1,24 @@
 shen_web = (function() {
+  var files = ["web/util.js", "web/jsfile.js", "web/fs.js", "web/edit.js",
+               "web/repl.js", "web/embed.js", "web/store.js", "shen.js",
+               "web/loader_github.js"];
   var self = {}, init_status;
+  self.plugins = [];
   self.set_init_status = function(s) {
     init_status.innerHTML = "";
     init_status.appendChild(document.createTextNode(s));
   };
 
   self.init = function(opts) {
-    var ondone = opts ? opts.ondone : null;
+    self.opts = opts = opts || {};
+    var ondone = opts.ondone;
+
+    function init_plugins(i, done) {
+      if (i < self.plugins.length)
+        self.plugins[i](function() {init_plugins(i + 1, done);});
+      else
+        done();
+    }
 
     function script(file, fn) {
       var s = document.createElement("script")
@@ -15,9 +27,6 @@ shen_web = (function() {
       s.async = true;
       document.head.appendChild(s);
     }
-    var files = ["web/util.js", "web/jsfile.js", "web/fs.js", "web/edit.js",
-                 "web/repl.js", "web/embed.js", "web/store.js", "shen.js",
-                 "web/loader_github.js"];
     files.forEach(script);
 
     function apply_hash() {
@@ -54,17 +63,16 @@ shen_web = (function() {
     window.onload = function() {
       window.onerror = onerror;
       init_status = document.getElementById("wait_status");
-      shen_web.set_init_status("Initializing repl");
       shen_web.init_repl();
-      shen_web.set_init_status("Initializing editor");
       shen_web.init_edit(function(path) {shen_web.send_file(path);});
-      shen_web.set_init_status("Initializing filesystem");
       shen_web.init_fs(function(file, path) {
         window.location.hash = "#" + path;
       });
-      shen_web.init_github_loader();
-      opts.ondone = done;
-      shen_web.embed_shen(opts);
+      shen_web.set_init_status("Initializing plug-ins");
+      init_plugins(0, function() {
+        opts.ondone = done;
+        shen_web.embed_shen(opts);
+      });
     };
   }
   return self;

@@ -1,4 +1,5 @@
 shen_web.init_edit = function(run) {
+  shen_web.set_init_status("Initializing editor");
   var edit = {};
   edit.file = null;
   edit.touched = false;

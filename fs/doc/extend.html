@@ -6,29 +6,29 @@
 consists of defining I/O initialisation function and passing it to <code>shen.init</code>
 by <code>io</code> key:</p>
 
-<pre><code>  function io(vm) {
-    var io_obj = {};
-    io_obj.open = function(name, direction, vm) {
-      …
-    };
-    vm.glob[&quot;*stoutput*&quot;] = vm.Stream(null, out_write_byte, out_close);
+<pre><code>function io(vm) {
+  var io_obj = {};
+  io_obj.open = function(name, direction, vm) {
+    …
+  };
+  vm.glob[&quot;*stoutput*&quot;] = vm.Stream(null, out_write_byte, out_close);
 
-    /* you can either directly assign a stream as an input */
-    vm.glob[&quot;*stinput*&quot;] = vm.Stream(in_read_byte, null, in_close);
-    /*
-      or you can initialise input channel:
+  /* you can either directly assign a stream as an input */
+  vm.glob[&quot;*stinput*&quot;] = vm.Stream(in_read_byte, null, in_close);
+  /*
+    or you can initialise input channel:
 
-        vm.ensure_chan_input();
+      vm.ensure_chan_input();
 
-      and then use 
+    and then use 
 
-        vm.send_str(some_string);
+      vm.send_str(some_string);
 
-      to pass data to it
-    */
-  }
+    to pass data to it
+  */
+}
 
-  shen.init({io: io, …});
+shen.init({io: io, …});
 </code></pre>
 
 <h3>Stream class</h3>

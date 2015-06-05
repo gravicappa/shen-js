@@ -1,4 +1,5 @@
 shen_web.init_fs = function(file_fn) {
+  shen_web.set_init_status("Initializing filesystem");
   var fs = {};
   fs.root = new Jsfile(null, "d");
   fs.selected = null;

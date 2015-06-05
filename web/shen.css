@@ -76,7 +76,6 @@
 
 .code {
   font-family: monospace;
-  font-size: 14px;
   padding: 4px;
   outline: 0;
 }
@@ -120,6 +119,7 @@ body {
   border: 0;
   overflow: hidden;
   position: fixed !important;
+  font-size: 1em;
 }
 /* } GENERAL */
 
@@ -184,6 +184,7 @@ body {
   width: 100%;
   max-width: 0;
   vertical-align: middle;
+  font-family: sans-serif;
   text-align: center;
   font-weight: bold;
   text-overflow: ellipsis;
@@ -296,6 +297,7 @@ ul.fs_dir {
   border: 1px solid transparent;
   padding: 0 6px 0 6px;
   line-height: 130%;
+  font-family: sans-serif;
 }
 
 .fs_name:hover {
@@ -354,7 +356,6 @@ ul.fs_dir {
 .wait_text {
   font-family: serif;
   font-weight: bold;
-  font-size: 16px;
   padding: 2px 0;
 }
 
@@ -448,25 +449,28 @@ a.dlg_cancel {
   font-family: serif;
 }
 
-.editor_view h1 {font-size: 24px; font-variant: small-caps;}
+.editor_view h1 {
+  font-size: 1.8em;
+  font-variant: small-caps;
+  line-height: 0.9em;}
 
 .editor_view h2 {
-  color: #445;
-  font-size: 20px;
+  font-size: 1.3em;
   border-bottom: 1px solid #dde;
   margin: 1em 0;
 }
 
-.editor_view h3 {font-size: 18px;}
-.editor_view h4 {font-size: 14px;}
+.editor_view h3 {font-size: 1.2em;}
+.editor_view h4 {font-size: 1em;}
 
 .editor_view code {
-  background-color: #fffff7;
-  border: 1px solid #fdd;
-  padding: 2px;
+  font-family: monospace;
+  background-color: #fdfaf0;
+  border: 1px solid #e6e9eb;
 }
 
 .editor_view pre > code {
+  border: 1px solid #c6c9cb;
   margin: 4px 2em;
   padding: 4px;
   display: block;
