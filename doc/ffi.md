@@ -23,7 +23,7 @@ Keep in mind that `js.` primitive will strip package names from symbols to
 simplify using it inside packages. But it also means that the code
 `(js. document.body children)` may not do that is expected to.
 
-### Calling native code
+## Calling native code
 `js.call` wraps it's arguments to a function call:
     
     (js. console (js.call log "Yellow pants! Double qu!"))

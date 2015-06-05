@@ -39,3 +39,8 @@ has simple structure:
       {"from": "http://absolute/link/...", to: "local/path"},
       ...
     ]
+
+### Adding own plugins
+Add your file to `files` list in 'web/boot.js'. Plugin initialisation code
+should be added to `shen_web.plugins` array. See 'web/loader_github.js' for a
+reference.
