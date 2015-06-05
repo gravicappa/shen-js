@@ -1,4 +1,4 @@
-shen_web.init_github_loader = function() {
+shen_web.plugins.push(function(done) {
   var match_re = /^(http|https):\/\/github\.com\/./,
       path_re = /^(http|https):\/\/github\.com\/([^/]*\/[^/]*)\/(.*)$/;
 
@@ -30,4 +30,5 @@ shen_web.init_github_loader = function() {
     }
   }
   shen_web.fs.loaders.push(shen_web.fs.mk_match_loader(match_re, load));
-};
+  done();
+});

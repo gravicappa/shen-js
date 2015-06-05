@@ -3,56 +3,84 @@
 exec jimsh "$0" "$@"
 
 set size 16x16
-set dirs {
-  /usr/share/icons/Tango
-  ~/.icons/Zen
-}
+set theme [expr {([lindex $argv 0] ne "") ? [lindex $argv 0] : "tango"}]
 
-array set icon_fallback {
-  places/folder-open.png {status/folder-open.png}
-}
-
-proc process_dirs {} {
-  global dirs env
-  set x {}
-  foreach d $dirs {
-    switch -glob -- $d {
-      #* {}
-      ~/* {lappend x [regsub {^~} $d $env(HOME)]}
-      default {lappend x $d}
+set themes {
+  gnome2 {
+    paths {
+      ~/.icons/OldGNOME2/16x16/*/*
     }
-    lappend x $d
   }
-  set dirs $x
+  late-afternoon {
+    paths {
+      ~/.icons/LateAfternoon/*/small/*
+      ~/.icons/LateAfternoon/*/big/*
+    }
+  }
+  faenza {
+    paths {
+      ~/.icons/Faenza/*/16/*
+    }
+  }
+  faience {
+    paths {
+      ~/.icons/Faience/*/16/*
+    }
+  }
+  baku {
+    paths {
+      ~/.icons/Baku/16x16/*/*
+      ~/.icons/Baku/scalable/*/*
+    }
+    map {
+      user-trash stock_delete 
+    }
+  }
+  tango {
+    paths {
+      ~/.icons/tango/16x16/*/*
+      ~/.icons/tango/scalable/*/*
+      /usr/share/icons/Tango/16x16/*/*
+    }
+    map {
+      utilities-terminal system-run 
+      user-trash stock_delete 
+      view-refresh document-revert
+    }
+  }
 }
 
-process_dirs
-
-proc get_src {src} {
-  global icon_fallback dirs size
-  set src_list [list $src]
-  catch {lappend src_list {*}$icon_fallback($src)}
-  foreach src $src_list {
-    set dir [file dirname $src]
-    set name [regsub {\.[^.]*$} [file tail $src] {}]
-    lappend names $name
-    catch {lappend names {*}$icon_fallback($name)}
-    set sizes [list [regsub {x.*$} $size {}] $size scalable]
-    foreach d $dirs {
-      foreach n $names {
-        foreach s $sizes {
-          foreach e {png svg} {
-            set file $d/$dir/$s/$n.$e
-            if {[file exists $file]} {
-              return $file
-            }
-            set file $d/$s/$dir/$n.$e
-            if {[file exists $file]} {
-              return $file
-            }
-          }
-        }
+proc collect {} {
+  global theme themes env index
+  set i 0
+  set paths [concat [dict get $themes $theme paths] \
+                    [dict get $themes tango paths]]
+  set map {}
+  catch {set map [dict get $themes $theme map]}
+  foreach p $paths {
+    switch -glob -- $p {
+      #* {continue}
+      ~/* {set p [regsub {^~} $p $env(HOME)]}
+    }
+    foreach f [glob -nocomplain $p] {
+      set key [regsub {\.[^.]*$} [file tail $f] {}]
+      if {[dict exists $map $key]} {
+        set index($i/[dict get $map $key]) $f
+      } else {
+        set index($i/$key) $f
       }
+    }
+    incr i
+  }
+  set index(n) $i
+}
+
+proc find_icon {name} {
+  global index
+  for {set i 0} {$i < $index(n)} {incr i} {
+    set key $i/$name
+    if {[info exists index($key)]} {
+      return $index($key)
     }
   }
 }
@@ -63,8 +91,8 @@ proc from_svg {from to} {
 }
 
 proc get {from to} {
-  set src [get_src $from]
-  #puts "; $src -> $to"
+  set src [find_icon $from]
+  puts ";  $from <- $src"
   switch -glob -- $src {
     *.png {file copy -force $src $to}
     *.svg {from_svg $src $to}
@@ -72,18 +100,18 @@ proc get {from to} {
   }
 }
 
-get actions/window-close.png web/close.png
-get mimetypes/document.png web/document.png
-get actions/down.png web/download.png
-get places/folder.png web/folder.png
-get actions/folder-new.png web/folder_new.png
-get places/folder-open.png web/folder_open.png
-get mimetypes/html.png web/html.png
-get actions/view-fullscreen.png web/maximize.png
-get actions/document-new.png web/new.png
-get actions/document-revert.png web/revert.png
-get actions/stock_delete.png web/rm.png
-get actions/system-run.png web/run.png
-get actions/document-save.png web/save.png
-get mimetypes/text-x-generic.png web/shen_source.png
-get actions/up.png web/upload.png
+collect
+get document web/document.png
+get down web/download.png
+get folder web/folder.png
+get folder-new web/folder_new.png
+get folder-open web/folder_open.png
+get html web/html.png
+get view-fullscreen web/maximize.png
+get document web/new.png
+get document-revert web/revert.png
+get stock_delete web/rm.png
+get system-run web/run.png
+get document-save web/save.png
+get text-x-generic web/shen_source.png
+get up web/upload.png

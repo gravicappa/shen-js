@@ -1,4 +1,5 @@
 shen_web.init_repl = function() {
+  shen_web.set_init_status("Initializing repl");
   var repl = {};
   function puts(str, tag) {
     var cont = repl.out.parentNode;
@@ -12,6 +13,7 @@ shen_web.init_repl = function() {
       repl.out.insertBefore(s, repl.inp);
     } else
       repl.out.insertBefore(t, repl.inp);
+    repl.out.normalize();
     if (diff < 5)
       cont.scrollTop = cont.scrollHeight;
   }
@@ -27,7 +29,8 @@ shen_web.init_repl = function() {
     repl.inp.contentEditable = true;
     repl.inp.spellcheck = false;
     repl.out.onclick = function() {
-      repl.inp.focus();
+      if (document.activeElement !== repl.inp)
+        repl.inp.focus();
     };
 
     repl.inp.onkeyup = function(e) {
