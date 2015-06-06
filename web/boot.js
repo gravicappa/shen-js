@@ -46,7 +46,8 @@ shen_web = (function() {
       while (t.firstChild)
         t.removeChild(t.firstChild);
       t.appendChild(document.createTextNode("Error occured: " + msg));
-      p.removeChild(img);
+      if (img && img.parentNode === p)
+        p.removeChild(img);
     }
 
     function done() {
