@@ -377,7 +377,6 @@ ul.fs_dir {
   -webkit-transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   background-color: #fff;
-  border: 1px solid #778;
   box-shadow: 1px 1px 10px #000;
   cursor: default;
   display: table;
@@ -407,6 +406,10 @@ ul.fs_dir {
 
 .dlg_content label {
   padding-right: 1em;
+}
+
+.dlg_content input[type="text"] {
+  outline: 0;
 }
 
 .dlg_msg {

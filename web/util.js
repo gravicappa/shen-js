@@ -85,6 +85,7 @@
         content = el("dlg_content"),
         ctl = document.createElement("div"),
         cancel = document.createElement("button");
+    t.classList.add("hdr_title");
     t.appendChild(document.createTextNode(title));
 
     ctl.className = "dlg_ctl";
@@ -123,6 +124,8 @@
       var lb = document.createElement("label"),
           inp = document.createElement("input");
       inp.id = "dlg_entry";
+      inp.type = "text";
+      inp.className = "entry_bg entry_fg";
       inp.onkeyup = function(e) {
         var key = e.keyCode || e.which;
         switch (key) {
