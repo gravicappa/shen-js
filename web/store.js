@@ -20,8 +20,11 @@ shen_web.init_store = function(done) {
   function with_db(self, fn) {
     if (self.db)
       fn.call(self);
-    else
-      return self.open(function(err) {fn.call(self, err);});
+    else if (idb)
+      return self.open(function(e) {fn.call(self, e);});
+    else {
+      fn("No support");
+    }
   }
 
   function get_store(self, access) {
@@ -30,7 +33,6 @@ shen_web.init_store = function(done) {
   }
 
   fsdb.open = function(done) {
-    done = done || function() {};
     var self = this;
     if (idb)
       onreq(idb.open("shen", ver),
@@ -38,9 +40,9 @@ shen_web.init_store = function(done) {
               self.db = e.target.result;
               done();
             },
-            function onerror(err) {
-              console.log("IndexedDB error", err);
-              done(err);
+            function onerror(e) {
+              console.log("IndexedDB error", e);
+              done(e);
             },
             function onupgradeneeded(e) {
               var db = e.target.result;
@@ -49,15 +51,15 @@ shen_web.init_store = function(done) {
                 store.createIndex("name", "name", {unique: true});
               }
             });
-    else {
-      console.log("IndexedDB is not supported");
-      done();
-    }
+    else
+      done("No support");
   };
 
   fsdb.deploy = function(done) {
     done = done || function() {};
     with_db(this, function(err) {
+      if (err)
+        return done(err);
       var store = get_store(this, "readonly"),
           keys = [],
           root = shen_web.fs.root;
@@ -78,20 +80,19 @@ shen_web.init_store = function(done) {
               done(e);
             });
     });
-  }
+  };
 
   fsdb.put = function(name, type, data, done) {
     done = done || function() {};
-    if (idb)
-      with_db(this, function(err) {
-        var store = get_store(this, "readwrite"),
-            file = {name: name, type: type, data: data};
-        onreq(store.put(file),
-              function onsuccess() {done();},
-              function onerror(e) {done(e);});
-      });
-    else
-      done();
+    with_db(this, function(err) {
+      if (err)
+        return done(err);
+      var store = get_store(this, "readwrite"),
+          file = {name: name, type: type, data: data};
+      onreq(store.put(file),
+            function onsuccess() {done();},
+            function onerror(e) {done(e);});
+    });
   };
 
   fsdb.mkdir = function(name, done) {
@@ -104,36 +105,33 @@ shen_web.init_store = function(done) {
 
   fsdb.get = function(name, done) {
     done = done || function() {};
-    if (idb)
-      with_db(this, function(err) {
-        var store = get_store(this, "readonly");
-        onreq(store.get(name),
-              function onsuccess(e) {
-                var res = e.target.result;
-                console.log("get res", res);
-                done(res);
-              },
-              function onerror(e) {
-                console.log("get err", e);
-                done(null, e);
-              });
-      });
-    else
-      done();
+    with_db(this, function(err) {
+      if (err)
+        return done(err);
+      var store = get_store(this, "readonly");
+      onreq(store.get(name),
+            function onsuccess(e) {
+              var res = e.target.result;
+              console.log("get res", res);
+              done(res);
+            },
+            function onerror(e) {
+              console.log("get err", e);
+              done(null, e);
+            });
+    });
   };
 
   fsdb.rm = function(name, done) {
     done = done || function() {};
-    if (idb)
-      with_db(this, function(err) {
-        console.log("rm", err);
-        var store = get_store(this, "readwrite");
-        onreq(store.delete(name),
-              function onsuccess() {done();},
-              function onerror(e) {done(e);});
-      });
-    else
-      done();
+    with_db(this, function(err) {
+      if (err)
+        return done(err);
+      var store = get_store(this, "readwrite");
+      onreq(store.delete(name),
+            function onsuccess() {done();},
+            function onerror(e) {done(e);});
+    });
   };
 
   shen_web.store = fsdb;
