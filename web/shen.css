@@ -128,12 +128,12 @@ body {
   -webkit-transform: translate(18em, 0);
   -ms-transform: translate(18em, 0);
   transition: transform 0.5s;
-  -webkit-transition: transform 0.5s;
+  -webkit-transition: -webkit-transform 0.5s;
 }
 
 .main {
   transition: transform 0.5s;
-  -webkit-transition: transform 0.5s;
+  -webkit-transition: -webkit-transform 0.5s;
 }
 
 .main_inner {
@@ -348,8 +348,7 @@ ul.fs_dir {
   -webkit-transform: translate(0, -50%);
   -ms-transform: translate(0, -50%);
   padding: 16px;
-  border-top: 1px solid;
-  border-bottom: 1px solid;
+  outline: 1px solid;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
 }
 
