@@ -96,12 +96,14 @@ shen_web.init_edit = function(run) {
   };
 
   edit.reload = function(force) {
-    var s = "Do you want to restore file? All unsaved changes will be lost";
-    if (!force && !(this.file && this.touched && confirm(s)))
+    var t = "Do you want to restore file? All unsaved changes will be lost";
+    if (!force && !(this.file && this.touched))
       return;
-    var text = document.getElementById("editor_edit");
-    text.value = this.file.str_data();
-    text.touched = false;
+    shen_web.confirm("Restore", t, function() {
+      var text = document.getElementById("editor_edit");
+      text.value = edit.file.str();
+      edit.touched = false;
+    });
   };
 
   edit.save = function() {

@@ -48,14 +48,18 @@ shen_web.init_fs = function(file_fn) {
 
   fs.upload = function(path, multiple, fn) {
     var fs = this;
-    shen_web.dialog("Upload to file", function(dlg, content) {
-      var text = document.createElement("div");
-      text.appendChild(document.createTextNode("Choose a file to upload"));
+    shen_web.dialog("Upload", function(content, ctl, close) {
+      var text = document.createElement("div"),
+          input = document.createElement("input"),
+          msg;
       text.className = "dlg_msg";
-      var input = document.createElement("input");
       input.type = "file";
-      if (multiple)
+      msg = "Choose a file to upload";
+      if (multiple) {
+        msg = "Choose file(s) to upload";
         input.directory = input.webkitdirectory = input.multiple = true;
+      }
+      text.appendChild(document.createTextNode(msg));
       input.onchange = function(ev) {
         var files = ev.target.files || ev.target.webkitEntries;
         fn(files);
@@ -148,27 +152,49 @@ shen_web.init_fs = function(file_fn) {
     });
   };
 
-  function mk_file_dlg(text, fn) {
-    return function() {
-      if (!fs.selected)
-        return;
-      var name = prompt(text), path;
-      if (!name || name === "")
-        return;
-      path = fs.selected.path() + "/" + name;
+  function mk_file_dlg(dir, type) {
+    if (!dir || dir.type !== "d")
+      return;
+    var action, label, fn;
+    switch (type) {
+    case "f":
+      action = "Create file";
+      label = "File name:";
+      fn = function(path) {fs.root.put("", path);};
+      break;
+    case "d":
+      action = "Create directory";
+      label = "Directory name:";
+      fn = function(path) {fs.root.mkdir(path);};
+      break;
+    }
+    shen_web.prompt(action, label, function(name) {
+      var path = dir.path() + "/" + name;
       if (!fs.root.get(path))
         fn(path);
-    };
+    });
+  }
+
+  function rm_dlg(file) {
+    if (!file) 
+      return;
+    var title, path = file.path();
+    if (file.parent)
+      title = "Remove '" + path + "'?";
+    else
+      title = "Remove whole filesystem contents?";
+    shen_web.confirm("Remove", title, function() {
+      if (file === fs.selected)
+        fs.select(file.parent ? file.parent : fs.root);
+      file.rm();
+      close();
+    });
   }
 
   var rm_btn_def = {
     title: "Delete",
     icon: "web/rm.png",
-    onclick: function() {
-      if (fs.selected && confirm("Do you want to delete '"
-                                 + fs.selected.path() + "'?"))
-        fs.selected.rm();
-    }
+    onclick: function() {rm_dlg(fs.selected);}
   };
 
   function init_file_ctl(div) {
@@ -190,16 +216,12 @@ shen_web.init_fs = function(file_fn) {
       {
         title: "Create file",
         icon: "web/new.png",
-        onclick: mk_file_dlg("Create file", function(path) {
-          fs.root.put("", path);
-        })
+        onclick: function() {mk_file_dlg(fs.selected, "f");}
       },
       {
         title: "Create dir",
         icon: "web/folder_new.png",
-        onclick: mk_file_dlg("Create directory", function(path) {
-          fs.root.mkdir(path);
-        })
+        onclick: function() {mk_file_dlg(fs.selected, "d");}
       },
       {
         title: "Upload file",

@@ -69,7 +69,7 @@
     over.className = "overlay";
     over.onclick = function() {
       over.parentNode.removeChild(over);
-    }
+    };
 
     var dlg = document.createElement("div");
     dlg.className = "dlg";
@@ -81,32 +81,90 @@
       return true;
     };
 
-    var t = document.createElement("div");
-    t.className = "dlg_title";
+    var t = el("dlg_title"),
+        content = el("dlg_content"),
+        ctl = document.createElement("div"),
+        cancel = document.createElement("button");
+    t.classList.add("hdr_title");
     t.appendChild(document.createTextNode(title));
 
-    var content = document.createElement("div");
-    content.className = "dlg_content";
+    ctl.className = "dlg_ctl";
 
-    var ctl = document.createElement("div");
-    var cancel = document.createElement("a");
-    cancel.href = "";
-    cancel.className = "dlg_cancel link_btn";
+    cancel.appendChild(document.createTextNode("Cancel"));
+    cancel.className = "btn_font dim_btn_fg dim_btn_bg dlg_cancel";
     cancel.onclick = function() {
       over.parentNode.removeChild(over);
       return false;
     };
-    cancel.appendChild(document.createTextNode("cancel"));
 
-    fn(over, content, ctl);
     ctl.appendChild(cancel);
-    dlg.appendChild(t);
-    dlg.appendChild(content);
-    content.appendChild(ctl);
+    fn(content, ctl, close);
+    dlg.appendChild(ctl);
     over.appendChild(dlg);
     document.body.appendChild(over);
     return over;
+
+    function el(name) {
+      var cont = document.createElement("div");
+      cont.className = name + "_outer";
+      var obj = document.createElement("div");
+      obj.className = name;
+      cont.appendChild(obj);
+      dlg.appendChild(cont);
+      return obj;
+    }
+
+    function close() {
+      over.parentNode.removeChild(over);
+    }
   };
+
+  shen_web.prompt = function(action, text, fn) {
+    this.dialog(action, function(dlg, ctl, close) {
+      var lb = document.createElement("label"),
+          inp = document.createElement("input");
+      inp.id = "dlg_entry";
+      inp.type = "text";
+      inp.className = "entry_bg entry_fg";
+      inp.onkeyup = function(e) {
+        var key = e.keyCode || e.which;
+        switch (key) {
+        case 0xd: ok.onclick();
+        }
+      };
+      lb.appendChild(document.createTextNode(text));
+      lb.htmlFor = "dlg_entry";
+      dlg.appendChild(lb);
+      dlg.appendChild(inp);
+      var ok = shen_web.btn(action);
+      ok.onclick = function() {
+        if (inp.value && inp.value !== "")
+          fn(inp.value);
+        close();
+      };
+      ctl.appendChild(ok);
+      setTimeout(function() {inp.focus()}, 50);
+    });
+  };
+
+  shen_web.confirm = function(title, text, fn) {
+    this.dialog(title, function(dlg, ctl, close) {
+      dlg.appendChild(document.createTextNode(text));
+      var btn = shen_web.btn(title);
+      btn.onclick = function() {
+        fn();
+        close();
+      };
+      ctl.appendChild(btn);
+    });
+  }
+
+  shen_web.btn = function(title) {
+    var b = document.createElement("button");
+    b.className = "btn_font btn_fg alt_hdr_bg btn_bg";
+    b.appendChild(document.createTextNode(title));
+    return b;
+  }
 
   shen_web.dlg_okcancel = function(show, fn) {
     var div = document.createElement("div"), ok, cancel;
