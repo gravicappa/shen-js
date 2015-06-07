@@ -25,9 +25,7 @@ The screen is divided into three parts:
 ### Filesystem pane
 
 Press a button <span id="fs_btn_sample"></span> on topleft page corner to show
-or hide filesystem view which represents virtual filesystem. **Note that
-persistent storage is not implemented yet hence all changes will be lost when
-you close or reload Shen repl page.**
+or hide filesystem view which represents virtual filesystem.
 
 Click on a file or directory to select it. If a file has `.html` extension
 then it will be displayed in the editor pane as a formatted document (just
