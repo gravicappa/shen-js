@@ -1,7 +1,7 @@
 #!/bin/sh
 index() {
   find "$1" -type f '(' -name '*.html' -or -name '*.shen' ')' \
-  | awk -v dst_prefix="$2" -v dir="$1" '
+  | sort | awk -v dst_prefix="$2" -v dir="$1" '
   {
     to = from = $0
     sub("^" dir "/", dst_prefix, to);
