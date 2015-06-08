@@ -37,6 +37,12 @@
 .dim_btn_bg:hover {background-color: #ddd; border-color: #ccc;}
 .dim_btn_bg:active {background-color: #000; border-color: #000;}
 
+.dmg_btn_fg {color: #444;}
+.dmg_btn_fg:active {color: #fff;}
+.dmg_btn_bg {background-color: #eee; border-color: transparent;}
+.dmg_btn_bg:hover {background-color: #ddd; border-color: #ccc;}
+.dmg_btn_bg:active {background-color: #000; border-color: #000;}
+
 .hdr_fg {color: #ffffff;}
 .hdr_bg {background-color: #556; border-color: #445;}
 
@@ -450,7 +456,7 @@ ul.fs_dir {
   border-style: solid;
   outline: 0;
   font-weight: bold;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 1.0);
 }
 
 button.dlg_cancel {

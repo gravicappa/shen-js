@@ -48,25 +48,28 @@ shen_web.init_fs = function(file_fn) {
 
   fs.upload = function(path, multiple, fn) {
     var fs = this;
-    shen_web.dialog("Upload", function(content, ctl, close) {
-      var text = document.createElement("div"),
-          input = document.createElement("input"),
-          msg;
-      text.className = "dlg_msg";
-      input.type = "file";
-      msg = "Choose a file to upload";
-      if (multiple) {
-        msg = "Choose file(s) to upload";
-        input.directory = input.webkitdirectory = input.multiple = true;
+    shen_web.dialog({
+      title: "Upload",
+      oncreate: function(content, ctl, close) {
+        var text = document.createElement("div"),
+            input = document.createElement("input"),
+            msg;
+        text.className = "dlg_msg";
+        input.type = "file";
+        msg = "Choose a file to upload";
+        if (multiple) {
+          msg = "Choose file(s) to upload";
+          input.directory = input.webkitdirectory = input.multiple = true;
+        }
+        text.appendChild(document.createTextNode(msg));
+        input.onchange = function(ev) {
+          var files = ev.target.files || ev.target.webkitEntries;
+          fn(files);
+          close();
+        };
+        content.appendChild(text);
+        content.appendChild(input);
       }
-      text.appendChild(document.createTextNode(msg));
-      input.onchange = function(ev) {
-        var files = ev.target.files || ev.target.webkitEntries;
-        fn(files);
-        dlg.parentNode.removeChild(dlg);
-      };
-      content.appendChild(text);
-      content.appendChild(input);
     });
   };
 
@@ -155,40 +158,39 @@ shen_web.init_fs = function(file_fn) {
   function mk_file_dlg(dir, type) {
     if (!dir || dir.type !== "d")
       return;
-    var action, label, fn;
+    var fn, opts = {
+      onpositive: function(name) {
+        var path = dir.path() + "/" + name;
+        if (!fs.root.get(path))
+          fn(path);
+      }
+    };
     switch (type) {
     case "f":
-      action = "Create file";
-      label = "File name:";
+      opts.action_text = "Create file";
+      opts.label = "File name:";
       fn = function(path) {fs.root.put("", path);};
       break;
     case "d":
-      action = "Create directory";
-      label = "Directory name:";
+      opts.action_text = "Create directory";
+      opts.label = "Directory name:";
       fn = function(path) {fs.root.mkdir(path);};
       break;
     }
-    shen_web.prompt(action, label, function(name) {
-      var path = dir.path() + "/" + name;
-      if (!fs.root.get(path))
-        fn(path);
-    });
+    shen_web.prompt(opts);
   }
 
   function rm_dlg(file) {
     if (!file) 
       return;
-    var title, path = file.path();
-    if (file.parent)
-      title = "Remove '" + path + "'?";
-    else
-      title = "Remove whole filesystem contents?";
-    shen_web.confirm("Remove", title, function() {
-      if (file === fs.selected)
-        fs.select(file.parent ? file.parent : fs.root);
-      file.rm();
-      close();
-    });
+    var path = file.path(), opts = {
+      action_text: "Remove",
+      text: "Remove '" + path + "'?",
+      onpositive: function() {file.rm();}
+    };
+    if (!file.parent)
+      opts.text = "Remove whole filesystem contents?";
+    shen_web.confirm(opts);
   }
 
   var rm_btn_def = {
@@ -252,7 +254,7 @@ shen_web.init_fs = function(file_fn) {
     }
   }
 
-  fs.select = function(file) {
+  fs.select = function(file, call_event) {
     if (fs.selected) {
       toggle_item_select(fs.selected.container, false);
       fs.selected.container.classList.remove("fs_selection");
@@ -261,7 +263,8 @@ shen_web.init_fs = function(file_fn) {
       file = fs.root.get(file);
     if (!file)
       return;
-    file_fn(file, file.path());
+    if (call_event === undefined || call_event)
+      file_fn(file, file.path());
     fs.file_ctl.classList.remove("undisplayed");
     fs.dir_ctl.classList.remove("undisplayed");
     switch (file.type) {
@@ -271,7 +274,7 @@ shen_web.init_fs = function(file_fn) {
     fs.selected = file;
     file.container.classList.add("fs_selection");
     toggle_item_select(fs.selected.container, true);
-  }
+  };
 
   function basename(path) {
     return path.match(/[^/]*$/)[0];
@@ -327,9 +330,24 @@ shen_web.init_fs = function(file_fn) {
     file.container.appendChild(mk_entry_name(file));
   }
 
+  function attach_sorted(entry, container) {
+    var items = container.childNodes, n = items.length, i,
+        name = entry.shen_file.name;
+    for (i = 0; i < n; ++i) {
+      var item = items[i];
+      if (item.shen_file && item.shen_file.name > name)
+        break;
+    }
+    if (i < n)
+      container.insertBefore(entry, item);
+    else
+      container.appendChild(entry);
+  }
+
   function oncreate() {
     var entry = document.createElement("li");
     this.container = entry;
+    entry.shen_file = this;
     switch (this.type) {
     case "d":
       oncreate_dir(this);
@@ -342,11 +360,14 @@ shen_web.init_fs = function(file_fn) {
     }
     if (this.parent) {
       var container = shen_web.by_tag("ul", this.parent.container);
-      container.appendChild(entry);
+      attach_sorted(entry, container);
     }
   }
 
   function onrm() {
+    var call_event;
+    if (this === fs.selected)
+      fs.select(this.parent ? this.parent : fs.root, (call_event = false));
     if (this.parent)
       this.container.parentNode.removeChild(this.container);
     shen_web.store.rm(this.path());

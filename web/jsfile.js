@@ -62,8 +62,6 @@ function Jsfile(name, type, parent) {
         file.rm();
       return;
     }
-    if (this.parent)
-      this.parent.detach_file(this.name);
     if (type === "d") {
       var fnames = Object.keys(files), n = fnames.length, i;
       for (i = 0; i < n; ++i)
@@ -71,6 +69,8 @@ function Jsfile(name, type, parent) {
     }
     if (this.onrm)
       this.onrm();
+    if (this.parent)
+      this.parent.detach_file(this.name);
   };
 
   this.walk = function(fn, context, name, parent, path) {

@@ -30,7 +30,7 @@ shen_web.init_edit = function(run) {
     function process_code(where) {
       var items = where.querySelectorAll(".editor_view pre > code"), i;
       for (i = 0; i < items.length; ++i) {
-        items[i].onmouseenter = function() {
+        items[i].onclick = items[i].onmouseenter = function() {
           this.appendChild(edit.runner);
           edit.runner.x_shen_text = (this.textContent || this.innerText);
         };
@@ -96,13 +96,16 @@ shen_web.init_edit = function(run) {
   };
 
   edit.reload = function(force) {
-    var t = "Do you want to restore file? All unsaved changes will be lost";
     if (!force && !(this.file && this.touched))
       return;
-    shen_web.confirm("Restore", t, function() {
-      var text = document.getElementById("editor_edit");
-      text.value = edit.file.str();
-      edit.touched = false;
+    shen_web.confirm({
+      action_text: "Restore",
+      text: "Do you want to restore file? All unsaved changes will be lost",
+      onpositive: function() {
+        var text = document.getElementById("editor_edit");
+        text.value = edit.file.str();
+        edit.touched = false;
+      }
     });
   };
 

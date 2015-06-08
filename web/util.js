@@ -64,7 +64,7 @@
     }
   };
 
-  shen_web.dialog = function(title, fn) {
+  shen_web.dialog = function(opts) {
     var over = document.createElement("div");
     over.className = "overlay";
     over.onclick = function() {
@@ -86,19 +86,22 @@
         ctl = document.createElement("div"),
         cancel = document.createElement("button");
     t.classList.add("hdr_title");
-    t.appendChild(document.createTextNode(title));
+    t.appendChild(document.createTextNode(opts.title || ""));
 
     ctl.className = "dlg_ctl";
 
     cancel.appendChild(document.createTextNode("Cancel"));
     cancel.className = "btn_font dim_btn_fg dim_btn_bg dlg_cancel";
     cancel.onclick = function() {
+      if (opts.onnegative)
+        opts.onnegative();
       over.parentNode.removeChild(over);
       return false;
     };
 
     ctl.appendChild(cancel);
-    fn(content, ctl, close);
+    if (opts.oncreate)
+      opts.oncreate(content, ctl, close);
     dlg.appendChild(ctl);
     over.appendChild(dlg);
     document.body.appendChild(over);
@@ -119,8 +122,8 @@
     }
   };
 
-  shen_web.prompt = function(action, text, fn) {
-    this.dialog(action, function(dlg, ctl, close) {
+  shen_web.prompt = function(opts) {
+    opts.oncreate = function(dlg, ctl, close) {
       var lb = document.createElement("label"),
           inp = document.createElement("input");
       inp.id = "dlg_entry";
@@ -132,31 +135,36 @@
         case 0xd: ok.onclick();
         }
       };
-      lb.appendChild(document.createTextNode(text));
+      lb.appendChild(document.createTextNode(opts.label || ""));
       lb.htmlFor = "dlg_entry";
       dlg.appendChild(lb);
       dlg.appendChild(inp);
-      var ok = shen_web.btn(action);
+      var ok = shen_web.btn(opts.action_text || "");
       ok.onclick = function() {
-        if (inp.value && inp.value !== "")
-          fn(inp.value);
+        if (inp.value && inp.value !== "" && opts.onpositive)
+          opts.onpositive(inp.value);
         close();
       };
       ctl.appendChild(ok);
       setTimeout(function() {inp.focus()}, 50);
-    });
+    };
+    this.dialog(opts);
   };
 
-  shen_web.confirm = function(title, text, fn) {
-    this.dialog(title, function(dlg, ctl, close) {
-      dlg.appendChild(document.createTextNode(text));
-      var btn = shen_web.btn(title);
+  shen_web.confirm = function(opts) {
+    opts.oncreate = function(dlg, ctl, close) {
+      dlg.appendChild(document.createTextNode(opts.text || ""));
+      var btn = shen_web.btn(opts.action_text || "");
+      if (opts.positive_class_name)
+        btn.className += " " + opts.positive_class_name;
       btn.onclick = function() {
-        fn();
+        if (opts.onpositive)
+          opts.onpositive();
         close();
       };
       ctl.appendChild(btn);
-    });
+    };
+    this.dialog(opts);
   }
 
   shen_web.btn = function(title) {
