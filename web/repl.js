@@ -1,5 +1,7 @@
 shen_web.init_repl = function() {
   shen_web.set_init_status("Initializing repl");
+  var lineBuffer = [];
+  var bufferIndex = 0;
   var repl = {};
   function puts(str, tag) {
     var cont = repl.out.parentNode;
@@ -40,7 +42,24 @@ shen_web.init_repl = function() {
         line = line.trimRight("\n") + "\n";
         shen_web.send(line);
         shen_web.clean(repl.inp);
+
+        var strippedLine = line.slice(0, -1);
+        if (lineBuffer.length == 0 || strippedLine != lineBuffer[lineBuffer.length - 1]) {
+          lineBuffer.push(strippedLine);
+        }
+        bufferIndex = lineBuffer.length;
         return true;
+      } else if (key == 0x26) {
+
+        if (bufferIndex > 0) {
+          var newText = lineBuffer[--bufferIndex];
+          repl.inp.textContent = newText;
+        }
+      } else if (key == 0x28) {
+        if (bufferIndex < lineBuffer.length) {
+          bufferIndex++;
+          repl.inp.textContent = lineBuffer[bufferIndex];
+        }
       }
       return false;
     };
