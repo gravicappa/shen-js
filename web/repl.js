@@ -20,6 +20,21 @@ shen_web.init_repl = function() {
       cont.scrollTop = cont.scrollHeight;
   }
 
+  function set_caret_pos(off) {
+    var range = document.createRange(),
+        sel = window.getSelection(),
+        obj = repl.inp.childNodes[0],
+        t;
+    if (!obj)
+      return;
+    if (off === undefined)
+      off = (repl.inp.textContent || repl.inp.innerText).length;
+    range.setStart(obj, off);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
   function init_input() {
     var t = document.getElementById("repl_in"),
         b = document.getElementById("repl_in_send"),
@@ -53,11 +68,13 @@ shen_web.init_repl = function() {
         if (buffer_index > 0) {
           var new_text = line_buffer[--buffer_index];
           repl.inp.textContent = new_text;
+          set_caret_pos();
         }
       } else if (key == 0x28) {
         if (buffer_index < line_buffer.length) {
           buffer_index++;
           repl.inp.textContent = line_buffer[buffer_index];
+          set_caret_pos();
         }
       }
       return false;
