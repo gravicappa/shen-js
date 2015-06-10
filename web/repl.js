@@ -52,6 +52,15 @@ shen_web.init_repl = function() {
     sel.addRange(range);
   }
 
+  function selection_len() {
+    var sel = window.getSelection(), len = 0;
+    for (var i = 0; i < sel.rangeCount; ++i) {
+      var r = sel.getRangeAt(i);
+      len += r.endOffset - r.startOffset;
+    }
+    return len;
+  }
+
   function init_input() {
     var t = document.getElementById("repl_in"),
         b = document.getElementById("repl_in_send"),
@@ -63,7 +72,7 @@ shen_web.init_repl = function() {
     repl.inp.contentEditable = true;
     repl.inp.spellcheck = false;
     repl.out.onclick = function() {
-      if (document.activeElement !== repl.inp)
+      if (!selection_len() && document.activeElement !== repl.inp)
         repl.inp.focus();
     };
 
