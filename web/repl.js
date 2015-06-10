@@ -1,7 +1,7 @@
 shen_web.init_repl = function() {
   shen_web.set_init_status("Initializing repl");
-  var lineBuffer = [];
-  var bufferIndex = 0;
+  var line_buffer = [];
+  var buffer_index = 0;
   var repl = {};
   function puts(str, tag) {
     var cont = repl.out.parentNode;
@@ -43,22 +43,22 @@ shen_web.init_repl = function() {
         shen_web.send(line);
         shen_web.clean(repl.inp);
 
-        var strippedLine = line.slice(0, -1);
-        if (lineBuffer.length == 0 || strippedLine != lineBuffer[lineBuffer.length - 1]) {
-          lineBuffer.push(strippedLine);
+        var stripped_line = line.slice(0, -1);
+        if (line_buffer.length == 0 || stripped_line != line_buffer[line_buffer.length - 1]) {
+          line_buffer.push(stripped_line);
         }
-        bufferIndex = lineBuffer.length;
+        buffer_index = line_buffer.length;
         return true;
       } else if (key == 0x26) {
 
-        if (bufferIndex > 0) {
-          var newText = lineBuffer[--bufferIndex];
-          repl.inp.textContent = newText;
+        if (buffer_index > 0) {
+          var new_text = line_buffer[--buffer_index];
+          repl.inp.textContent = new_text;
         }
       } else if (key == 0x28) {
-        if (bufferIndex < lineBuffer.length) {
-          bufferIndex++;
-          repl.inp.textContent = lineBuffer[bufferIndex];
+        if (buffer_index < line_buffer.length) {
+          buffer_index++;
+          repl.inp.textContent = line_buffer[buffer_index];
         }
       }
       return false;
