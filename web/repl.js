@@ -1,8 +1,11 @@
 shen_web.init_repl = function() {
   shen_web.set_init_status("Initializing repl");
-  var line_buffer = [],
-      buffer_index = 0,
+  var hist = [],
+      max_hist_size = 300,
+      hist_index = 0,
+      saved_line = null,
       repl = {};
+
   function puts(str, tag) {
     var cont = repl.out.parentNode,
         sd = cont.scrollHeight - cont.scrollTop,
@@ -58,22 +61,30 @@ shen_web.init_repl = function() {
         shen_web.send(line + "\n");
         shen_web.clean(repl.inp);
 
-        if (line_buffer.length == 0
-            || line != line_buffer[line_buffer.length - 1]) {
-          line_buffer.push(line);
+        if (hist.length == 0 || line != hist[hist.length - 1]) {
+          hist.push(line);
+          if (hist.length > max_hist_size)
+            hist.shift();
         }
-        buffer_index = line_buffer.length;
+        hist_index = hist.length;
         return true;
       } else if (key == 0x26) {
-        if (buffer_index > 0) {
-          var new_text = line_buffer[--buffer_index];
+        if (hist_index > 0) {
+          var new_text = hist[--hist_index],
+              t = (repl.inp.textContent || repl.inp.innerText);
+          if (saved_line === null && t && t.length)
+            saved_line = repl.inp.textContent || repl.inp.innerText;
           repl.inp.textContent = new_text;
           set_caret_pos();
         }
       } else if (key == 0x28) {
-        if (buffer_index < line_buffer.length) {
-          buffer_index++;
-          repl.inp.textContent = line_buffer[buffer_index];
+        if (hist_index < hist.length - 1) {
+          hist_index++;
+          repl.inp.textContent = hist[hist_index];
+          set_caret_pos();
+        } else if (saved_line !== null) {
+          repl.inp.textContent = saved_line;
+          saved_line = null;
           set_caret_pos();
         }
       }
