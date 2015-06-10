@@ -7,20 +7,34 @@ shen_web.init_repl = function() {
       repl = {};
 
   function puts(str, tag) {
+    if (!str.length)
+      return;
     var cont = repl.out.parentNode,
         sd = cont.scrollHeight - cont.scrollTop,
         diff = Math.abs(sd - cont.clientHeight),
-        t = document.createTextNode(str);
+        lines = str.split("\n"), i, objs = [];
+    add_line(lines[0]);
+    for (i = 1; i < lines.length; ++i) {
+      objs.push(document.createElement("br"));
+      add_line(lines[i]);
+    }
     if (tag) {
       var s = document.createElement("span");
       s.className = "repl_tag_" + tag;
-      s.appendChild(t);
+      for (i = 0; i < objs.length; ++i)
+        s.appendChild(objs[i]);
       repl.out.insertBefore(s, repl.inp);
     } else
-      repl.out.insertBefore(t, repl.inp);
+      for (i = 0; i < objs.length; ++i)
+        repl.out.insertBefore(objs[i], repl.inp);
     repl.out.normalize();
     if (diff < 5)
       cont.scrollTop = cont.scrollHeight;
+
+    function add_line(s) {
+      if (s.length)
+        objs.push(document.createTextNode(s));
+    }
   }
 
   function set_caret_pos(off) {
