@@ -1,8 +1,8 @@
 shen_web.init_repl = function() {
   shen_web.set_init_status("Initializing repl");
   var hist = [],
-      max_hist_size = 300,
       hist_index = 0,
+      max_hist_size = 300,
       saved_line = null,
       repl = {};
 
@@ -54,39 +54,42 @@ shen_web.init_repl = function() {
     };
 
     repl.inp.onkeyup = function(e) {
-      var key = e.keyCode || e.which;
-      if (key == 0xd && !e.ctrlKey) {
+      switch (e.keyCode || e.which) {
+      case 0xd:
         var line = repl.inp.textContent || repl.inp.innerText;
-        line = line.trimRight("\n");
-        shen_web.send(line + "\n");
-        shen_web.clean(repl.inp);
-
-        if (hist.length == 0 || line != hist[hist.length - 1]) {
-          hist.push(line);
-          if (hist.length > max_hist_size)
-            hist.shift();
+        if (line !== undefined) {
+          line = line.trimRight("\n");
+          shen_web.send(line + "\n");
+          if (hist.length == 0 || line != hist[hist.length - 1]) {
+            hist.push(line);
+            if (hist.length > max_hist_size)
+              hist.shift();
+          }
+          hist_index = hist.length;
         }
-        hist_index = hist.length;
+        shen_web.clean(repl.inp);
         return true;
-      } else if (key == 0x26) {
+
+      case 0x26:
         if (hist_index > 0) {
-          var new_text = hist[--hist_index],
-              t = (repl.inp.textContent || repl.inp.innerText);
-          if (saved_line === null && t && t.length)
-            saved_line = repl.inp.textContent || repl.inp.innerText;
+          if (hist_index == hist.length)
+            saved_line = (repl.inp.textContent || repl.inp.innerText || "");
+          var new_text = hist[--hist_index];
           repl.inp.textContent = new_text;
           set_caret_pos();
         }
-      } else if (key == 0x28) {
+        break;
+
+       case 0x28:
         if (hist_index < hist.length - 1) {
-          hist_index++;
-          repl.inp.textContent = hist[hist_index];
+          repl.inp.textContent = hist[++hist_index];
           set_caret_pos();
         } else if (saved_line !== null) {
+          hist_index = hist.length;
           repl.inp.textContent = saved_line;
-          saved_line = null;
           set_caret_pos();
         }
+        break;
       }
       return false;
     };
