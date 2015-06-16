@@ -133,8 +133,6 @@ shen = (function() {
       return this.buf.shift();
     if (this.closed)
       return vm.fail_obj;
-    if (!Object.keys(threads).length)
-      vm.error("Possible deadlock");
     this.readers.push(vm);
     vm.interrupt();
   };
