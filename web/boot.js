@@ -1,7 +1,7 @@
 shen_web = (function() {
   var files = ["web/util.js", "web/jsfile.js", "web/fs.js", "web/edit.js",
                "web/repl.js", "web/embed.js", "web/store.js", "shen.js",
-               "web/loader_github.js"];
+               "web/loader_http.js", "web/loader_github.js"];
   var self = {}, init_status;
   self.plugins = [];
   self.set_init_status = function(s) {

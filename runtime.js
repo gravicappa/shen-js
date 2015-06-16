@@ -1086,7 +1086,7 @@ shen = (function() {
     return stream.write_byte(byte, this);
   });
 
-  sh.defun(function get_time(type) {
+  sh.defun("get-time", function get_time(type) {
     switch (type.str) {
     case "run":
     case "unix": return Math.floor(Date.now() / 1000);
