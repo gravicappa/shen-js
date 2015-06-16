@@ -98,8 +98,8 @@ shen_web.init_fs = function(file_fn) {
   fs.loaders = [];
 
   fs.find_loader = function(name) {
-    var hs = this.loaders, n = hs.length, i, f;
-    for (i = 0; i < n; ++i) {
+    var hs = this.loaders, f;
+    for (i = hs.length - 1; i >= 0; --i) {
       f = hs[i](name);
       if (f)
         return f;

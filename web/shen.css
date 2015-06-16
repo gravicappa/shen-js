@@ -78,6 +78,10 @@
   -webkit-transition: 0.4s;
 }
 
+.icon_btn > img {
+  vertical-align: middle;
+}
+
 .code {
   font-family: monospace;
   padding: 4px;
@@ -123,8 +127,9 @@ body {
   border: 0;
   overflow: hidden;
   position: fixed !important;
-  font-size: 1em;
+  font-size: 14px;
 }
+
 /* } GENERAL */
 
 .fs_opened {
@@ -172,6 +177,7 @@ body {
   height: 100%;
   margin: 0;
   border: 0;
+  display: block;
 }
 
 .editor_border {
@@ -208,6 +214,10 @@ body {
 
 .hdr_tool {
   white-space: nowrap;
+  vertical-align: middle;
+}
+
+.hdr_tool > * {
   vertical-align: middle;
 }
 
@@ -516,5 +526,5 @@ input[type="button"]::-moz-focus-inner,
 input[type="submit"]::-moz-focus-inner,
 input[type="reset"]::-moz-focus-inner {
   padding: 0 !important;
-  border: 0 none !important;
+  border: 0 !important;
 }
