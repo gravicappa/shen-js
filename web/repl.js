@@ -76,6 +76,13 @@ shen_web.init_repl = function() {
         repl.inp.focus();
     };
 
+    repl.inp.onkeydown = function(e) {
+      switch (e.keyCode || e.which) {
+      case 0xd: return false;
+      default: return true;
+      }
+    };
+
     repl.inp.onkeyup = function(e) {
       switch (e.keyCode || e.which) {
       case 0xd:
