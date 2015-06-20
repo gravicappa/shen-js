@@ -2,6 +2,18 @@ shen_web = (function() {
   var files = ["web/util.js", "web/jsfile.js", "web/fs.js", "web/edit.js",
                "web/repl.js", "web/embed.js", "web/store.js", "shen.js",
                "web/loader_http.js", "web/loader_github.js"];
+
+  if (!Function.prototype.name && Object.defineProperty) {
+    Object.defineProperty(Function.prototype, "name", {
+      get: function() {
+        var re = /function\s*([\w$_]*)\s*\(/,
+            x = re.exec(this.toString())[1];
+        return x ? x : "";
+      },
+      set: function() {}
+    });
+  }
+
   var self = {}, init_status;
   self.plugins = [];
   self.set_init_status = function(s) {

@@ -81,7 +81,7 @@ shen_web.init_repl = function() {
       case 0xd:
         var line = repl.inp.textContent || repl.inp.innerText;
         if (line !== undefined) {
-          line = line.trimRight("\n");
+          line = line.replace(/\n*$/, "");
           shen_web.send(line + "\n");
           if (hist.length == 0 || line != hist[hist.length - 1]) {
             hist.push(line);
