@@ -259,7 +259,7 @@ body {
 }
 
 .repl_in::after {
-  content:" ";
+  content:"\200d";
   border-left: 2px solid Black;
 }
 
@@ -268,7 +268,7 @@ body {
 }
 
 .repl_in:focus:empty::after {
-  content:" ";
+  content:"\200d";
   border-left: 1px solid Black;
 }
 
