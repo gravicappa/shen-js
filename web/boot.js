@@ -3,7 +3,7 @@ shen_web = (function() {
                "web/repl.js", "web/embed.js", "web/store.js", "shen.js",
                "web/loader_http.js", "web/loader_github.js"];
 
-  if (!Function.prototype.name && Object.defineProperty) {
+  if (Function.prototype.name === undefined && Object.defineProperty) {
     Object.defineProperty(Function.prototype, "name", {
       get: function() {
         var re = /function\s*([\w$_]*)\s*\(/,
