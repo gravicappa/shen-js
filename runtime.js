@@ -1033,8 +1033,8 @@ shen = (function() {
       if (!this.io[keys[i]])
         throw new Error("shen: IO has no method " + keys[i]);
     this.set_async(opts.async || false);
+    this.call_toplevel = this.call_toplevel_run;
     if (this.toplevels.length) {
-      this.call_toplevel = this.call_toplevel_run;
       call_toplevels(this, 0, this.toplevels, function() {
         vm.toplevels = [];
         end.call(vm);
