@@ -1,3 +1,4 @@
+**Node.js support is outdated. Work in progress though.**
 # Running in Node.js
 
 The current Node.js port support compiling, executing source files as well as REPL.

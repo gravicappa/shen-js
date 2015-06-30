@@ -12,7 +12,7 @@ Type in your terminal (choose a line depending on your js interpreter):
 If you want to carry console Shen-js around, you need only `shen.js` file.
 
 ## Running in Node.js
-**Node.js is outdated. But I am not familiar with it.**
+**Node.js support is outdated. Work in progress though.**
 See `doc/node.md`.
 
 ## Running in a browser
