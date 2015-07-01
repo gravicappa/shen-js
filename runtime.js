@@ -115,6 +115,7 @@ shen = (function() {
     this.buf = [];
     this.readers = [];
     this.closed = false;
+    this.end = Shen.prototype.fail_obj;
   };
 
   Shen.prototype.Chan.prototype.write = function(x) {
@@ -129,10 +130,14 @@ shen = (function() {
   };
 
   Shen.prototype.Chan.prototype.read = function(vm) {
-    if (this.buf.length)
-      return this.buf.shift();
+    if (this.buf.length) {
+      var r = this.buf.shift();
+      if (r instanceof Error)
+        throw r;
+      return r;
+    }
     if (this.closed)
-      return vm.fail_obj;
+      return this.end;
     this.readers.push(vm);
     vm.interrupt();
   };
@@ -141,7 +146,7 @@ shen = (function() {
     this.closed = true;
     var r = this.readers;
     for (var i = 0; i < r.length; ++i)
-      r[i].resume(vm.fail_obj);
+      r[i].resume(this.end);
     this.readers.length = 0;
     return true;
   };
@@ -680,7 +685,7 @@ shen = (function() {
     this.ret = false;
     var vm = this, toplevel_next = this.next;
     if (this.dump_eval_enabled)
-      print("EVAL:\n" + s + "\n");
+      log("EVAL:\n" + s + "\n");
     this.wipe_stack(0);
     eval("(function(vm) { " + s + " })(vm);");
     return toplevel_next;

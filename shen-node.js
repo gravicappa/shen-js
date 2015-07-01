@@ -1,155 +1,135 @@
 #!/usr/bin/env node
+var shen = require("./shen"),
+    fs = require("fs"),
+    stream = require("stream");
 
-var Shen = require('./shen'),
-	repl = require('repl'),
-	vm = require('vm'),
-	fs = require('fs'),
-	program = require('commander'),
-	lib =  require('./runtime-node/lib.js').setup(Shen);
+shen_node = (function() {
+  var sn = {};
 
-program
-	.version('0.10.1')
-	.usage('[options] <file ...>')
-	.option('-c, --compile', 'Compile to JavaScript and save as .js files')
-	.option('-i, --interactive', 'Run an interactive Shen REPL')
-	.option('-p, --print', 'Print compiled JavaScript instead of writing to file')
-	.parse(process.argv);
+  function mk_read_byte(s) {
+    var chan = shen.Chan(),
+        started = false;
+    chan.end = -1;
+    function ensure_listeners(vm) {
+      if (started)
+        return;
+      started = true;
+      s.on("data", function(data) {
+        for (var i = 0; i < data.length; ++i)
+          chan.write(data[i], vm);
+      });
+      s.on("end", function() {
+        chan.close(vm);
+      });
+      s.on("error", function(err) {
+        chan.write(new Error(err), vm);
+      });
+    }
+    return function(vm) {
+      ensure_listeners(vm);
+      return chan.read(vm);
+    };
+  }
 
-if(program.compile) {
-	compileShen(program.args, program.print);
-}
-else if(program.interactive) {
-	startRepl();
-}
-else if(program.args.length >= 1) {
-	runShen(program.args);
-}
-else {
-	startRepl();
-}
+  function mk_write_byte(s) {
+    return function(byte, vm) {
+      var ret = s.write(new Buffer([byte]), null, function(err) {
+        vm.resume(err ? new Error(err) : byte);
+      });
+      vm.interrupt();
+    }
+  }
 
-function startRepl() {
-	var shenRepl = repl.start({
-		prompt: "(Shen)",
-		input: process.stdin,
-		output: process.stdout,
-		ignoreUndefined: true,
-		eval: shenEval,
-		writer: function(x) {return x;}
-	});
-	// since shen.js takes a long time to load, it's faster copying it over than re-requiring it
-	shenRepl.context = vm.createContext({'Shen': Shen});
-}
+  function wrap_stream(s, dir) {
+    function is_dir(str, type) {
+      return dir === str || (!dir && s instanceof type);
+    }
+    if (is_dir("r", stream.Readable))
+      return shen.Stream(mk_read_byte(s), null, function() {
+        s.removeAllListeners();
+      });
+    if (is_dir("w", stream.Writable))
+      return shen.Stream(null, mk_write_byte(s), function() {s.end();});
+    if (is_dir("rw", stream.Duples))
+      return shen.Stream(mk_read_byte(s), mk_write_byte(s), function() {
+        s.end();
+        s.removeAllListeners();
+      });
+    throw new Error("Unsupported stream type");
+  }
 
-function compileShen(filelist, print) {
-	if (filelist.length === 0) {
-		return console.error('Please specify source file to compile');
-	}
-	filelist.forEach(function(filename) {
-		var hasExtension = false, kl, js;
+  function open(name, dir, vm) {
+    var filename = vm.glob["*home-directory*"] + name;
+    switch (dir.str) {
+    case "in": return wrap_stream(fs.createReadStream(filename), "r");
+    case "out": return wrap_stream(fs.createWriteStream(filename), "w");
+    default: return vm.error("Unsupported 'open' flags");
+    }
+  }
 
-		if(filename.slice(-5) === '.shen') {
-			hasExtension = true;
-		}
-		if(!fs.existsSync(filename)) {
-			if(hasExtension === false && fs.existsSync(filename + '.shen')) {
-				filename += '.shen';
-				hasExtension = true;
-			}
-			else {
-				return console.error('Error:', filename, "doesn't exist!");
-			}
-		}
+  function io(vm) {
+    var io = {};
+    io.open = open;
+    vm.glob["*stinput*"] = wrap_stream(process.stdin, "r");
+    vm.glob["*stoutput*"] = wrap_stream(process.stdout, "w");
+    return io;
+  }
 
-		try {
-			kl = Shen.call_by_name("read-from-string", [fs.readFileSync(filename, 'utf-8')]);
-		}
-		catch(err) {
-			return console.error('Error:', err.message);
-		}
+  function repl() {
+    shen.start_repl();
+  }
 
-                var curr = kl;
-                js = "";
-                while (curr.length !== 0) {
-                  var compiled = Shen.call_by_name("js-from-shen", [curr[1]]);
-                  if (typeof(compiled) !== "undefined") {
-                    js = js + compiled;
-                  }
-                  curr = curr[2];
-                }
+  function init() {
+    shen.init({io: io, async: true});
+  }
 
-		if(print) {
-			console.info(js);
-		}
-		else {
-			var jsPath = (hasExtension? filename.slice(0,-5) : filename) + '.js';
-			fs.writeFileSync(jsPath, js, 'utf-8');
-		}
-	});
-	console.info("========================================\n\n"+
-		"All compilation done. Don't forget to include shen.js in your source library.");
-}
+  function usage_die() {
+    process.stdout.write("Usage: shen-node.js [-c target_file] <source files...>\n");
+    process.exit(1);
+  }
 
-function runShen(filename) {
-	if (filename.length === 0) {
-		return console.error('Please specify source file to execute');
-	}
-	filename = filename[0];
-	if(!fs.existsSync(filename)) {
-		if(filename.slice(-5) !== '.shen' && fs.existsSync(filename + '.shen')) {
-			filename += '.shen';
-		}
-		else {
-			return console.error('Error:', filename, "doesn't exist!");
-		}
-	}
-	runCode(fs.readFileSync(filename, 'utf-8'), vm.createContext({'Shen': Shen}), filename, function(err, result) {
-		if(err) {
-			throw err;
-		}
-	});
-}
+  function load(src, callback) {
+    shen.exec("load", [src], callback);
+  }
 
-function shenEval(cmd, context, filename, callback) {
-	if(cmd[cmd.length-1] != ')') {
-		// stop the trippy repl module from resending illegal commands
-		return callback('SyntaxError');
-	}
+  function on_files(files, i, fn, callback) {
+    if (i < files.length)
+      fn(files[i], function() {
+        load_files(files, i + 1, callback);
+      });
+    else if (callback)
+      callback();
+  }
 
-	// prevent repl from adding () around commands
-	runCode(cmd.slice(1,-1), context, filename, function(err, result) {
-		if (err) {
-			if(err.message.indexOf('read error') != -1) {
-				callback('SyntaxError');
-			}
-			else {
-				callback(err);
-			}
-		}
-		else {
-			callback(null, result);
-		}
-	});
-}
+  function compile(files, i, dest, callback) {
+    var list = shen.list(files.slice(i))
+    shen.exec("js.save-from-files", [list, dest], callback);
+  }
 
-function runCode(cmd, context, filename, callback) {
-	var kl, js, result = null, error = null;
-	try {
-		kl = Shen.call_by_name("read-from-string", [cmd]);
-	}
-	catch(err) {
-		return callback(err);
-	}
-	if(kl.length === 0) {
-		return callback(null, '');
-	}
-	js = Shen.call_by_name("js-from-shen", [kl[1]]);
-	try {
-		// shen obj must be in the same context as lib for shenstr() to function correctly
-		result = vm.runInContext('Shen.eval_to_shenstr('+JSON.stringify(js)+');', context, filename);
-	}
-	catch (err) {
-		error = err;
-	}
-	callback(error, result);
-}
+  function main() {
+    var i, compile_dest;
+    process.on("exit", function() {});
+    for (i = 2; i < process.argv.length && process.argv[i].match(/^-/); ++i) {
+      switch (process.argv[i]) {
+      case "-c": compile_dest = process.argv[++i]; break;
+      default: usage_die();
+      }
+    }
+    if (i >= process.argv.length)
+      shen.start_repl();
+    else if (compile_dest)
+      compile(process.argv, i, compile_dest);
+    else
+      on_files(process.argv, i, load);
+  }
+
+  sn.wrap_stream = wrap_stream;
+  sn.init = init;
+  sn.main = main;
+  init();
+  return sn;
+})();
+
+module.exports = shen_node;
+if (require.main === module)
+  shen_node.main();

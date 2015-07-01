@@ -31,6 +31,10 @@ To be used like
           (error "Request failed")
           (process-response Data)))
 
+You also can throw exception directly resuming with `Error` object:
+
+    vm.resume(new Error("Request failed"));
+
 ## Defining Shen function
 Use `shen.defun` to define a Shen function. It has two modes. Called with a
 single function argument it takes passed function's name:
