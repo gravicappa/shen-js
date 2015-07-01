@@ -6,8 +6,8 @@ module.exports = (function() {
       fs = require("fs"),
       stream = require("stream"),
       self = {},
-      home = process.env[(process.platform == 'win32')
-                         ? 'USERPROFILE' : 'HOME'];
+      home = process.env[(process.platform == "win32")
+                         ? "USERPROFILE" : "HOME"];
 
   function main() {
     var i, compile_dest, init = true;
@@ -76,11 +76,14 @@ module.exports = (function() {
     switch (dir) {
     case "r":
       return shen.Stream(mk_read_byte(stream, vm), null, mk_close(stream));
+
     case "w":
       return shen.Stream(null, mk_write_byte(stream), mk_close(stream));
+
     case "rw": case "wr": case "w+": case "r+":
       return shen.Stream(mk_read_byte(stream, vm), mk_write_byte(stream),
                          mk_close(stream));
+
     default: throw new Error("Unsupported stream type: " + dir);
     }
   }
