@@ -1,19 +1,19 @@
 {
-  "name": "shen-js-node",
-  "version": "0.10.1",
+  "name": "shen",
+  "version": "0.2.0",
+  "license": "BSD-3-Clause",
   "author": "xkxx <xkxiang@gmail.com>",
-  "description": "Shen Node.js Port",
+  "contributors": ["Ramil Farkhshatov <ramil@gmx.co.uk>"],
+  "description": "Shen Node.js port",
   "keywords": [
     "javascript",
     "language",
     "Shen",
     "compiler"
   ],
-  "dependencies" : {
-    "commander": "1.1.x"
-  },
+  "main": "shen-node.js",
   "bin": {
-    "shen-js": "shen-node.js"
+    "shen-node-js": "shen-node.js"
   },
   "repository": {
     "type": "git",
