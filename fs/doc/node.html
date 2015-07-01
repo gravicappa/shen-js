@@ -1,28 +1,19 @@
 <h1>Running in Node.js</h1>
 
-<p>The current Node.js port support compiling, executing source files as well as REPL.</p>
+<p>The current Node.js port support compiling, executing source files as well as
+REPL.</p>
 
-<p>To use it, navigate to this repository in your console, then do:</p>
+<p>For REPL execute <code>shen-node.js</code> script</p>
 
-<p>```</p>
-
-<blockquote>
-<p>npm install -g
-shen-js --help</p>
-</blockquote>
-
-<p>Usage: shen-js [options] <file ...></p>
-
-<p>Options:</p>
-
-<pre><code>-h, --help         output usage information
--V, --version      output the version number
--c, --compile      Compile to JavaScript and save as .js files
--i, --interactive  Run an interactive Shen REPL
--p, --print        Print compiled JavaScript instead of writing to file
+<pre><code>./shen-node.js
 </code></pre>
 
-<p>```</p>
+<p>To load a list of files do</p>
 
-<p><code>shen-js [filename]</code> will execute the specified source file. Executing <code>shen-js</code>
-without args will drop you to the REPL</p>
+<pre><code>./shen-node.js file1.shen ... fileN.shen
+</code></pre>
+
+<p>To compile files into .js</p>
+
+<pre><code>./shen-node.js -c target.js file1.shen ... fileN.shen
+</code></pre>

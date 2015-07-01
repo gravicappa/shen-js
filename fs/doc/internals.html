@@ -37,6 +37,11 @@ useful when dealing with asynchronous Javascript tasks:</p>
       (process-response Data)))
 </code></pre>
 
+<p>You also can throw exception directly resuming with <code>Error</code> object:</p>
+
+<pre><code>vm.resume(new Error(&quot;Request failed&quot;));
+</code></pre>
+
 <h2>Defining Shen function</h2>
 
 <p>Use <code>shen.defun</code> to define a Shen function. It has two modes. Called with a
