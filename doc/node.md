@@ -1,7 +1,8 @@
 # Running in Node.js
 
 The current Node.js port support compiling, executing source files as well as
-REPL.
+REPL. It also reads '~/.shen.shen' initialization file where you can setup
+things like modulesys paths. Use `-noinit` flag to skip init file.
 
 For REPL execute `shen-node.js` script
 

@@ -4,74 +4,101 @@ var shen = require("./shen"),
     stream = require("stream");
 
 shen_node = (function() {
-  var sn = {};
+  var sn = {},
+      home = process.env[(process.platform == 'win32')
+                         ? 'USERPROFILE' : 'HOME'];
 
-  function mk_read_byte(s) {
-    var chan = shen.Chan(),
-        started = false;
+  function usage_die() {
+    process.stdout.write("Usage: shen-node.js [-noinit] [-c target_file]"
+                         + " <source files...>\n");
+    process.exit(1);
+  }
+
+  function mk_read_byte(stream, vm) {
+    var chan = shen.Chan();
     chan.end = -1;
-    function ensure_listeners(vm) {
-      if (started)
-        return;
-      started = true;
-      s.on("data", function(data) {
-        for (var i = 0; i < data.length; ++i)
-          chan.write(data[i], vm);
-      });
-      s.on("end", function() {
-        chan.close(vm);
-      });
-      s.on("error", function(err) {
-        chan.write(new Error(err), vm);
-      });
-    }
+    stream.vm = vm;
+    stream.on("error", function(err) {
+      chan.write(new Error(err), stream.vm);
+    });
+    stream.on("data", function(data) {
+      var i, vm = stream.vm;
+      for (i = 0; i < data.length; ++i)
+        chan.write(data[i], vm);
+    });
+    stream.on("end", function() {
+      chan.close(stream.vm);
+    });
     return function(vm) {
-      ensure_listeners(vm);
+      stream.vm = vm;
       return chan.read(vm);
     };
   }
 
-  function mk_write_byte(s) {
+  function mk_write_byte(stream) {
     return function(byte, vm) {
-      var ret = s.write(new Buffer([byte]), null, function(err) {
+      var ret = stream.write(new Buffer([byte]), null, function(err) {
         vm.resume(err ? new Error(err) : byte);
       });
       vm.interrupt();
     }
   }
 
-  function wrap_stream(s, dir) {
-    function is_dir(str, type) {
-      return dir === str || (!dir && s instanceof type);
+  function mk_close(stream) {
+    return function() {
+      if (stream.end)
+        stream.end();
+      stream.removeAllListeners();
+      stream.on("error", function() {});
     }
-    if (is_dir("r", stream.Readable))
-      return shen.Stream(mk_read_byte(s), null, function() {
-        s.removeAllListeners();
-      });
-    if (is_dir("w", stream.Writable))
-      return shen.Stream(null, mk_write_byte(s), function() {s.end();});
-    if (is_dir("rw", stream.Duples))
-      return shen.Stream(mk_read_byte(s), mk_write_byte(s), function() {
-        s.end();
-        s.removeAllListeners();
-      });
-    throw new Error("Unsupported stream type");
+  }
+
+  function wrap_stream(stream, dir, vm) {
+    switch (dir) {
+    case "r":
+      return shen.Stream(mk_read_byte(stream, vm), null, mk_close(stream));
+    case "w":
+      return shen.Stream(null, mk_write_byte(stream), mk_close(stream));
+    case "rw": case "wr": case "w+": case "r+":
+      return shen.Stream(mk_read_byte(stream, vm), mk_write_byte(stream),
+                         mk_close(stream));
+    default: throw new Error("Unsupported stream type: " + dir);
+    }
+  }
+
+  function fix_path(path) {
+    return path.replace(/^~/, home);
   }
 
   function open(name, dir, vm) {
-    var filename = vm.glob["*home-directory*"] + name;
+    var filename = fix_path(vm.glob["*home-directory*"] + name);
     switch (dir.str) {
-    case "in": return wrap_stream(fs.createReadStream(filename), "r");
-    case "out": return wrap_stream(fs.createWriteStream(filename), "w");
+    case "in":
+      wait_result(fs.createReadStream(filename), "readable", function(err) {
+        vm.resume((err) ? err : wrap_stream(this, "r", vm));
+      });
+      break;
+
+    case "out":
+      wait_result(fs.createWriteStream(filename), "drain", function(err) {
+        vm.resume((err) ? err : wrap_stream(this, "w", vm));
+      });
+
     default: return vm.error("Unsupported 'open' flags");
+    }
+
+    function wait_result(stream, ev, onready) {
+      stream.once("error", onready);
+      stream.once(ev, onready);
+      vm.interrupt();
     }
   }
 
   function io(vm) {
     var io = {};
     io.open = open;
-    vm.glob["*stinput*"] = wrap_stream(process.stdin, "r");
-    vm.glob["*stoutput*"] = wrap_stream(process.stdout, "w");
+    vm.glob["*stinput*"] = wrap_stream(process.stdin, "r", vm);
+    vm.glob["*stoutput*"] = wrap_stream(process.stdout, "w", vm);
     return io;
   }
 
@@ -81,11 +108,6 @@ shen_node = (function() {
 
   function init() {
     shen.init({io: io, async: true});
-  }
-
-  function usage_die() {
-    process.stdout.write("Usage: shen-node.js [-c target_file] <source files...>\n");
-    process.exit(1);
   }
 
   function load(src, callback) {
@@ -106,21 +128,43 @@ shen_node = (function() {
     shen.exec("js.save-from-files", [list, dest], callback);
   }
 
+  function read_init_file(callback) {
+    var path = home + "/.shen.shen";
+    fs.access(path, fs.R_OK, function(err) {
+      if (err)
+        callback();
+      else {
+        shen.glob["*hush*"] = true;
+        shen.exec("load", [path], function() {
+          shen.glob["*hush*"] = false;
+          callback();
+        });
+      }
+    });
+  }
+
   function main() {
-    var i, compile_dest;
-    process.on("exit", function() {});
+    var i, compile_dest, init = true;
     for (i = 2; i < process.argv.length && process.argv[i].match(/^-/); ++i) {
       switch (process.argv[i]) {
-      case "-c": compile_dest = process.argv[++i]; break;
+      case "-noinit": init = false; break;
+      case "-c": case "-compile": compile_dest = process.argv[++i]; break;
       default: usage_die();
       }
     }
-    if (i >= process.argv.length)
-      shen.start_repl();
-    else if (compile_dest)
-      compile(process.argv, i, compile_dest);
+    if (init)
+      read_init_file(start);
     else
-      on_files(process.argv, i, load);
+      start();
+
+    function start() {
+      if (i >= process.argv.length)
+        shen.start_repl();
+      else if (compile_dest)
+        compile(process.argv, i, compile_dest);
+      else
+        on_files(process.argv, i, load);
+    }
   }
 
   sn.wrap_stream = wrap_stream;
