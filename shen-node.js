@@ -1,17 +1,36 @@
 #!/usr/bin/env node
-var shen = require("./shen"),
-    fs = require("fs"),
-    stream = require("stream");
 
-shen_node = (function() {
-  var sn = {},
+module.exports = (function() {
+  var usage = ["Usage: shen-node.js [-noinit] [-c target_file] <files...>"],
+      shen = require("./shen"),
+      fs = require("fs"),
+      stream = require("stream"),
+      self = {},
       home = process.env[(process.platform == 'win32')
                          ? 'USERPROFILE' : 'HOME'];
 
-  function usage_die() {
-    process.stdout.write("Usage: shen-node.js [-noinit] [-c target_file]"
-                         + " <source files...>\n");
-    process.exit(1);
+  function main() {
+    var i, compile_dest, init = true;
+    for (i = 2; i < process.argv.length && process.argv[i].match(/^-/); ++i) {
+      switch (process.argv[i]) {
+      case "-noinit": init = false; break;
+      case "-c": case "-compile": compile_dest = process.argv[++i]; break;
+      default: usage_die();
+      }
+    }
+    if (init)
+      read_init_file(start);
+    else
+      start();
+
+    function start() {
+      if (i >= process.argv.length)
+        shen.start_repl();
+      else if (compile_dest)
+        compile(process.argv, i, compile_dest);
+      else
+        on_files(process.argv, i, load);
+    }
   }
 
   function mk_read_byte(stream, vm) {
@@ -38,7 +57,7 @@ shen_node = (function() {
   function mk_write_byte(stream) {
     return function(byte, vm) {
       var ret = stream.write(new Buffer([byte]), null, function(err) {
-        vm.resume(err ? new Error(err) : byte);
+        vm.resume(err ? err : byte);
       });
       vm.interrupt();
     }
@@ -71,18 +90,19 @@ shen_node = (function() {
   }
 
   function open(name, dir, vm) {
-    var filename = fix_path(vm.glob["*home-directory*"] + name);
+    var path = fix_path(vm.glob["*home-directory*"] + name);
     switch (dir.str) {
     case "in":
-      wait_result(fs.createReadStream(filename), "readable", function(err) {
+      wait_result(fs.createReadStream(path), "readable", function(err) {
         vm.resume((err) ? err : wrap_stream(this, "r", vm));
       });
       break;
 
     case "out":
-      wait_result(fs.createWriteStream(filename), "drain", function(err) {
+      wait_result(fs.createWriteStream(path), "drain", function(err) {
         vm.resume((err) ? err : wrap_stream(this, "w", vm));
       });
+      break;
 
     default: return vm.error("Unsupported 'open' flags");
     }
@@ -100,14 +120,6 @@ shen_node = (function() {
     vm.glob["*stinput*"] = wrap_stream(process.stdin, "r", vm);
     vm.glob["*stoutput*"] = wrap_stream(process.stdout, "w", vm);
     return io;
-  }
-
-  function repl() {
-    shen.start_repl();
-  }
-
-  function init() {
-    shen.init({io: io, async: true});
   }
 
   function load(src, callback) {
@@ -143,37 +155,17 @@ shen_node = (function() {
     });
   }
 
-  function main() {
-    var i, compile_dest, init = true;
-    for (i = 2; i < process.argv.length && process.argv[i].match(/^-/); ++i) {
-      switch (process.argv[i]) {
-      case "-noinit": init = false; break;
-      case "-c": case "-compile": compile_dest = process.argv[++i]; break;
-      default: usage_die();
-      }
-    }
-    if (init)
-      read_init_file(start);
-    else
-      start();
-
-    function start() {
-      if (i >= process.argv.length)
-        shen.start_repl();
-      else if (compile_dest)
-        compile(process.argv, i, compile_dest);
-      else
-        on_files(process.argv, i, load);
-    }
+  function usage_die() {
+    process.stdout.write(usage.join(" ") + "\n");
+    process.exit(1);
   }
 
-  sn.wrap_stream = wrap_stream;
-  sn.init = init;
-  sn.main = main;
-  init();
-  return sn;
+  self.wrap_stream = wrap_stream;
+  self.main = main;
+
+  shen.init({io: io, async: true});
+  return self;
 })();
 
-module.exports = shen_node;
 if (require.main === module)
-  shen_node.main();
+  module.exports.main();
