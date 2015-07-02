@@ -1,6 +1,7 @@
 Shen-js
 =======
-Javascript port of [Shen](http://shenlanguage.org) language.
+Javascript port of [Shen](http://shenlanguage.org) language. You may want to
+try it [online](http://gravicappa.github.io/shen-js/shen.html#.doc/welcome.html).
 
 ## Running console REPL
 
