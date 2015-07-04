@@ -16,7 +16,7 @@ release and platform).
 Unlike Lisp the quote (') is not used. Entering `hello` returns `hello`, so
 symbols are implicitly quoted. You can run example below in REPL by pressing
 <img class="icon_btn btn_bg btn_fg" src="web/run.png"> button on the left side
-of code block.
+of code block (it appears when mouse is over the block).
 
     hello
 

@@ -1,0 +1,3 @@
+*.html
+examples/ffi.shen
+examples/threads.shen
