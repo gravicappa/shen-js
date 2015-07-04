@@ -1,0 +1,136 @@
+<h1>Functions</h1>
+
+<h2>Defining functions</h2>
+
+<p>Function definitions have the form</p>
+
+<pre><code>(define &lt;function name&gt;
+  &lt;rules&gt;)
+</code></pre>
+
+<p>or</p>
+
+<pre><code>(define &lt;function name&gt;
+  &lt;signature&gt;
+  &lt;rules&gt;)
+</code></pre>
+
+<p>(See <a href="#.learn/types.html">Types (functions)</a> for more on this).</p>
+
+<p>A function name is a symbol beginning in lowercase. Rules have the form</p>
+
+<p><code>&lt;arguments&gt; -&gt; &lt;result&gt;</code></p>
+
+<p>or</p>
+
+<p><code>&lt;arguments&gt; -&gt; &lt;result&gt; where &lt;guard&gt;</code></p>
+
+<p><code>&lt;-</code> is used in place of <code>-&gt;</code> if backtracking is needed (see
+<a href="#.learn/backtracking.html">backtracking</a>).</p>
+
+<p>Arguments can be any atom (string, symbol, number, boolean) or lists or
+vectors of such (see <strong>pattern matching</strong> below). Variables are symbols
+beginning in uppercase.</p>
+
+<pre><code>(define zero?
+  0 -&gt; true
+  X -&gt; false)
+
+(zero? 0)
+</code></pre>
+
+<hr>
+
+<pre><code>(define likes
+  tom dick -&gt; yes
+  dick harry -&gt; yes
+  harry tom -&gt; yes)
+</code></pre>
+
+<hr>
+
+<pre><code>(likes tom dick)
+</code></pre>
+
+<hr>
+
+<pre><code>(likes dick fred)
+n
+</code></pre>
+
+<hr>
+
+<pre><code>(define greater-or-equal
+  X Y -&gt; X where (&gt; X Y)
+  _ Y -&gt; Y)
+</code></pre>
+
+<h2>Higher order functions</h2>
+
+<p>Shen supports higher-order functions.</p>
+
+<pre><code>(define foldl 
+  F Z [] -&gt; Z
+  F Z [X | Xs] -&gt; (foldl F (F Z X) Xs))
+</code></pre>
+
+<hr>
+
+<pre><code>(foldl (function +) 0 [1 2 3])
+</code></pre>
+
+<h2>Pattern matching</h2>
+
+<p>Like most modern functional languages, Shen sustains pattern-matching. A Shen
+pattern can be any of the following:</p>
+
+<ul>
+<li>an atom (symbol, string, boolean or number),</li>
+<li>a tuple or pair using <code>@p</code>,</li>
+<li>a list,</li>
+<li>a string construction using <code>@s</code>,</li>
+<li>a vector construction using <code>@v</code>.</li>
+</ul>
+
+<hr>
+
+<pre><code>(define rep
+  \* replace all occurrences of &quot;Julius Caesar&quot; in a string by
+     &quot;Mark Anthony&quot; *\
+  &quot;&quot; -&gt; &quot;&quot;
+  (@s &quot;Julius Caesar&quot; Ss) -&gt; (@s &quot;Mark Anthony&quot; (rep Ss))
+  (@s S Ss) -&gt; (@s S (rep Ss)))
+
+(rep &quot;Julius Caesar invaded Britain&quot;)
+</code></pre>
+
+<hr>
+
+<pre><code>(define vector-double
+  \* non-destructively double every element in a vector *\
+  &lt;&gt; -&gt; &lt;&gt;
+  (@v X V) -&gt; (@v (+ X X) (vector-double V)))
+
+(vector-double (@v 1 2 3 &lt;&gt;))
+</code></pre>
+
+<hr>
+
+<pre><code>(define tuple-&gt;list
+  \* recurse through a tuple converting into a list *\
+  (@p X Y) -&gt; [X | (tuple-&gt;list Y)]
+  X -&gt; [X])
+
+(tuple-&gt;list (@p 1 2 3))
+</code></pre>
+
+<hr>
+
+<pre><code>(define remove-duplicates
+  \* remove every duplicated element in a list *\
+  [] -&gt; []
+  [X | Y] -&gt; (remove-duplicates Y) where (element? X Y)
+  [X | Y] -&gt; [X | (remove-duplicates X Y)])
+
+(remove-duplicates [1 1 2 3])
+</code></pre>

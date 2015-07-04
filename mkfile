@@ -1,5 +1,6 @@
 MKSHELL = rc
-md = `{find . -name '*.md'}
+srcdir = src
+md = `{find $srcdir -name '*.md'}
 
 all:V: ${md:%.md=%.html}
  ./prep_fs_index >fs.json

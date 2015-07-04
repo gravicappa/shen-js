@@ -1,0 +1,286 @@
+<h1>Types</h1>
+
+<h2>Basic</h2>
+
+<p>The basic datatypes and types of Shen are </p>
+
+<ul>
+<li>symbols,</li>
+<li>strings,</li>
+<li>booleans,</li>
+<li>numbers,</li>
+<li>lists,</li>
+<li>tuples,</li>
+<li>vectors,</li>
+<li>lazy objects,</li>
+<li>abstractions.</li>
+</ul>
+
+<p>Typing </p>
+
+<pre><code>(tc +)
+</code></pre>
+
+<p>to the REPL activates type checking. Here are a few examples.</p>
+
+<pre><code>a
+</code></pre>
+
+<hr>
+
+<pre><code>&quot;hello world&quot;
+</code></pre>
+
+<hr>
+
+<pre><code>(= 4 5)
+</code></pre>
+
+<hr>
+
+<pre><code>(* 2.3 2)
+</code></pre>
+
+<hr>
+
+<pre><code>[1 2 3]
+</code></pre>
+
+<hr>
+
+<pre><code>(@v 1 2 3 &lt;&gt;)
+</code></pre>
+
+<hr>
+
+<pre><code>(@p 1 2 a)
+</code></pre>
+
+<hr>
+
+<pre><code>(@s &quot;10&quot; &quot; green&quot; &quot; bottles&quot;)
+</code></pre>
+
+<hr>
+
+<pre><code>(freeze (* 7 8))
+</code></pre>
+
+<hr>
+
+<pre><code>(* 7)
+</code></pre>
+
+<h2>Functions</h2>
+
+<p>Shen is an explicitly typed polymorphic language in the manner of Hope; it
+requires that functions be entered with their types. <code>A --&gt; B --&gt; C</code> is
+shorthand for <code>A --&gt; (B --&gt; C)</code>.</p>
+
+<pre><code>(define member?
+  {A --&gt; (list A) --&gt; boolean}
+  _ [] -&gt; false
+  X [X | _] -&gt; true
+  X [_ | Y] -&gt; (member X Y))
+</code></pre>
+
+<hr>
+
+<pre><code>(define square
+  {number --&gt; number}
+  X -&gt; (* X X))
+</code></pre>
+
+<hr>
+
+<pre><code>(define swap
+  {(A * B) --&gt; (B * A)}
+  (@p X Y) -&gt; (@p Y X))
+</code></pre>
+
+<hr>
+
+<pre><code>(define unit-vector?
+  {(vector A) --&gt; boolean}
+  (@v _ &lt;&gt;) -&gt; true
+  _ -&gt; false)
+</code></pre>
+
+<hr>
+
+<pre><code>(define unit-string?
+  {string --&gt; boolean}
+  (@s X &quot;&quot;) -&gt; true
+  _ -&gt; false)
+</code></pre>
+
+<hr>
+
+<pre><code>(member? 1 [1 2 3])
+</code></pre>
+
+<hr>
+
+<pre><code>(square 4)
+</code></pre>
+
+<hr>
+
+<pre><code>(swap (@p 1 2))
+</code></pre>
+
+<hr>
+
+<pre><code>(unit-vector? (@v 1 &lt;&gt;))
+</code></pre>
+
+<hr>
+
+<pre><code>(unit-string? &quot;a&quot;)
+</code></pre>
+
+<h2>Sequent calculus</h2>
+
+<p>In Shen, datatypes are formalised in a series of (single conclusion) <code>sequent
+calculus</code>_ rules. If we want to introduce a new type t, then we have to write
+down a series of deduction rules describing the conditions under which an
+object x can be proved to be an inhabitant of t. For clarity, these rules are
+organised into datatypes usually named after the type defined. For instance,
+we want to create a type colour in which red, yellow and green are colours. In
+sequent format, we write:</p>
+
+<pre><code>____________
+red : colour; 
+
+___________
+yellow : colour; 
+
+____________
+green : colour;
+</code></pre>
+
+<p>In Shen</p>
+
+<pre><code>(datatype colour
+
+  ____________
+  yellow : colour;
+
+  __________
+  red : colour;
+
+  ___________
+  green : colour;)
+</code></pre>
+
+<hr>
+
+<pre><code>red
+</code></pre>
+
+<hr>
+
+<pre><code>red : colour
+</code></pre>
+
+<hr>
+
+<pre><code>blue : colour
+</code></pre>
+
+<p>The term red is now overloaded — it is both a symbol and a colour. Shen plumps
+for the base type first when overloading is present.</p>
+
+<p>The use of 3 deduction rules is otiose — only one is needed if a <em>side
+condition</em> is placed before the rule. A side condition is signalled by the use
+of <em>if</em> , followed by some boolean expression, or <em>let</em> followed by a variable
+and an expression.</p>
+
+<pre><code>(datatype colour
+  if (element? X [red yellow green])
+  __________________________________
+  X : colour;)
+</code></pre>
+
+<p>Let&#39;s suppose we were writing a card game and we want to use lists like <code>[ace
+spades] [10 hearts] [5 diamonds] [jack clubs]</code> as cards. If we were to enter
+[5 diamonds] to Shen it would come back with a type error. So we want to
+define a type card which is the type of all cards. A card is a 2-element list;
+the first element being a rank and the second a suit.</p>
+
+<pre><code>(datatype rank
+
+  if (element? X [ace 2 3 4 5 6 7 8 9 10 jack queen king])
+  ________
+  X : rank;)
+
+(datatype suit
+
+  if (element? Suit [spades hearts diamonds clubs])
+  _________
+  Suit : suit;)
+
+(datatype card
+
+  Rank : rank; Suit : suit;
+  _________________
+  [Rank Suit] : card;
+
+  Rank : rank, Suit : suit &gt;&gt; P;
+  _____________________
+  [Rank Suit] : card &gt;&gt; P;)
+</code></pre>
+
+<p>The first rule says that a two-element list can be proved to be of the type
+<code>card</code> provided the first and second elements can be proved to be a <code>rank</code>
+and a <code>suit</code> respectively. The second rule says that given any proof in
+which it is assumed a two element list is a card, we can replace this
+assumption by the assumptions that the first and second elements are a
+<code>rank</code> and a <code>suit</code>. We need both rules to complete the identification of
+cards with pairs of ranks and suits f we do not use <em>synonyms</em> (see left).</p>
+
+<p>Shen permits a shorthand for expressing this type;</p>
+
+<pre><code>(datatype card
+
+  Rank : rank; Suit : suit;
+  =========================
+  [Rank Suit] : card;)
+</code></pre>
+
+<p>Note that semi-colons separate individual goals to be proved; <code>&gt;&gt;</code> is the Shen
+turnstile <code>|-</code> and commas are used to separate individual formulae in the list
+of assumptions to the left of <code>&gt;&gt;</code>. Here are some sample inputs.</p>
+
+<pre><code>[5 spades]
+</code></pre>
+
+<hr>
+
+<pre><code>[king hearts]
+</code></pre>
+
+<hr>
+
+<pre><code>[king hearts] : card
+</code></pre>
+
+<hr>
+
+<pre><code>(define get-suit
+  {card --&gt; suit}
+  [Rank Suit] -&gt; Suit)
+</code></pre>
+
+<h2>Synonyms</h2>
+
+<p>Synonyms allow the use of shorthands for types. All types are normalised to
+their definiens.</p>
+
+<pre><code>(synonyms coor (number * number))
+</code></pre>
+
+<hr>
+
+<pre><code>(@p 1 2) : coor
+</code></pre>

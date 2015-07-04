@@ -1,0 +1,24 @@
+#!/bin/sh
+if test -n "$PATH_INFO"; then
+  case "$PATH_INFO" in
+    */shen.html) 
+      env >serve.log
+      date >sync.log
+      echo $PATH >>sync.log
+      flock fs -c ./sync >>sync.log 2>&1
+      echo DONE >>sync.log
+      ;;
+  esac
+  case "$PATH_INFO" in
+    *.html) type="text/html" ;;
+    *.js) type="application/javascript" ;;
+    *.css) type="text/css" ;;
+    *.json) type="text/json" ;;
+    *) type="application/octet-stream" ;;
+  esac
+  echo "Content-Type: $type"
+  echo 
+  cat "$PATH_TRANSLATED"
+else
+  exec thttpd -D -T utf-8 -p 8013 -d . -c "$(basename "$0")"
+fi

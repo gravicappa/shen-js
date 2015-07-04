@@ -1,0 +1,21 @@
+<p>Backtracking is invoked in a Shen function by using <code>&lt;-</code> in place of <code>-&gt;</code>. The
+effect is that the expression after the <code>&lt;-</code>is returned only if it does not
+evaluate to the failure object <code>(fail)</code>. If <code>(fail)</code> is returned; then the
+next rule is applied.</p>
+
+<pre><code>(define foo
+  X &lt;- (if (integer? X)
+           0
+           (fail))
+  X -&gt; X)
+</code></pre>
+
+<hr>
+
+<pre><code>(foo 102)
+</code></pre>
+
+<hr>
+
+<pre><code>(foo a)
+</code></pre>

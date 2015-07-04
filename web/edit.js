@@ -86,12 +86,15 @@ shen_web.init_edit = function(run) {
     var edit_cont = document.getElementById("editor_edit_container"),
         view_cont = document.getElementById("editor_view_container"),
         view = document.getElementById("editor_view"),
+        ed = document.getElementById("editor_edit"),
         ctl = document.getElementById("editor_toolbar");
     this.set_title("");
     this.file = null;
     ctl.classList.add("undisplayed");
     view_cont.classList.remove("undisplayed");
     edit_cont.classList.add("undisplayed");
+    ed.value = "";
+    view.parentNode.scrollTop = ed.parentNode.scrollTop = 0;
     shen_web.clean(view);
   };
 

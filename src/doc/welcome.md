@@ -10,9 +10,11 @@ future.*
 * [Better FFI](#.doc/ffi.html).
 * [Async-compatible VM](#.doc/internals.html).
 * New shiny web UI which has
-  - Persistent file storage in web UI (via IndexedDB).
-  - Ability to load files from github.com (see [Github loader](#.doc/web.html)).
-  - Initialization file `.init.shen` loading on startup.
+  - built-in editor,
+  - built-in documentation viewer,
+  - persistent file storage in web UI (via IndexedDB),
+  - ability to load files from github.com (see [Github loader](#.doc/web.html)),
+  - initialisation file `.init.shen` loading on startup.
 
 ## Usage
 
@@ -47,6 +49,11 @@ Shen, downloading, updating, etc.
 ### REPL pane
 
 Nothing unexpected here.
+
+## Learn Shen
+
+If you're new to Shen you can take a [15 min tutorial](#.learn/15min.html).
+<span style="display:none">Also browse `.learn` folder in Filesystem pane.</span>
 
 ## Development
 

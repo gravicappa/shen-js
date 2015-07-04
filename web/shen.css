@@ -501,22 +501,40 @@ button.dlg_cancel {
 
 .editor_view code {
   font-family: monospace;
-  background-color: #fdfaf0;
-  border: 1px solid #e6e9eb;
 }
 
 .editor_view pre > code {
-  border: 1px solid #c6c9cb;
-  margin: 4px 2em;
-  padding: 4px;
+  margin: 0 2em;
+  padding: 8px 4px;
   display: block;
   position: relative;
+}
+
+.editor_view pre > code:hover {
+  background-color: #efd;
+  transition: background-color 0.2s ease-in;
+}
+
+.editor_view hr {
+  border: 0;
+  height: 1px;
+  background-color: #ddd;
+  margin: 4px 2em;
+}
+
+.editor_view pre + hr {
+  background-color: transparent;
 }
 
 .editor_view .popup {
   position: absolute;
   bottom: 0;
-  right: 0;
+  left: 0;
+  top: 0;
+
+  transform: translate(-100%, 0);
+  -webkit-transform: translate(-100%, 0);
+  -ms-transform: translate(-100%, 0);
 }
 
 /* } SHEN DOC */

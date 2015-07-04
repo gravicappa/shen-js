@@ -7,6 +7,11 @@
   {"to": ".doc/threads.html", "from": "fs/doc/threads.html"},
   {"to": ".doc/web.html", "from": "fs/doc/web.html"},
   {"to": ".doc/welcome.html", "from": "fs/doc/welcome.html"},
+  {"to": ".examples/factorial.shen", "from": "fs/examples/factorial.shen"},
   {"to": ".examples/ffi.shen", "from": "fs/examples/ffi.shen"},
-  {"to": ".examples/threads.shen", "from": "fs/examples/threads.shen"}
+  {"to": ".examples/threads.shen", "from": "fs/examples/threads.shen"},
+  {"to": ".learn/15min.html", "from": "fs/learn/15min.html"},
+  {"to": ".learn/backtracking.html", "from": "fs/learn/backtracking.html"},
+  {"to": ".learn/functions.html", "from": "fs/learn/functions.html"},
+  {"to": ".learn/types.html", "from": "fs/learn/types.html"}
 ]

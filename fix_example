@@ -22,5 +22,5 @@ cleanup() {
 trap cleanup EXIT
 
 for f in "$@"; do
-  filter <"$f" >"$t" && mv "$t" "$f"
+  filter <"$f" >"$t" && { cmp "$t" "$f" >/dev/null || mv "$t" "$f";}
 done

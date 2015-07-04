@@ -1,0 +1,309 @@
+<h1>Shen in 15 minutes</h1>
+
+<p>The Shen top level is a read-evaluate-print loop as in all functional
+languages. When you start it up, you get something like this (depending on
+release and platform).</p>
+
+<pre><code>Shen 2010, copyright (C) 2010 Mark Tarver
+www.lambdassociates.org, version 1.8
+running under Common Lisp, implementation: CLisp 2.49
+port 1.0 ported by Mark Tarver
+
+
+(0-)
+</code></pre>
+
+<p>Unlike Lisp the quote (&#39;) is not used. Entering <code>hello</code> returns <code>hello</code>, so
+symbols are implicitly quoted. You can run example below in REPL by pressing
+<img class="icon_btn btn_bg btn_fg" src="web/run.png"> button on the left side
+of code block.</p>
+
+<pre><code>hello
+</code></pre>
+
+<p>Functions are applied in prefix form just like Lisp. Unlike some Listps
+(Common Lisp, Scheme), Shen is case-sensitive, so b and B are not treated as
+the same. <code>=</code> is the general equality relation (unlike some Lisps where it is
+used for only numbers). Unlike some Lisps, Shen uses true and false as
+booleans.</p>
+
+<pre><code>(and true false)
+</code></pre>
+
+<hr>
+
+<pre><code>(or true false)
+</code></pre>
+
+<hr>
+
+<pre><code>(not true)
+</code></pre>
+
+<hr>
+
+<pre><code>(if true a b)
+</code></pre>
+
+<hr>
+
+<pre><code>(= 1 1)
+</code></pre>
+
+<p><code>^</code> breaks off input.</p>
+
+<pre><code>(- 10 ^
+</code></pre>
+
+<p>Shen permits currying, and also partial applications, which both generate
+closures.</p>
+
+<pre><code>((* 7) 9)
+</code></pre>
+
+<hr>
+
+<pre><code>(* 7)
+</code></pre>
+
+<p>In lambda calculus, the identity function is <code>(λ x x)</code>. In Shen it is written
+<code>(/. X X)</code>, and evaluates to a closure. <code>(/. X Y X)</code> is acceptable shorthand
+for <code>(λ x (λ y x))</code>. In Shen an abstraction can always be used in place of a
+function.</p>
+
+<pre><code>(/. X X)
+</code></pre>
+
+<hr>
+
+<pre><code>((/. X X) 9)
+</code></pre>
+
+<hr>
+
+<pre><code>((/. X Y Y) 6 7)
+</code></pre>
+
+<hr>
+
+<pre><code>((/. X Y (* X Y)) 6 7)
+</code></pre>
+
+<p>A list begins with a <code>[</code> and ends with a <code>]</code>. Spaces seperate items. cons,
+head and tail are standard. Note that Shen includes an infix <code>|</code> that works as
+Prolog. <code>[1 2 | [3]] = [1 2 3]</code>.</p>
+
+<pre><code>[1 2 3]
+</code></pre>
+
+<hr>
+
+<pre><code>(= [1 (+ 1 1) 3] [1 2 3])
+</code></pre>
+
+<hr>
+
+<pre><code>(head [1])
+</code></pre>
+
+<hr>
+
+<pre><code>(tail [1])
+</code></pre>
+
+<hr>
+
+<pre><code>(cons 1 [])
+</code></pre>
+
+<hr>
+
+<pre><code>[1 2 | [3]]
+</code></pre>
+
+<p>Suppose we have to define a function f that, if it receives 1 returns 0 and if
+it receives 0 returns 1. In Shen this appears as a series of rewrite rules.</p>
+
+<pre><code>(define invert
+  0 -&gt; 1
+  1 -&gt; 0)
+</code></pre>
+
+<hr>
+
+<pre><code>(invert 0)
+</code></pre>
+
+<hr>
+
+<pre><code>(invert 1)
+</code></pre>
+
+<p>If all rules fail an error is raised. <strong>Don&#39;t forget to answer <code>n</code> in REPL</strong>.</p>
+
+<pre><code>(invert 2)
+</code></pre>
+
+<p>Now lets look at an example using variables. We define <code>factorial</code>, this
+requires a variable, which in Shen is any symbol beginning in uppercase.</p>
+
+<pre><code> (define factorial
+   0 -&gt; 1
+   X -&gt; (* X (factorial (- X 1))))
+</code></pre>
+
+<hr>
+
+<pre><code>(factorial 6)
+</code></pre>
+
+<p>Here are two list processing functions in Shen; one that totals a list and the
+other that splits a lists into triples.</p>
+
+<pre><code>(define total
+  [] -&gt; 0
+  [X | Y] -&gt; (+ X (total Y)))
+</code></pre>
+
+<hr>
+
+<pre><code>(define triples
+  [] -&gt; []
+  [W X Y | Z] -&gt; [[W X Y] | (triples Z)])
+</code></pre>
+
+<hr>
+
+<pre><code>(total [12 45 28])
+</code></pre>
+
+<hr>
+
+<pre><code>(triples [1 2 3 4 5 6])
+</code></pre>
+
+<p>Patterns can be non-left linear; repeated variables require equality.</p>
+
+<pre><code>(define id
+  X X -&gt; true
+  _ _ -&gt; false)
+</code></pre>
+
+<p>Shen supports guards.</p>
+
+<pre><code>(define greater
+  X Y -&gt; X where (&gt; X Y)
+  X Y -&gt; Y where (&gt; Y X)
+  _ _ -&gt; ?)
+</code></pre>
+
+<hr>
+
+<pre><code>(greater 4 5)
+</code></pre>
+
+<hr>
+
+<pre><code>(greater 14 5)
+</code></pre>
+
+<hr>
+
+<pre><code>(greater 14 14)
+</code></pre>
+
+<p>Here is <code>foldl</code> in Shen. Note that <code>function</code> may be needed to disambiguate
+those symbol arguments that denote functions.</p>
+
+<pre><code>(define foldl
+  F Z [] -&gt; Z
+  F Z [X | Y] -&gt; (foldl F (F Z X) Y))
+</code></pre>
+
+<hr>
+
+<pre><code>(foldl (function +) 0 [1 2 3])
+</code></pre>
+
+<p><code>load</code> will load a Shen program. Shen uses a mutilated C++ convention for
+comments.</p>
+
+<pre><code>\* Here is a comment *\ (load &quot;.examples/factorial.shen&quot;)
+</code></pre>
+
+<p>So far Shen looks like an untyped language (e.g. like SASL). Actually Shen
+does have type checking, but you have to switch it on. <code>(tc +)</code> does it. The
+<code>+</code> shows that you are now working in a statically typed environment. Shen
+will typecheck everything that is loaded or entered into the image. Like ML,
+mixed lists will not now be accepted. <code>(tc -)</code> switches the typechecker back
+off.</p>
+
+<pre><code>(tc +)
+</code></pre>
+
+<hr>
+
+<pre><code>123
+</code></pre>
+
+<hr>
+
+<pre><code>[1 a]
+</code></pre>
+
+<hr>
+
+<pre><code>(* 7)
+</code></pre>
+
+<hr>
+
+<pre><code>[1 2 3]
+</code></pre>
+
+<p>The pair <code>&lt;1,2&gt;</code> is represented as <code>(@p 1 2)</code> in Shen. The functions <code>fst</code> and
+<code>snd</code> select the first and second elements of a pair. <code>(@p 1 2 3)</code> is just
+shorthand for <code>(@p 1 (@p 2 3))</code>.</p>
+
+<pre><code>(@p 1 2)
+</code></pre>
+
+<hr>
+
+<pre><code>(fst (@p 1 2))
+</code></pre>
+
+<hr>
+
+<pre><code>(snd (@p 1 2))
+</code></pre>
+
+<hr>
+
+<pre><code>(@p 1 2 3)
+</code></pre>
+
+<p>Shen is like Hope in requiring explicit types to be attached to functions. It
+supports polymorphism and variables are allowed in types. You can use <code>@p</code> in
+a pattern-directed manner in function definitions.</p>
+
+<pre><code>(tc +)
+
+(define total
+  {(list number) --&gt; number}
+  [] -&gt; 0
+  [X | Y] -&gt; (+ X (total Y)))
+
+(define triples
+  {(list A) --&gt; (list (list A))}
+  [] -&gt; []
+  [W X Y | Z] -&gt; [[W X Y] | (triples Z)])
+
+(define swap
+  {(A * B) --&gt; (B * A)}
+  (@p X Y) -&gt; (@p Y X))
+
+(tc -)
+</code></pre>
+
+<p><em>Here ends the 15 minute introduction</em></p>

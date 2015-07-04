@@ -21,11 +21,12 @@ else
   git_sync
 fi
 
-mk
+cp -r examples doc src/
 
+export PATH=/home/ramil/bin:$PATH:/usr/plan9/bin
+echo $PATH
+
+mk srcdir=src
 rm -rf fs
-mkdir -p fs/doc fs/examples
-rm doc/*.md
-mv examples fs
-mv doc/*.html fs/doc
-mv web_doc/*.html fs/doc
+cp -r src fs
+find fs -name '*.md' -delete
