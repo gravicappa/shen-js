@@ -26,7 +26,7 @@ shen_web.embed_shen = function(opts) {
       case "d": return vm.error("open: '" + filename + "' is directory");
       default: return vm.error("open: '" + filename + "' has unknown type");
       }
-    case "out": return file_out_stream(shen_web.fs.root.put(filename), vm);
+    case "out": return file_out_stream(shen_web.fs.root.put(null, filename), vm);
     default: return vm.error("Unsupported 'open' flags");
     }
   }
