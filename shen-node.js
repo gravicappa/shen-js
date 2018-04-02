@@ -132,7 +132,7 @@ module.exports = (function() {
   function on_files(files, i, fn, callback) {
     if (i < files.length)
       fn(files[i], function() {
-        load_files(files, i + 1, callback);
+        on_files(files, i + 1, fn, callback);
       });
     else if (callback)
       callback();
