@@ -29,7 +29,7 @@ module.exports = (function() {
       else if (compile_dest)
         compile(process.argv, i, compile_dest);
       else
-        on_files(process.argv, i, load);
+        on_files(process.argv, i, load, function() {process.exit()});
     }
   }
 
